@@ -1,0 +1,71 @@
+type User {
+  id: ID!
+  created_at: Date!
+  updated_at: Date
+  firstName: String!
+  middleName: String!
+  lastName: String!
+  roles: [Role]!
+}
+
+input CreateUserInput {
+  firstName: String!
+  middleName: String!
+  lastName: String!
+  roleName: RoleName!
+}
+
+input UpdateUserInput {
+  id: ID!
+  firstName: String
+  middleName: String
+  lastName: String
+}
+
+type Query {
+  users: [User]!
+  user(id: ID!): User
+  roles: [Role]!
+  role(id: ID!): Role
+}
+
+type Mutation {
+  createUser(createUserInput: CreateUserInput!): User!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+  removeUser(id: ID!): User
+
+  createRole(createRoleInput: CreateRoleInput!): Role!
+  updateRole(updateRoleInput: UpdateRoleInput!): Role!
+  removeRole(id: ID!): Role
+
+  setUserRole(userId: ID!, roleId: ID!): Boolean!
+  revokeUserRole(userId: ID!, roleId: ID!): Boolean!
+}
+
+type Role {
+  id: ID!
+  created_at: Date!
+  updated_at: Date
+  name: RoleName!
+  members: [User]!
+}
+
+enum RoleName {
+  DEV
+  ADMINISTRATOR
+  DEPARTMENT_ADMINSTRATOR
+  TEACHER
+  STUDENT
+  COURSE_MANAGER
+  COURSE_OWNER
+  COURSE_TEACHER
+}
+
+input CreateRoleInput {
+  name: RoleName!
+}
+
+input UpdateRoleInput {
+  id: ID!
+  name: RoleName
+}

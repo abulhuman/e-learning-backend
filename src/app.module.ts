@@ -5,6 +5,7 @@ import { GraphQLModule } from '@nestjs/graphql'
 import * as Joi from 'joi'
 import { join } from 'node:path'
 import { DatabaseModule } from './database/database.module'
+import { UsersModule } from './users/users.module'
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { DatabaseModule } from './database/database.module'
       }),
     }),
     DatabaseModule,
+    UsersModule,
   ],
   providers: [],
 })
