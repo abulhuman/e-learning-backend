@@ -1,10 +1,10 @@
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { GraphQLModule } from '@nestjs/graphql';
-import * as Joi from 'joi';
-import { join } from 'node:path';
-import { DatabaseModule } from './database/database.module';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
+import { Module } from '@nestjs/common'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import { GraphQLModule } from '@nestjs/graphql'
+import * as Joi from 'joi'
+import { join } from 'node:path'
+import { DatabaseModule } from './database/database.module'
 
 @Module({
   imports: [
