@@ -10,9 +10,9 @@ import { UsersService } from './users.service'
 import { CreateUserInput } from './dto/create-user.input'
 import { UpdateUserInput } from './dto/update-user.input'
 import { CreateRoleInput } from './dto/create-role.input'
-import { UpdateRoleInput } from './dto/update-role.input'
 import { Role } from './entities/role.entity'
 import { User } from './entities/user.entity'
+import { RoleName } from 'src/graphql'
 
 @Resolver('User')
 export class UserResolver {
@@ -68,14 +68,12 @@ export class RoleResolver {
     return this.usersService.findOneRole(id)
   }
 
-  @Mutation('updateRole')
-  updateRole(@Args('updateRoleInput') updateRoleInput: UpdateRoleInput) {
-    return this.usersService.updateRole(updateRoleInput.id, updateRoleInput)
-  }
-
-  @Mutation('removeRole')
-  removeRole(@Args('id') id: string) {
-    return this.usersService.removeRole(id)
+  @Mutation('revokeUserRole')
+  revokeUserRole(
+    @Args('userId') userId: string,
+    @Args('roleName') roleName: RoleName,
+  ) {
+    return this.usersService.revokeUserRole(userId, roleName)
   }
 
   @ResolveField('members')

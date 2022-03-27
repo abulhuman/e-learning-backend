@@ -20,6 +20,7 @@ input UpdateUserInput {
   firstName: String
   middleName: String
   lastName: String
+  roleName: RoleName
 }
 
 type Query {
@@ -35,11 +36,7 @@ type Mutation {
   removeUser(id: ID!): User
 
   createRole(createRoleInput: CreateRoleInput!): Role!
-  updateRole(updateRoleInput: UpdateRoleInput!): Role!
-  removeRole(id: ID!): Role
-
-  setUserRole(userId: ID!, roleId: ID!): Boolean!
-  revokeUserRole(userId: ID!, roleId: ID!): Boolean!
+  revokeUserRole(userId: ID!, roleName: RoleName!): User!
 }
 
 type Role {
