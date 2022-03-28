@@ -5,8 +5,8 @@ import { GraphQLModule } from '@nestjs/graphql'
 import * as Joi from 'joi'
 import { join } from 'node:path'
 import { DatabaseModule } from './database/database.module'
-import { UserModule } from './user/user.module'
 import { AuthModule } from './auth/auth.module'
+import { UsersModule } from './users/users.module'
 
 @Module({
   imports: [
@@ -17,24 +17,22 @@ import { AuthModule } from './auth/auth.module'
         PORT: Joi.number().required(),
       }),
     }),
-    // GraphQLModule.forRootAsync<ApolloDriverConfig>({
-    //   imports: [ConfigModule],
-    //   inject: [ConfigService],
-    //   driver: ApolloDriver,
-    //   useFactory: (configService: ConfigService) => ({
-    //     playground: configService.get('NODE_ENV') !== 'production',
-    //     typePaths: ['./**/*.graphql'],
-    //     definitions: {
-    //       path: join(process.cwd(), 'src/graphql.ts'),
-    //     },
-    //     watch: true,
-    //     emitTypenameField: true,
-    //   }),
-    // }),
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      driver: ApolloDriver,
+      useFactory: (configService: ConfigService) => ({
+        playground: configService.get('NODE_ENV') !== 'production',
+        typePaths: ['./**/*.graphql'],
+        definitions: {
+          path: join(process.cwd(), 'src/graphql.ts'),
+        },
+        emitTypenameField: true,
+      }),
+    }),
     DatabaseModule,
-    UserModule,
+    UsersModule,
     AuthModule,
   ],
-  providers: [],
 })
 export class AppModule {}

@@ -13,7 +13,7 @@ async function bootstrap() {
       transform: true,
     }),
   )
-  app.use(helmet())
+  // app.use(helmet())
   await app.listen(configService.get('PORT') || 5050)
 }
 bootstrap()

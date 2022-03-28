@@ -1,10 +1,10 @@
 import { ArgumentsHost, BadRequestException, Catch } from '@nestjs/common'
-import { BaseExceptionFilter } from '@nestjs/core'
+import { GqlExceptionFilter } from '@nestjs/graphql'
 import { PostgresErrorCode } from 'src/database/postgres-error-codes.enum'
 import { QueryFailedError } from 'typeorm'
 
 @Catch(QueryFailedError)
-export class QueryFailedExceptionFilter extends BaseExceptionFilter {
+export class QueryFailedExceptionFilter implements GqlExceptionFilter {
   catch(exception: any, host: ArgumentsHost) {
     if (exception?.code === PostgresErrorCode.UniqueViolation) {
       const { detail } = exception?.driverError
@@ -23,9 +23,8 @@ export class QueryFailedExceptionFilter extends BaseExceptionFilter {
         // fall back error message
         message = 'Unique key violation'
       }
-      super.catch(new BadRequestException(message), host)
-    } else {
-      super.catch(exception, host)
+      return new BadRequestException(message)
     }
+    return exception
   }
 }
