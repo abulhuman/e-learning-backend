@@ -7,6 +7,9 @@ import { join } from 'node:path'
 import { DatabaseModule } from './database/database.module'
 import { AuthModule } from './auth/auth.module'
 import { UsersModule } from './users/users.module'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { Session } from './auth/entities/session.entity'
+import { PassportModule } from '@nestjs/passport'
 
 @Module({
   imports: [
@@ -15,6 +18,8 @@ import { UsersModule } from './users/users.module'
         NODE_ENV: Joi.string().valid('development', 'production').optional(),
         DATABASE_URL: Joi.string().required(),
         PORT: Joi.number().required(),
+        SESSION_SECRET: Joi.string().required(),
+        COOKIE_MAX_AGE: Joi.number().default(4.32e7),
       }),
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
@@ -33,6 +38,10 @@ import { UsersModule } from './users/users.module'
     DatabaseModule,
     UsersModule,
     AuthModule,
+    TypeOrmModule.forFeature([Session]),
+    PassportModule.register({
+      session: true,
+    }),
   ],
 })
 export class AppModule {}
