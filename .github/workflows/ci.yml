@@ -53,6 +53,3 @@ jobs:
 
       - name: Run build 🏗️
         run: npm run build
-
-      - name: Run NestJS 😻🚀
-        run: npm run start
