@@ -49,8 +49,15 @@ export class UsersService {
     return this.findOne({ email })
   }
 
-  private findOne(findUserDto: FindUserDto): Promise<User> {
-    return this.userRepository.findOne(findUserDto)
+  async getRoles(id: string): Promise<Role[]> {
+    const userWithRoles = await this.findOne({ id }, true)
+    return userWithRoles.roles
+  }
+
+  private findOne(findUserDto: FindUserDto, withRoles = false): Promise<User> {
+    return this.userRepository.findOne(findUserDto, {
+      relations: withRoles ? ['roles'] : undefined,
+    })
   }
 
   async updateUser(id: string, updateUserInput: UpdateUserInput) {
