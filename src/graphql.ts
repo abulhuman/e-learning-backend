@@ -32,6 +32,7 @@ export interface UpdateUserInput {
     firstName?: Nullable<string>;
     middleName?: Nullable<string>;
     lastName?: Nullable<string>;
+    roleName?: Nullable<RoleName>;
 }
 
 export interface CreateRoleInput {
@@ -67,10 +68,7 @@ export interface IMutation {
     updateUser(updateUserInput: UpdateUserInput): User | Promise<User>;
     removeUser(id: string): Nullable<User> | Promise<Nullable<User>>;
     createRole(createRoleInput: CreateRoleInput): Role | Promise<Role>;
-    updateRole(updateRoleInput: UpdateRoleInput): Role | Promise<Role>;
-    removeRole(id: string): Nullable<Role> | Promise<Nullable<Role>>;
-    setUserRole(userId: string, roleId: string): boolean | Promise<boolean>;
-    revokeUserRole(userId: string, roleId: string): boolean | Promise<boolean>;
+    revokeUserRole(userId: string, roleName: RoleName): User | Promise<User>;
 }
 
 export interface Role {

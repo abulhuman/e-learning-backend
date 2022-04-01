@@ -1,6 +1,11 @@
-import { Injectable } from '@nestjs/common'
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import * as bcrypt from 'bcrypt'
+import { RoleName } from 'src/graphql'
 import { Repository } from 'typeorm'
 import { CreateRoleInput } from './dto/create-role.input'
 import { CreateUserInput } from './dto/create-user.input'
@@ -37,15 +42,14 @@ export class UsersService {
   }
 
   async findAllUsers() {
-    const allUsers = await this.userRepository.find({ relations: ['roles'] })
-    return allUsers
+    return this.userRepository.find({ relations: ['roles'] })
   }
 
-  findById(id: string): Promise<User> {
+  findOneUserById(id: string): Promise<User> {
     return this.findOne({ id })
   }
 
-  findByEmail(email: string): Promise<User> {
+  findOneUserByEmail(email: string): Promise<User> {
     return this.findOne({ email })
   }
 
@@ -61,14 +65,46 @@ export class UsersService {
   }
 
   async updateUser(id: string, updateUserInput: UpdateUserInput) {
-    const userToUpdate = await this.findById(id)
+    const userToUpdate = await this.findOneUserById(id)
+
+    if (!userToUpdate)
+      throw new NotFoundException(
+        `User with id ${updateUserInput.id} was not found.`,
+      )
 
     Object.assign(userToUpdate, updateUserInput)
+
+    // Check if user already has the provided Role
+    // In order to avoid redundant roles on a single user
+    const userAlreadyHasRole = userToUpdate.roles
+      .map(role => role.name)
+      .includes(updateUserInput.roleName)
+
+    if (userAlreadyHasRole)
+      throw new ConflictException(
+        `User already has ${updateUserInput.roleName} role.`,
+      )
+
+    if (updateUserInput.roleName) {
+      let roleToAssign = await this.findOneRole(
+        undefined,
+        updateUserInput.roleName,
+      )
+
+      if (!roleToAssign) {
+        roleToAssign = await this.createRole(
+          new CreateRoleInput(updateUserInput.roleName),
+        )
+      }
+
+      userToUpdate.roles.push(roleToAssign)
+    }
+
     return this.userRepository.save(userToUpdate)
   }
 
   async removeUser(id: string) {
-    const userToDelete = await this.findById(id)
+    const userToDelete = await this.findOneUserById(id)
     return this.userRepository.remove(userToDelete)
   }
 
@@ -82,8 +118,11 @@ export class UsersService {
     return this.roleRepository.find({ relations: ['members'] })
   }
 
-  findOneRole(id: string) {
-    return this.roleRepository.findOne(id, { relations: ['members'] })
+  findOneRole(id?: string, roleName?: RoleName) {
+    return this.roleRepository.findOne(id, {
+      relations: ['members'],
+      where: { name: roleName },
+    })
   }
 
   async updateRole(id: string, updateRoleInput: UpdateRoleInput) {
@@ -98,5 +137,29 @@ export class UsersService {
     const roleToDelete = await this.findOneRole(id)
 
     return this.roleRepository.remove(roleToDelete)
+  }
+
+  async revokeUserRole(userId: string, roleName: RoleName) {
+    const user = await this.findOneUserById(userId)
+
+    if (!user) throw new NotFoundException(`User with id ${userId} not found.`)
+
+    const userAlreadyHasRole = user.roles
+      .map(role => role.name)
+      .includes(roleName)
+
+    if (!userAlreadyHasRole)
+      throw new NotFoundException(
+        `User role ${roleName} was not found on User with id ${userId}.`,
+      )
+
+    const roleToRevoke = await this.findOneRole(undefined, roleName)
+
+    if (!roleToRevoke)
+      throw new NotFoundException(`Role with name ${roleName} was not found.`)
+
+    user.roles = user.roles.filter(role => role.name !== roleToRevoke.name)
+
+    return this.userRepository.save(user)
   }
 }
