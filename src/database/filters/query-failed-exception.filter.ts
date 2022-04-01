@@ -5,7 +5,8 @@ import { QueryFailedError } from 'typeorm'
 
 @Catch(QueryFailedError)
 export class QueryFailedExceptionFilter implements GqlExceptionFilter {
-  catch(exception: any, host: ArgumentsHost) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  catch(exception: any, _host: ArgumentsHost) {
     if (exception?.code === PostgresErrorCode.UniqueViolation) {
       const { detail } = exception?.driverError
       let message

@@ -1,6 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common'
 import { GqlExecutionContext } from '@nestjs/graphql'
-import { Request } from 'express'
 import { Observable } from 'rxjs'
 
 @Injectable()
