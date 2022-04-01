@@ -29,12 +29,12 @@ export class User implements IUser {
   @Column()
   lastName: string
 
-  @ManyToMany(() => Role, (role: Role) => role.members)
-  roles: Role[]
-
   @Column({ unique: true })
   email: string
 
   @Column()
   password: string
+
+  @ManyToMany(() => Role, (role: Role) => role.members)
+  roles: Role[]
 }
