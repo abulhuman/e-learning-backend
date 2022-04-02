@@ -24,6 +24,8 @@ input UpdateUserInput {
   firstName: String
   middleName: String
   lastName: String
+  email: String
+  password: String
   roleName: RoleName
 }
 
@@ -64,9 +66,4 @@ enum RoleName {
 
 input CreateRoleInput {
   name: RoleName!
-}
-
-input UpdateRoleInput {
-  id: ID!
-  name: RoleName
 }
