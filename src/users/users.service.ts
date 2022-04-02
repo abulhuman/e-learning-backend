@@ -10,7 +10,6 @@ import { Repository } from 'typeorm'
 import { CreateRoleInput } from './dto/create-role.input'
 import { CreateUserInput } from './dto/create-user.input'
 import { FindUserDto } from './dto/find-user.dto'
-import { UpdateRoleInput } from './dto/update-role.input'
 import { UpdateUserInput } from './dto/update-user.input'
 import { Role } from './entities/role.entity'
 import { User } from './entities/user.entity'
@@ -26,17 +25,15 @@ export class UsersService {
     createUserInput.password = await bcrypt.hash(createUserInput.password, 10)
     const { roleName, ...rest } = createUserInput
 
-    let userRole = await this.roleRepository.findOne({
-      where: { name: roleName },
-    })
+    let roleToAssign = await this.findOneRole(undefined, roleName)
 
-    if (!userRole) {
+    if (!roleToAssign) {
       const newRoleInput = new CreateRoleInput(createUserInput.roleName)
-      userRole = await this.createRole(newRoleInput)
+      roleToAssign = await this.createRole(newRoleInput)
     }
 
     const newUser = this.userRepository.create(rest)
-    newUser.roles = [userRole]
+    newUser.roles = [roleToAssign]
 
     return this.userRepository.save(newUser)
   }
@@ -45,8 +42,8 @@ export class UsersService {
     return this.userRepository.find({ relations: ['roles'] })
   }
 
-  findOneUserById(id: string): Promise<User> {
-    return this.findOne({ id })
+  findOneUserById(id: string, withRoles = true): Promise<User> {
+    return this.findOne({ id }, withRoles)
   }
 
   findOneUserByEmail(email: string): Promise<User> {
@@ -71,6 +68,10 @@ export class UsersService {
       throw new NotFoundException(
         `User with id ${updateUserInput.id} was not found.`,
       )
+
+    updateUserInput.password = updateUserInput.password
+      ? await bcrypt.hash(updateUserInput.password, 10)
+      : undefined
 
     Object.assign(userToUpdate, updateUserInput)
 
@@ -123,14 +124,6 @@ export class UsersService {
       relations: ['members'],
       where: { name: roleName },
     })
-  }
-
-  async updateRole(id: string, updateRoleInput: UpdateRoleInput) {
-    const roleToUpdate = await this.findOneRole(id)
-
-    Object.assign(roleToUpdate, updateRoleInput)
-
-    return this.roleRepository.save(roleToUpdate)
   }
 
   async removeRole(id: string) {

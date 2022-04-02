@@ -32,16 +32,13 @@ export interface UpdateUserInput {
     firstName?: Nullable<string>;
     middleName?: Nullable<string>;
     lastName?: Nullable<string>;
+    email?: Nullable<string>;
+    password?: Nullable<string>;
     roleName?: Nullable<RoleName>;
 }
 
 export interface CreateRoleInput {
     name: RoleName;
-}
-
-export interface UpdateRoleInput {
-    id: string;
-    name?: Nullable<RoleName>;
 }
 
 export interface User {
