@@ -1,0 +1,127 @@
+type Course {
+  id: ID!
+  created_at: Date!
+  updated_at: Date
+  code: String!
+  name: String!
+  description: String!
+  overview: String!
+  creditHour: Int!
+  users: [User]
+  chapters: [Chapter]!
+  courseDocuments: [CourseDocument]!
+}
+
+input CreateCourseInput {
+  code: String!
+  name: String!
+  description: String!
+  overview: String!
+  creditHour: Int!
+}
+
+input UpdateCourseInput {
+  id: String!
+  code: String
+  name: String
+  description: String
+  overview: String
+  creditHour: Int
+}
+
+type Chapter {
+  id: ID!
+  created_at: Date!
+  updated_at: Date
+  title: String!
+  sequenceNumber: Int!
+  course: Course!
+  subChapters: [SubChapter]!
+}
+
+input CreateChapterInput {
+  title: String!
+  sequenceNumber: Int!
+  courseId: ID!
+}
+
+input UpdateChapterInput {
+  id: String!
+  title: String
+  sequenceNumber: Int
+}
+
+type SubChapter {
+  id: ID!
+  created_at: Date!
+  updated_at: Date
+  title: String!
+  sequenceNumber: Int!
+  chapter: Chapter!
+}
+
+input CreateSubChapterInput {
+  title: String!
+  sequenceNumber: Int!
+  chapterId: ID!
+}
+
+input UpdateSubChapterInput {
+  id: String!
+  title: String
+  sequenceNumber: Int
+}
+
+type CourseDocument {
+  id: ID!
+  created_at: Date!
+  updated_at: Date
+  documentType: String!
+  documentName: String!
+  documentURL: String!
+  course: Course!
+}
+
+input CreateCourseDocumentInput {
+  documentType: String!
+  documentName: String!
+  documentURL: String!
+  courseId: ID!
+}
+
+input UpdateCourseDocumentInput {
+  id: String!
+  documentType: String
+  documentName: String
+  documentURL: String
+}
+
+type Query {
+  courses: [Course]!
+  course(id: ID!): Course
+}
+
+type Mutation {
+  createCourse(createCourseInput: CreateCourseInput!): Course!
+  updateCourse(updateCourseInput: UpdateCourseInput!): Course!
+  removeCourse(id: ID!): Course
+
+  # assign_enroll(courseId: ID!, userId: ID!): Boolean!
+  # unassign_dropout(courseId: ID!, userId: ID!): Boolean!
+
+  createChapter(createChapterInput: CreateChapterInput): Chapter!
+  updateChapter(updateChapterInput: UpdateChapterInput): Chapter!
+  removeChapter(id: ID!): Chapter!
+
+  createSubChapter(createSubChapterInput: CreateSubChapterInput): SubChapter!
+  updateSubChapter(updateSubChapterInput: UpdateSubChapterInput): SubChapter!
+  removeSubChapter(id: ID!): SubChapter!
+
+  createCourseDocument(
+    createCourseDocumentInput: CreateCourseDocumentInput
+  ): CourseDocument!
+  updateCourseDocument(
+    updateCourseDocumentInput: UpdateCourseDocumentInput
+  ): CourseDocument!
+  removeCourseDocument(id: ID!): CourseDocument!
+}

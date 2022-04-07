@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Session } from './auth/entities/session.entity'
 import { PassportModule } from '@nestjs/passport'
+import { CourseModule } from './course/course.module'
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { PassportModule } from '@nestjs/passport'
     DatabaseModule,
     UsersModule,
     AuthModule,
+    CourseModule,
     TypeOrmModule.forFeature([Session]),
     PassportModule.register({
       session: true,
