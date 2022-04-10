@@ -1,10 +1,14 @@
+import { ParseUUIDPipe } from '@nestjs/common'
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql'
 import { CourseService } from './course.service'
 import { CreateChapterInput } from './dto/create-chapter.input'
 import { CreateCourseDocumentInput } from './dto/create-course-document.input'
 import { CreateCourseInput } from './dto/create-course.input'
 import { CreateSubChapterInput } from './dto/create-sub-chapter.input'
+import { UpdateChapterInput } from './dto/update-chapter.input'
+import { UpdateCourseDocumentInput } from './dto/update-course-document.input'
 import { UpdateCourseInput } from './dto/update-course.input'
+import { UpdateSubChapterInput } from './dto/update-sub-chapter.input'
 
 @Resolver('Course')
 export class CourseResolver {
@@ -15,37 +19,6 @@ export class CourseResolver {
     @Args('createCourseInput') createCourseInput: CreateCourseInput,
   ) {
     return this.courseService.createOneCourse(createCourseInput)
-  }
-  @Mutation('createChapter')
-  createChapter(
-    @Args('createChapterInput') createChapterInput: CreateChapterInput,
-  ) {
-    return this.courseService.createOneChapter(createChapterInput)
-  }
-
-  @Mutation('createSubChapter')
-  createSubChapter(
-    @Args('createSubChapterInput') createSubChapterInput: CreateSubChapterInput,
-  ) {
-    return this.courseService.createOneSubChapter(createSubChapterInput)
-  }
-
-  @Mutation('createCourseDocument')
-  createCourseDocument(
-    @Args('createCourseDocumentInput')
-    createCourseDocumentInput: CreateCourseDocumentInput,
-  ) {
-    return this.courseService.createOneCourseDocument(createCourseDocumentInput)
-  }
-
-  @Query('courses')
-  findAllCourses() {
-    return this.courseService.findAllCourses()
-  }
-
-  @Query('course')
-  findOne(@Args('id') id: string) {
-    return this.courseService.findOneCourse(id)
   }
 
   @Mutation('updateCourse')
@@ -59,7 +32,101 @@ export class CourseResolver {
   }
 
   @Mutation('removeCourse')
-  removeCourse(@Args('id') id: string) {
+  removeCourse(@Args('id', ParseUUIDPipe) id: string) {
     return this.courseService.removeCourse(id)
+  }
+
+  @Query('courses')
+  findAllCourses() {
+    return this.courseService.findAllCourses()
+  }
+
+  @Query('course')
+  findOne(@Args('id', ParseUUIDPipe) id: string) {
+    return this.courseService.findOneCourse(id)
+  }
+
+  @Mutation('assignUserToCourse')
+  assignUserToCourse(
+    @Args('courseId', ParseUUIDPipe) courseId: string,
+    @Args('userId', ParseUUIDPipe) userId: string,
+  ) {
+    return this.courseService.assignUserToCourse(courseId, userId)
+  }
+
+  @Mutation('unassignUserFromCourse')
+  unassignUserFromCourse(
+    @Args('courseId', ParseUUIDPipe) courseId: string,
+    @Args('userId', ParseUUIDPipe) userId: string,
+  ) {
+    return this.courseService.unassignUserFromCourse(courseId, userId)
+  }
+
+  @Mutation('createChapter')
+  createChapter(
+    @Args('createChapterInput') createChapterInput: CreateChapterInput,
+  ) {
+    return this.courseService.createOneChapter(createChapterInput)
+  }
+
+  @Mutation('updateChapter')
+  updateChapter(
+    @Args('updateChapterInput') updateChapterInput: UpdateChapterInput,
+  ) {
+    return this.courseService.updateChapter(
+      updateChapterInput.id,
+      updateChapterInput,
+    )
+  }
+
+  @Mutation('removeChapter')
+  removeChapter(@Args('id', ParseUUIDPipe) id: string) {
+    return this.courseService.removeChapter(id)
+  }
+
+  @Mutation('createSubChapter')
+  createSubChapter(
+    @Args('createSubChapterInput') createSubChapterInput: CreateSubChapterInput,
+  ) {
+    return this.courseService.createOneSubChapter(createSubChapterInput)
+  }
+
+  @Mutation('updateSubChapter')
+  updateSubChapter(
+    @Args('updateSubChapterInput') updateSubChapterInput: UpdateSubChapterInput,
+  ) {
+    return this.courseService.updateSubChapter(
+      updateSubChapterInput.id,
+      updateSubChapterInput,
+    )
+  }
+
+  @Mutation('removeSubChapter')
+  removeSubChapter(@Args('id', ParseUUIDPipe) id: string) {
+    return this.courseService.removeSubChapter(id)
+  }
+
+  @Mutation('createCourseDocument')
+  createCourseDocument(
+    @Args('createCourseDocumentInput')
+    createCourseDocumentInput: CreateCourseDocumentInput,
+  ) {
+    return this.courseService.createOneCourseDocument(createCourseDocumentInput)
+  }
+
+  @Mutation('updateCourseDocument')
+  updateCourseDocument(
+    @Args('updateCourseDocumentInput')
+    updateCourseDocumentInput: UpdateCourseDocumentInput,
+  ) {
+    return this.courseService.updateCourseDocument(
+      updateCourseDocumentInput.id,
+      updateCourseDocumentInput,
+    )
+  }
+
+  @Mutation('removeCourseDocument')
+  removeCourseDocument(@Args('id', ParseUUIDPipe) id: string) {
+    return this.courseService.removeCourseDocument(id)
   }
 }

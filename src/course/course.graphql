@@ -106,8 +106,8 @@ type Mutation {
   updateCourse(updateCourseInput: UpdateCourseInput!): Course!
   removeCourse(id: ID!): Course
 
-  # assign_enroll(courseId: ID!, userId: ID!): Boolean!
-  # unassign_dropout(courseId: ID!, userId: ID!): Boolean!
+  assignUserToCourse(courseId: ID!, userId: ID!): Boolean!
+  unassignUserFromCourse(courseId: ID!, userId: ID!): Boolean!
 
   createChapter(createChapterInput: CreateChapterInput): Chapter!
   updateChapter(updateChapterInput: UpdateChapterInput): Chapter!

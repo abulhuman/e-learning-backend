@@ -152,6 +152,8 @@ export interface IMutation {
     createCourse(createCourseInput: CreateCourseInput): Course | Promise<Course>;
     updateCourse(updateCourseInput: UpdateCourseInput): Course | Promise<Course>;
     removeCourse(id: string): Nullable<Course> | Promise<Nullable<Course>>;
+    assignUserToCourse(courseId: string, userId: string): boolean | Promise<boolean>;
+    unassignUserFromCourse(courseId: string, userId: string): boolean | Promise<boolean>;
     createChapter(createChapterInput?: Nullable<CreateChapterInput>): Chapter | Promise<Chapter>;
     updateChapter(updateChapterInput?: Nullable<UpdateChapterInput>): Chapter | Promise<Chapter>;
     removeChapter(id: string): Chapter | Promise<Chapter>;

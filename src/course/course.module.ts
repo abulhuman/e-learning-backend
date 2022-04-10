@@ -6,9 +6,11 @@ import { Course } from './entities/course.entity'
 import { SubChapter } from './entities/sub-chapter.entity'
 import { Chapter } from './entities/chapter.entity'
 import { CourseDocument } from './entities/course-document.entity'
+import { UsersModule } from 'src/users/users.module'
 
 @Module({
   imports: [
+    UsersModule,
     TypeOrmModule.forFeature([Course, Chapter, SubChapter, CourseDocument]),
   ],
   providers: [CourseResolver, CourseService],

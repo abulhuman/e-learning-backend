@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
+import { UsersService } from 'src/users/users.service'
 import { Repository } from 'typeorm'
 import { CreateChapterInput } from './dto/create-chapter.input'
 import { CreateCourseDocumentInput } from './dto/create-course-document.input'
@@ -28,6 +29,8 @@ export class CourseService {
 
     @InjectRepository(CourseDocument)
     private courseDocumentRepository: Repository<CourseDocument>,
+
+    private usersService: UsersService,
   ) {}
   createOneCourse(createCourseInput: CreateCourseInput) {
     const newCourse = this.courseRepository.create(createCourseInput)
@@ -69,7 +72,7 @@ export class CourseService {
 
   findAllCourses() {
     return this.courseRepository.find({
-      relations: ['chapters', 'chapters.subChapters'],
+      relations: ['chapters', 'chapters.subChapters', 'users', 'users.roles'],
     })
   }
 
@@ -87,7 +90,7 @@ export class CourseService {
 
   findOneCourse(id: string) {
     return this.courseRepository.findOne(id, {
-      relations: ['chapters', 'chapters.subChapters'],
+      relations: ['chapters', 'chapters.subChapters', 'users', 'users.roles'],
     })
   }
 
@@ -151,5 +154,36 @@ export class CourseService {
   async removeCourseDocument(id: string) {
     const courseDocumentToDelete = await this.findOneCourseDocument(id)
     return this.courseDocumentRepository.remove(courseDocumentToDelete)
+  }
+
+  async assignUserToCourse(courseId: any, userId: any) {
+    const user = await this.usersService.findOneUserById(userId, true)
+    const course = await this.findOneCourse(courseId)
+
+    course?.users.push(user)
+
+    const updatedCourse = await this.courseRepository.save(course)
+
+    return updatedCourse.users.includes(user)
+  }
+
+  async unassignUserFromCourse(courseId: string, userId: string) {
+    const userToUnassign = await this.usersService.findOneUserById(userId, true)
+    const course = await this.findOneCourse(courseId)
+
+    const courseAlreadyHasUser = course.users
+      .map(user => user.id)
+      .includes(userId)
+
+    if (!courseAlreadyHasUser)
+      throw new BadRequestException(
+        `User with id ${userId} dosen't have course with id ${courseId}.`,
+      )
+
+    course.users = course.users.filter(user => user.id !== userId)
+
+    const updatedCourse = await this.courseRepository.save(course)
+
+    return !updatedCourse.users.includes(userToUnassign)
   }
 }
