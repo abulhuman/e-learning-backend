@@ -1,3 +1,4 @@
+import { Course } from 'src/course/entities/course.entity'
 import { User as IUser } from 'src/graphql'
 import {
   Column,
@@ -37,4 +38,7 @@ export class User implements IUser {
 
   @ManyToMany(() => Role, (role: Role) => role.members)
   roles: Role[]
+
+  @ManyToMany(() => Course, (course: Course) => course.users)
+  courses?: Course[]
 }
