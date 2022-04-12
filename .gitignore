@@ -37,3 +37,6 @@ lerna-debug.log*
 # Environment variables
 .env
 .env.production
+
+# File uploads
+upload/

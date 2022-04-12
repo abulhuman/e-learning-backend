@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Session } from './auth/entities/session.entity'
 import { PassportModule } from '@nestjs/passport'
+import { FilesModule } from './files/files.module'
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { PassportModule } from '@nestjs/passport'
     PassportModule.register({
       session: true,
     }),
+    FilesModule,
   ],
 })
 export class AppModule {}
