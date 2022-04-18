@@ -1,11 +1,15 @@
 import {
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
+  InternalServerErrorException,
   Post,
   Request,
   Session,
   UseGuards,
 } from '@nestjs/common'
+import { Session as ExpressSession } from 'express-session'
 import { AuthenticatedGuard, LocalAuthGuard } from './guards/local-auth.guard'
 import { RequestWithUser } from './interfaces/request-with-user.interface'
 
@@ -13,9 +17,8 @@ import { RequestWithUser } from './interfaces/request-with-user.interface'
 export class AuthController {
   @Post('signin')
   @UseGuards(LocalAuthGuard)
-  signin(@Session() session: Record<string, any>, @Request() req: RequestWithUser) {
-    session.authenticated = true
-    return req.user;
+  signin(@Request() req: RequestWithUser) {
+    return req.user
   }
 
   @UseGuards(AuthenticatedGuard)
