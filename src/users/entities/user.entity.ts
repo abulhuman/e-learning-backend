@@ -1,5 +1,6 @@
 import { Course } from 'src/course/entities/course.entity'
 import { User as IUser } from 'src/graphql'
+import { ExcludeFromResponse } from 'src/utils/decorators/exclude-from-response.decorator'
 import {
   Column,
   CreateDateColumn,
@@ -15,9 +16,11 @@ export class User implements IUser {
   @PrimaryGeneratedColumn('uuid')
   readonly id: string
 
+  @ExcludeFromResponse()
   @CreateDateColumn()
   created_at: Date
 
+  @ExcludeFromResponse()
   @UpdateDateColumn({ nullable: true })
   updated_at?: Date
 
@@ -33,6 +36,7 @@ export class User implements IUser {
   @Column({ unique: true })
   email: string
 
+  @ExcludeFromResponse()
   @Column()
   password: string
 
