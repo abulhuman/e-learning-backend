@@ -23,4 +23,16 @@ export class AuthController {
   getProfile(@Request() req: RequestWithUser) {
     return req.user
   }
+
+  @UseGuards(AuthenticatedGuard)
+  @Post('signout')
+  @HttpCode(HttpStatus.OK)
+  signout(@Session() session: ExpressSession, @Request() req: RequestWithUser) {
+    try {
+      req.logOut()
+      session.cookie.maxAge = 0
+    } catch (error) {
+      throw new InternalServerErrorException(error)
+    }
+  }
 }
