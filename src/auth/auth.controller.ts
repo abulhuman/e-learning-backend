@@ -13,9 +13,9 @@ import { RequestWithUser } from './interfaces/request-with-user.interface'
 export class AuthController {
   @Post('signin')
   @UseGuards(LocalAuthGuard)
-  signin(@Session() session: Record<string, any>) {
+  signin(@Session() session: Record<string, any>, @Request() req: RequestWithUser) {
     session.authenticated = true
-    return session
+    return req.user;
   }
 
   @UseGuards(AuthenticatedGuard)
