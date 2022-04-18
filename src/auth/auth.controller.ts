@@ -18,7 +18,12 @@ export class AuthController {
   @Post('signin')
   @UseGuards(LocalAuthGuard)
   signin(@Request() req: RequestWithUser) {
-    return req.user
+    const { roles: rawRoles } = req.user
+    const roles = rawRoles.map(role => role.name)
+    return {
+      ...req.user,
+      roles,
+    }
   }
 
   @UseGuards(AuthenticatedGuard)
