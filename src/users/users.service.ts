@@ -46,8 +46,9 @@ export class UsersService {
     return this.findOne({ id }, withRoles)
   }
 
-  findOneUserByEmail(email: string): Promise<User> {
-    return this.findOne({ email })
+  findOneUserByEmail(email: string, withRoles = true): Promise<User> {
+    const user = this.findOne({ email }, withRoles)
+    return user
   }
 
   async getRoles(id: string): Promise<Role[]> {
