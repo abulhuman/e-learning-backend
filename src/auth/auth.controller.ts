@@ -6,12 +6,15 @@ import {
   InternalServerErrorException,
   Post,
   Request,
+  Response,
   Session,
   UseGuards,
 } from '@nestjs/common'
 import { Session as ExpressSession } from 'express-session'
+import { promisify } from 'util'
 import { AuthenticatedGuard, LocalAuthGuard } from './guards/local-auth.guard'
 import { RequestWithUser } from './interfaces/request-with-user.interface'
+import { Response as ExpressResponse } from 'express'
 
 @Controller('auth')
 export class AuthController {
@@ -32,13 +35,16 @@ export class AuthController {
     return req.user
   }
 
-  @UseGuards(AuthenticatedGuard)
   @Post('signout')
   @HttpCode(HttpStatus.OK)
-  signout(@Session() session: ExpressSession, @Request() req: RequestWithUser) {
+  async signout(
+    @Request() req: RequestWithUser,
+    @Response({ passthrough: true }) res: ExpressResponse,
+  ) {
     try {
       req.logOut()
-      session.cookie.maxAge = 0
+      await promisify(req.session.destroy.bind(req.session))()
+      res.clearCookie('sessionId')
     } catch (error) {
       throw new InternalServerErrorException(error)
     }
