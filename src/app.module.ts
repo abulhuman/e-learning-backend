@@ -28,6 +28,7 @@ import { MailModule } from './mail/mail.module'
         MAIL_USER: Joi.string().required(),
         MAIL_PASSWORD: Joi.string().required(),
         MAIL_FROM: Joi.string().default('elearning.aastu.edu'),
+        EMAIL_VERIFICATION_URL: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
       }),
     }),
