@@ -15,7 +15,12 @@
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix --color -f compact",
     "prepare": "husky install",
-    "schema-gen": "npx ts-node src/generate-typings"
+    "schema-gen": "npx ts-node src/generate-typings",
+    "migration:create": "npx ts-node node_modules/typeorm/cli.js migration:create --config src/database/database.config -d src/database/migrations -n",
+    "migration:run": "npm run build && npx ts-node node_modules/typeorm/cli.js migration:run --config src/database/database.config",
+    "migration:show": "npx ts-node node_modules/typeorm/cli.js migration:show --config src/database/database.config",
+    "migration:revert": "npx ts-node node_modules/typeorm/cli.js migration:revert --config src/database/database.config",
+    "schema:sync": "npx ts-node node_modules/typeorm/cli.js schema:sync --config src/database/database.config"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^1.6.1",
@@ -32,6 +37,7 @@
     "apollo-server-express": "^3.6.3",
     "bcrypt": "^5.0.1",
     "connect-typeorm": "^1.1.4",
+    "dotenv": "^16.0.0",
     "express-session": "^1.17.2",
     "graphql": "^16.3.0",
     "handlebars": "^4.7.7",
