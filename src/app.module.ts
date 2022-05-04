@@ -15,6 +15,7 @@ import { MailModule } from './mail/mail.module'
 import appConfigValidation from './app.config'
 import authConfigValidation from './auth/auth.config'
 import { databaseConfigValidation } from './database/database.config'
+
 import emailConfigValidation from './mail/mail.config'
 
 @Module({
