@@ -12,24 +12,19 @@ import { Session } from './auth/entities/session.entity'
 import { PassportModule } from '@nestjs/passport'
 import { CourseModule } from './course/course.module'
 import { MailModule } from './mail/mail.module'
+import appConfigValidation from './app.config'
+import authConfigValidation from './auth/auth.config'
+import databaseConfigValidation from './database/database.config'
+import emailConfigValidation from './mail/mail.config'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       validationSchema: Joi.object({
-        NODE_ENV: Joi.string().valid('development', 'production').optional(),
-        DATABASE_URL: Joi.string().required(),
-        PORT: Joi.number().required(),
-        SESSION_SECRET: Joi.string().required(),
-        COOKIE_MAX_AGE: Joi.number().default(4.32e7),
-        MAIL_HOST: Joi.string().required(),
-        MAIL_PORT: Joi.number().required(),
-        MAIL_IS_SECURE: Joi.boolean().required(),
-        MAIL_USER: Joi.string().required(),
-        MAIL_PASSWORD: Joi.string().required(),
-        MAIL_FROM: Joi.string().default('elearning.aastu.edu'),
-        EMAIL_VERIFICATION_URL: Joi.string().required(),
-        JWT_SECRET: Joi.string().required(),
+        ...appConfigValidation,
+        ...authConfigValidation,
+        ...databaseConfigValidation,
+        ...emailConfigValidation,
       }),
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
