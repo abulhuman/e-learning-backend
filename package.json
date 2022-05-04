@@ -17,7 +17,7 @@
     "prepare": "husky install",
     "schema-gen": "npx ts-node src/generate-typings",
     "migration:create": "npx ts-node node_modules/typeorm/cli.js migration:create --config src/database/database.config -d src/database/migrations -n",
-    "migration:run": "npx ts-node node_modules/typeorm/cli.js migration:run --config src/database/database.config",
+    "migration:run": "npm run build && npx ts-node node_modules/typeorm/cli.js migration:run --config src/database/database.config",
     "migration:show": "npx ts-node node_modules/typeorm/cli.js migration:show --config src/database/database.config",
     "migration:revert": "npx ts-node node_modules/typeorm/cli.js migration:revert --config src/database/database.config",
     "schema:sync": "npx ts-node node_modules/typeorm/cli.js schema:sync --config src/database/database.config"
