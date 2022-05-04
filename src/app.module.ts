@@ -11,6 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { Session } from './auth/entities/session.entity'
 import { PassportModule } from '@nestjs/passport'
 import { CourseModule } from './course/course.module'
+import { MailModule } from './mail/mail.module'
 
 @Module({
   imports: [
@@ -21,6 +22,14 @@ import { CourseModule } from './course/course.module'
         PORT: Joi.number().required(),
         SESSION_SECRET: Joi.string().required(),
         COOKIE_MAX_AGE: Joi.number().default(4.32e7),
+        MAIL_HOST: Joi.string().required(),
+        MAIL_PORT: Joi.number().required(),
+        MAIL_IS_SECURE: Joi.boolean().required(),
+        MAIL_USER: Joi.string().required(),
+        MAIL_PASSWORD: Joi.string().required(),
+        MAIL_FROM: Joi.string().default('elearning.aastu.edu'),
+        EMAIL_VERIFICATION_URL: Joi.string().required(),
+        JWT_SECRET: Joi.string().required(),
       }),
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
@@ -44,6 +53,7 @@ import { CourseModule } from './course/course.module'
     PassportModule.register({
       session: true,
     }),
+    MailModule,
   ],
 })
 export class AppModule {}

@@ -1,10 +1,13 @@
 import {
   ConflictException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import * as bcrypt from 'bcrypt'
+import { AuthService } from 'src/auth/auth.service'
 import { RoleName } from 'src/graphql'
 import { Repository } from 'typeorm'
 import { CreateRoleInput } from './dto/create-role.input'
@@ -19,6 +22,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Role) private roleRepository: Repository<Role>,
+    @Inject(forwardRef(() => AuthService))
+    private authService: AuthService,
   ) {}
 
   async createUser(createUserInput: CreateUserInput) {
@@ -34,7 +39,7 @@ export class UsersService {
 
     const newUser = this.userRepository.create(rest)
     newUser.roles = [roleToAssign]
-
+    await this.authService.sendVerificationLink(newUser)
     return this.userRepository.save(newUser)
   }
 
