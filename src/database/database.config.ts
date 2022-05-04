@@ -1,5 +1,7 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm'
 import * as Joi from 'joi'
+import * as dotenv from 'dotenv'
+dotenv.config()
 
 export const databaseConfigValidation = {
   DATABASE_URL: Joi.string().required(),
