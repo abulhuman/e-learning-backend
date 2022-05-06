@@ -15,6 +15,7 @@ import { MailModule } from './mail/mail.module'
 import appConfigValidation from './app.config'
 import authConfigValidation from './auth/auth.config'
 import { databaseConfigValidation } from './database/database.config'
+import { NotificationModule } from './notification/notification.module'
 
 import emailConfigValidation from './mail/mail.config'
 
@@ -39,6 +40,7 @@ import emailConfigValidation from './mail/mail.config'
           path: join(process.cwd(), 'src/graphql.ts'),
         },
         emitTypenameField: true,
+        installSubscriptionHandlers: true,
       }),
     }),
     DatabaseModule,
@@ -50,6 +52,7 @@ import emailConfigValidation from './mail/mail.config'
       session: true,
     }),
     MailModule,
+    NotificationModule,
   ],
 })
 export class AppModule {}
