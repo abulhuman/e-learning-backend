@@ -1,10 +1,16 @@
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator'
-import { CreateNotificationInput as ICreateNotificationInput } from 'src/graphql'
+import { IsJSON, IsNotEmpty, IsUUID } from 'class-validator'
+import {
+  CreateNotificationInput as ICreateNotificationInput,
+  NotificationType,
+} from 'src/graphql'
 
 export class CreateNotificationInput implements ICreateNotificationInput {
   @IsNotEmpty()
-  @IsString()
-  text: string
+  @IsJSON()
+  data: string
+
+  @IsNotEmpty()
+  type: NotificationType
 
   @IsNotEmpty()
   @IsUUID()

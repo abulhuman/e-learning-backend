@@ -1,6 +1,7 @@
 import { MailerService } from '@nestjs-modules/mailer'
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { CourseAdditionNotification } from 'src/notification/dto/course-addition-notification.dto'
 
 @Injectable()
 export class MailService {
@@ -19,6 +20,20 @@ export class MailService {
       context: {
         url,
         name,
+      },
+    })
+  }
+
+  async sendCourseAdditionEmail(newNotification: CourseAdditionNotification) {
+    const { course, recipient, created_at } = newNotification
+    return this.mailerService.sendMail({
+      to: recipient.email,
+      subject: `Added to course ${course.name}`,
+      template: '/course-addition',
+      context: {
+        course,
+        name: recipient.firstName + recipient.lastName,
+        at: created_at.toDateString(),
       },
     })
   }
