@@ -2,13 +2,19 @@ type Notification {
   id: ID!
   created_at: Date!
   updated_at: Date
-  text: String
+  data: String!
+  type: NotificationType!
   status: NotificationStatus
   recipient: User!
 }
 
+enum NotificationType {
+  COURSE_ADDITION
+}
+
 input CreateNotificationInput {
-  text: String!
+  data: String!
+  type: NotificationType!
   recipientId: ID!
 }
 

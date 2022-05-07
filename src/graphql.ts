@@ -7,6 +7,10 @@
 
 /* tslint:disable */
 /* eslint-disable */
+export enum NotificationType {
+    COURSE_ADDITION = "COURSE_ADDITION"
+}
+
 export enum NotificationStatus {
     UNREAD = "UNREAD",
     READ = "READ",
@@ -80,7 +84,8 @@ export interface UpdateCourseDocumentInput {
 }
 
 export interface CreateNotificationInput {
-    text: string;
+    data: string;
+    type: NotificationType;
     recipientId: string;
 }
 
@@ -196,7 +201,8 @@ export interface Notification {
     id: string;
     created_at: Date;
     updated_at?: Nullable<Date>;
-    text?: Nullable<string>;
+    data: string;
+    type: NotificationType;
     status?: Nullable<NotificationStatus>;
     recipient: User;
 }

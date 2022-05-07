@@ -1,4 +1,8 @@
-import { Notification as INotification, NotificationStatus } from 'src/graphql'
+import {
+  Notification as INotification,
+  NotificationStatus,
+  NotificationType,
+} from 'src/graphql'
 import { User } from 'src/users/entities/user.entity'
 import {
   Column,
@@ -21,7 +25,10 @@ export class Notification implements INotification {
   updated_at?: Date
 
   @Column()
-  text?: string
+  data: string
+
+  @Column()
+  type: NotificationType
 
   @Column({
     type: 'enum',
