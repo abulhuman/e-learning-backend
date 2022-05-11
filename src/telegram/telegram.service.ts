@@ -1,0 +1,163 @@
+import { HttpService } from '@nestjs/axios'
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
+import {
+  catchError,
+  from,
+  map,
+  mergeMap,
+  Observable,
+  of,
+  repeat,
+  retry,
+  Subscription,
+  tap,
+  throwError,
+} from 'rxjs'
+import { AppService } from 'src/app/app.service'
+import * as Telegram from './dtos'
+import {
+  GetUpdatesParams,
+  MessageEntity,
+  MessageUpdate,
+  SendMessageParams,
+  Update,
+} from './dtos'
+import { Command, MessageEntityType } from './telegram.contants'
+import { TelegramModule } from './telegram.module'
+
+@Injectable()
+export class TelegramService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(TelegramModule.name)
+  private apiURL: string
+  private offset: number
+  private $updateSubscription: Subscription
+
+  constructor(
+    private appService: AppService,
+    private httpService: HttpService,
+    private configService: ConfigService,
+  ) {
+    this.apiURL = this.configService
+      .get<string>('TELEGRAM_API_URL')
+      .concat(this.configService.get('BOT_KEY'))
+  }
+  onModuleInit() {
+    if (this.appService.isInProduction) {
+      this.logger.log('Listening on Webhook')
+    } else {
+      this.$updateSubscription = of({})
+        .pipe(
+          mergeMap(() =>
+            this.getUpdates({
+              offset: this.offset,
+            }),
+          ),
+          tap(updates => {
+            if (updates.length) {
+              const lastUpdateId = updates.at(-1).update_id + 1
+              this.offset = lastUpdateId
+            }
+          }),
+          repeat(),
+          retry(3),
+        )
+        .subscribe({
+          next: updates => this.dispatcher(updates),
+          error: error => this.logger.error(error.message),
+        })
+    }
+  }
+  dispatcher(updates: Update[]): void {
+    from(updates)
+      .pipe(
+        map(update => {
+          if (update.hasOwnProperty('message')) {
+            update.type = 'message'
+          }
+          return update
+        }),
+      )
+      .subscribe({
+        next: update => {
+          switch (update.type) {
+            case 'message':
+              this.messageDispatcher(update as MessageUpdate)
+              break
+          }
+        },
+      })
+  }
+  messageDispatcher(update: MessageUpdate) {
+    let commandEntity: MessageEntity
+    if (
+      (commandEntity = update.message.entities.find(
+        update => update.type === MessageEntityType.COMMAND,
+      ))
+    ) {
+      const command = update.message.text.substring(
+        commandEntity.offset,
+        commandEntity.length,
+      )
+      switch (command) {
+        case Command.START:
+          this.sendMessage({
+            chat_id: update.message.chat.id,
+            text: `Welcome ${update.message.from.first_name}. \n Please authorize your E-Learning account below`,
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: 'Authorize 🔒',
+                    url: 'https://google.com',
+                  },
+                ],
+              ],
+            },
+          }).subscribe()
+          break
+      }
+    }
+  }
+  sendMessage(params: SendMessageParams) {
+    return this.telegramApiCall(this.sendMessage.name, params)
+  }
+
+  onModuleDestroy() {
+    this.$updateSubscription?.unsubscribe()
+  }
+
+  private getUpdates(params?: GetUpdatesParams): Observable<Update[]> {
+    return this.telegramApiCall<Update[]>(this.getUpdates.name, params)
+  }
+
+  private telegramApiCall<T>(
+    endpoint: string,
+    data?: any,
+    requestConfig?: AxiosRequestConfig,
+  ): Observable<T> {
+    return this.httpService
+      .post(`${this.apiURL}/${endpoint}`, data, requestConfig)
+      .pipe(
+        map((response: AxiosResponse<Telegram.Response>) => {
+          return response.data.result
+        }),
+        catchError(error => {
+          if (error?.isAxiosError) {
+            const axiosError = error as AxiosError<Telegram.Response>
+            const { data } = axiosError.response
+            return throwError(
+              () => new Error(`${data.error_code}: ${data.description}`),
+            )
+          }
+          return throwError(() => error)
+        }),
+      )
+  }
+}
