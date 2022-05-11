@@ -7,6 +7,16 @@
 
 /* tslint:disable */
 /* eslint-disable */
+export enum NotificationType {
+    COURSE_ADDITION = "COURSE_ADDITION"
+}
+
+export enum NotificationStatus {
+    UNREAD = "UNREAD",
+    READ = "READ",
+    ARCHIVED = "ARCHIVED"
+}
+
 export enum RoleName {
     DEV = "DEV",
     ADMINISTRATOR = "ADMINISTRATOR",
@@ -71,6 +81,18 @@ export interface UpdateCourseDocumentInput {
     documentType?: Nullable<string>;
     documentName?: Nullable<string>;
     documentURL?: Nullable<string>;
+}
+
+export interface CreateNotificationInput {
+    data: string;
+    type: NotificationType;
+    recipientId: string;
+}
+
+export interface UpdateNotificationInput {
+    id: string;
+    text?: Nullable<string>;
+    status?: Nullable<NotificationStatus>;
 }
 
 export interface CreateUserInput {
@@ -142,6 +164,8 @@ export interface CourseDocument {
 export interface IQuery {
     courses(): Nullable<Course>[] | Promise<Nullable<Course>[]>;
     course(id: string): Nullable<Course> | Promise<Nullable<Course>>;
+    notifications(): Nullable<Notification>[] | Promise<Nullable<Notification>[]>;
+    notification(id: string): Nullable<Notification> | Promise<Nullable<Notification>>;
     users(): Nullable<User>[] | Promise<Nullable<User>[]>;
     user(id: string): Nullable<User> | Promise<Nullable<User>>;
     roles(): Nullable<Role>[] | Promise<Nullable<Role>[]>;
@@ -163,11 +187,28 @@ export interface IMutation {
     createCourseDocument(createCourseDocumentInput?: Nullable<CreateCourseDocumentInput>): CourseDocument | Promise<CourseDocument>;
     updateCourseDocument(updateCourseDocumentInput?: Nullable<UpdateCourseDocumentInput>): CourseDocument | Promise<CourseDocument>;
     removeCourseDocument(id: string): CourseDocument | Promise<CourseDocument>;
+    createNotification(createNotificationInput: CreateNotificationInput): Notification | Promise<Notification>;
+    updateNotification(updateNotificationInput: UpdateNotificationInput): Notification | Promise<Notification>;
+    removeNotification(id: string): Nullable<Notification> | Promise<Nullable<Notification>>;
     createUser(createUserInput: CreateUserInput): User | Promise<User>;
     updateUser(updateUserInput: UpdateUserInput): User | Promise<User>;
     removeUser(id: string): Nullable<User> | Promise<Nullable<User>>;
     createRole(createRoleInput: CreateRoleInput): Role | Promise<Role>;
     revokeUserRole(userId: string, roleName: RoleName): User | Promise<User>;
+}
+
+export interface Notification {
+    id: string;
+    created_at: Date;
+    updated_at?: Nullable<Date>;
+    data: string;
+    type: NotificationType;
+    status?: Nullable<NotificationStatus>;
+    recipient: User;
+}
+
+export interface ISubscription {
+    onSubscribe(recipientId: string): Nullable<Notification>[] | Promise<Nullable<Notification>[]>;
 }
 
 export interface User {
@@ -181,6 +222,7 @@ export interface User {
     password: string;
     roles: Nullable<Role>[];
     courses?: Nullable<Nullable<Course>[]>;
+    notifications?: Nullable<Nullable<Notification>[]>;
 }
 
 export interface Role {

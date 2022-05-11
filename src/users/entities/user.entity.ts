@@ -5,10 +5,12 @@ import {
   CreateDateColumn,
   Entity,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
 import { Role } from './role.entity'
+import { Notification } from 'src/notification/entities/notification.entity'
 
 @Entity()
 export class User implements IUser {
@@ -41,4 +43,10 @@ export class User implements IUser {
 
   @ManyToMany(() => Course, (course: Course) => course.users)
   courses?: Course[]
+
+  @OneToMany(
+    () => Notification,
+    (notification: Notification) => notification.recipient,
+  )
+  notifications: Notification[]
 }

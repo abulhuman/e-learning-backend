@@ -1,5 +1,6 @@
 import { ParseUUIDPipe } from '@nestjs/common'
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql'
+import { NotificationService } from 'src/notification/notification.service'
 import { CourseService } from './course.service'
 import { CreateChapterInput } from './dto/create-chapter.input'
 import { CreateCourseDocumentInput } from './dto/create-course-document.input'
@@ -9,10 +10,14 @@ import { UpdateChapterInput } from './dto/update-chapter.input'
 import { UpdateCourseDocumentInput } from './dto/update-course-document.input'
 import { UpdateCourseInput } from './dto/update-course.input'
 import { UpdateSubChapterInput } from './dto/update-sub-chapter.input'
+import { NotificationType } from 'src/graphql'
 
 @Resolver('Course')
 export class CourseResolver {
-  constructor(private readonly courseService: CourseService) {}
+  constructor(
+    private readonly courseService: CourseService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   @Mutation('createCourse')
   createCourse(
@@ -47,11 +52,24 @@ export class CourseResolver {
   }
 
   @Mutation('assignUserToCourse')
-  assignUserToCourse(
+  async assignUserToCourse(
     @Args('courseId', ParseUUIDPipe) courseId: string,
     @Args('userId', ParseUUIDPipe) userId: string,
   ) {
-    return this.courseService.assignUserToCourse(courseId, userId)
+    const updatedCourse = await this.courseService.assignUserToCourse(
+      courseId,
+      userId,
+    )
+    if (updatedCourse.users.some(user => user.id === userId)) {
+      const notification = await this.notificationService.create({
+        data: JSON.stringify(updatedCourse),
+        recipientId: userId,
+        type: NotificationType.COURSE_ADDITION,
+      })
+      await this.notificationService.dispatch(notification)
+      return true
+    }
+    return false
   }
 
   @Mutation('unassignUserFromCourse')

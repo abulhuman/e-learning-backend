@@ -9,6 +9,7 @@ type User {
   password: String!
   roles: [Role]!
   courses: [Course]
+  notifications: [Notification]
 }
 
 input CreateUserInput {

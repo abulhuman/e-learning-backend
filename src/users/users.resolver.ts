@@ -15,10 +15,14 @@ import { User } from './entities/user.entity'
 import { UseFilters } from '@nestjs/common'
 import { QueryFailedExceptionFilter } from 'src/database/filters/query-failed-exception.filter'
 import { RoleName } from 'src/graphql'
+import { NotificationService } from 'src/notification/notification.service'
 
 @Resolver('User')
 export class UserResolver {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private notificationService: NotificationService,
+  ) {}
 
   @UseFilters(QueryFailedExceptionFilter)
   @Mutation('createUser')
@@ -49,6 +53,11 @@ export class UserResolver {
   @ResolveField('roles')
   roles(@Parent() user: User) {
     return user.roles
+  }
+
+  @ResolveField('notifications')
+  notifications(@Parent() user: User) {
+    return this.notificationService.findOne(user.id)
   }
 }
 
