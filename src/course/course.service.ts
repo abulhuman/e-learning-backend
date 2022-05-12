@@ -162,9 +162,7 @@ export class CourseService {
 
     course?.users.push(user)
 
-    const updatedCourse = await this.courseRepository.save(course)
-
-    return updatedCourse.users.includes(user)
+    return this.courseRepository.save(course)
   }
 
   async unassignUserFromCourse(courseId: string, userId: string) {

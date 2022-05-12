@@ -17,6 +17,7 @@ import authConfigValidation from './auth/auth.config'
 import { databaseConfigValidation } from './database/database.config'
 import { TelegramModule } from './telegram/telegram.module'
 import { AppService } from './app/app.service'
+import { NotificationModule } from './notification/notification.module'
 
 import emailConfigValidation from './mail/mail.config'
 import { telegramConfigValidation } from './telegram/telegram.config'
@@ -43,6 +44,7 @@ import { telegramConfigValidation } from './telegram/telegram.config'
           path: join(process.cwd(), 'src/graphql.ts'),
         },
         emitTypenameField: true,
+        installSubscriptionHandlers: true,
       }),
     }),
     DatabaseModule,
@@ -55,6 +57,7 @@ import { telegramConfigValidation } from './telegram/telegram.config'
     }),
     MailModule,
     TelegramModule,
+    NotificationModule,
   ],
   providers: [AppService],
   exports: [AppService],
