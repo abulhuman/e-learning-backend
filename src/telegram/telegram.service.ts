@@ -34,7 +34,7 @@ import {
   Update,
 } from './dtos'
 import { TelegramAccount } from './entities/telegram-account.entity'
-import { Command, MessageEntityType } from './telegram.contants'
+import { Command, MessageEntityType } from './telegram.constants'
 import { TelegramModule } from './telegram.module'
 
 @Injectable()
@@ -160,36 +160,6 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
                   }).subscribe(),
               })
           }
-          //  from([]).pipe(
-          //    switchMap(() => {
-          //      if (!isAuthorized) {
-          //        return {
-          //          text: "Successfully authorized"
-          //        }
-          //      }
-          //      return this.accountExists
-          //    })
-          //  )
-          //     this.accountExists(update.message.from.id)).pipe(
-          //     map((account) : Partial<SendMessageParams> => {
-          //       if (account === undefined) {
-          //         return {
-          //           text: `Welcome ${update.message.from.first_name}. \n Please authorize your E-Learning account below`,
-          //           reply_markup: {
-          //             inline_keyboard: [
-          //               [
-          //                 {
-          //                   text: 'Authorize 🔒',
-          //                   url: `https://7f9c-197-156-73-170.in.ngrok.io/telegramAuth?userId=${update.message.from.id}&chatId=${update.message.chat.id}&name=${update.message.from.first_name}`,
-          //                 },
-          //               ],
-          //             ],
-          //           },
-          //         }
-          //       }
-          //     })
-          //   )
-          //   this.sendMessage({...message, chat_id: update.message.chat.id}).subscribe()
           break
       }
     }

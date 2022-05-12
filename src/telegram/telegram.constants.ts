@@ -1,8 +1,5 @@
 export enum Command {
   START = '/start',
-  REGISTER = '/register',
-  LIST = '/list',
-  UNREGISTER = '/deregister',
 }
 export enum MessageEntityType {
   MENTION = 'mention',

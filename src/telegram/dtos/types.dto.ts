@@ -1,5 +1,5 @@
 import { TelegramAccount } from '../entities/telegram-account.entity'
-import { MessageEntityType } from '../telegram.contants'
+import { MessageEntityType } from '../telegram.constants'
 
 export class Update {
   update_id: number
@@ -8,7 +8,7 @@ export class Update {
 
 export class MessageUpdate extends Update {
   message: Message
-  tyoe = 'message'
+  type = 'message'
 }
 
 export interface MessageEntity {

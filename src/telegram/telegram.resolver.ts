@@ -1,6 +1,5 @@
 import { BadRequestException } from '@nestjs/common'
 import { Args, Mutation, Resolver } from '@nestjs/graphql'
-import { firstValueFrom } from 'rxjs'
 import { AuthorizeTelegramInput } from 'src/graphql'
 import { TelegramAccount } from './entities/telegram-account.entity'
 import { TelegramService } from './telegram.service'
@@ -35,7 +34,5 @@ export class TelegramResolver {
     } catch (error) {
       throw new BadRequestException(error.message)
     }
-
-    // return this.telegramService.createAccount(newAccount)
   }
 }
