@@ -32,6 +32,7 @@ import { telegramConfigValidation } from './telegram/telegram.config'
         ...emailConfigValidation,
         ...telegramConfigValidation,
       }),
+      expandVariables: true,
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       imports: [ConfigModule],
@@ -45,6 +46,7 @@ import { telegramConfigValidation } from './telegram/telegram.config'
         },
         emitTypenameField: true,
         installSubscriptionHandlers: true,
+        autoTransformHttpErrors: false,
       }),
     }),
     DatabaseModule,

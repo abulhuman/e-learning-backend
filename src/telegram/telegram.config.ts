@@ -9,4 +9,6 @@ export const telegramConfigValidation = {
     then: Joi.required(),
     otherwise: Joi.optional(),
   }),
+  FRONTEND_URL: Joi.string().required(),
+  TELEGRAM_AUTH_URL: Joi.string().required(),
 }
