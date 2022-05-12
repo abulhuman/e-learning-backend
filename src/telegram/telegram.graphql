@@ -1,0 +1,17 @@
+type TelegramAccount {
+  id: ID!
+  first_name: String!
+  user: User!
+}
+
+input AuthorizeTelegramInput {
+  userId: String!
+  telegramId: String!
+  chatId: String!
+}
+
+type Mutation {
+  authorizeTelegram(
+    authorizeTelegramInput: AuthorizeTelegramInput!
+  ): TelegramAccount!
+}

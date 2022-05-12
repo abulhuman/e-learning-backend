@@ -15,9 +15,12 @@ import { MailModule } from './mail/mail.module'
 import appConfigValidation from './app.config'
 import authConfigValidation from './auth/auth.config'
 import { databaseConfigValidation } from './database/database.config'
+import { TelegramModule } from './telegram/telegram.module'
+import { AppService } from './app/app.service'
 import { NotificationModule } from './notification/notification.module'
 
 import emailConfigValidation from './mail/mail.config'
+import { telegramConfigValidation } from './telegram/telegram.config'
 
 @Module({
   imports: [
@@ -27,7 +30,9 @@ import emailConfigValidation from './mail/mail.config'
         ...authConfigValidation,
         ...databaseConfigValidation,
         ...emailConfigValidation,
+        ...telegramConfigValidation,
       }),
+      expandVariables: true,
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       imports: [ConfigModule],
@@ -41,6 +46,7 @@ import emailConfigValidation from './mail/mail.config'
         },
         emitTypenameField: true,
         installSubscriptionHandlers: true,
+        autoTransformHttpErrors: false,
       }),
     }),
     DatabaseModule,
@@ -52,7 +58,10 @@ import emailConfigValidation from './mail/mail.config'
       session: true,
     }),
     MailModule,
+    TelegramModule,
     NotificationModule,
   ],
+  providers: [AppService],
+  exports: [AppService],
 })
 export class AppModule {}

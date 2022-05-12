@@ -1,5 +1,6 @@
 import { Course } from 'src/course/entities/course.entity'
 import { User as IUser } from 'src/graphql'
+import { Notification } from 'src/notification/entities/notification.entity'
 import {
   Column,
   CreateDateColumn,
@@ -10,7 +11,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 import { Role } from './role.entity'
-import { Notification } from 'src/notification/entities/notification.entity'
 
 @Entity()
 export class User implements IUser {
