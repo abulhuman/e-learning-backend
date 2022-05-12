@@ -71,16 +71,16 @@ export interface UpdateSubChapterInput {
 
 export interface CreateCourseDocumentInput {
     documentType: string;
-    documentName: string;
-    documentURL: string;
+    documentDisplayName: string;
+    fileUpload: Upload;
     courseId: string;
 }
 
 export interface UpdateCourseDocumentInput {
     id: string;
     documentType?: Nullable<string>;
-    documentName?: Nullable<string>;
-    documentURL?: Nullable<string>;
+    documentDisplayName?: Nullable<string>;
+    fileUpload?: Nullable<Upload>;
 }
 
 export interface CreateNotificationInput {
@@ -162,9 +162,18 @@ export interface CourseDocument {
     created_at: Date;
     updated_at?: Nullable<Date>;
     documentType: string;
-    documentName: string;
-    documentURL: string;
+    documentDisplayName: string;
+    storedFileName: string;
     course: Course;
+}
+
+export interface File {
+    id: string;
+    created_at: Date;
+    updated_at?: Nullable<Date>;
+    filename: string;
+    mimetype: string;
+    encoding: string;
 }
 
 export interface IQuery {
@@ -179,6 +188,7 @@ export interface IQuery {
 }
 
 export interface IMutation {
+    singleFileUpload(file: Upload): File | Promise<File>;
     createCourse(createCourseInput: CreateCourseInput): Course | Promise<Course>;
     updateCourse(updateCourseInput: UpdateCourseInput): Course | Promise<Course>;
     removeCourse(id: string): Nullable<Course> | Promise<Nullable<Course>>;
@@ -246,4 +256,5 @@ export interface Role {
     members: Nullable<User>[];
 }
 
+export type Upload = any;
 type Nullable<T> = T | null;
