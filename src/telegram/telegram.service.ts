@@ -161,6 +161,12 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
               })
           }
           break
+        default:
+          this.sendMessage({
+            text: 'Unknown Command',
+            chat_id: message.chat.id,
+          })
+          break
       }
     }
   }
