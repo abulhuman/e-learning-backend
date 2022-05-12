@@ -1,5 +1,4 @@
 import * as Joi from 'joi'
-import { join } from 'path'
 
 export const telegramConfigValidation = {
   BOT_KEY: Joi.string().required(),
@@ -9,6 +8,5 @@ export const telegramConfigValidation = {
     then: Joi.required(),
     otherwise: Joi.optional(),
   }),
-  FRONTEND_URL: Joi.string().required(),
   TELEGRAM_AUTH_URL: Joi.string().required(),
 }
