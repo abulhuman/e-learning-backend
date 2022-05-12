@@ -1,8 +1,9 @@
 import { User } from 'src/users/entities/user.entity'
+import { TelegramAccount as ITelegramAccount } from 'src/graphql'
 import { Entity, JoinColumn, OneToOne, PrimaryColumn, Column } from 'typeorm'
 
 @Entity()
-export class TelegramUser {
+export class TelegramAccount implements ITelegramAccount {
   @PrimaryColumn('bigint')
   id: string
 

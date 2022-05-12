@@ -1,4 +1,4 @@
-import { TelegramUser } from '../entities/telegram-user.entity'
+import { TelegramAccount } from '../entities/telegram-account.entity'
 import { MessageEntityType } from '../telegram.contants'
 
 export class Update {
@@ -25,8 +25,8 @@ export interface Message {
   chat: Chat
   entities: MessageEntity[]
   text?: string
-  from?: TelegramUser
-  new_chat_members?: TelegramUser[]
+  from?: TelegramAccount
+  new_chat_members?: TelegramAccount[]
 }
 
 export enum ChatType {
@@ -41,4 +41,15 @@ export interface Chat {
   type: ChatType
   title?: string
   username?: string
+}
+
+export interface ChatMember {
+  status:
+    | 'creator'
+    | 'administrator'
+    | 'member'
+    | 'restricted'
+    | 'left'
+    | 'kicked'
+  user: TelegramAccount
 }

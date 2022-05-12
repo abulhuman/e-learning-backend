@@ -95,6 +95,12 @@ export interface UpdateNotificationInput {
     status?: Nullable<NotificationStatus>;
 }
 
+export interface AuthorizeTelegramInput {
+    userId: string;
+    telegramId: string;
+    chatId: string;
+}
+
 export interface CreateUserInput {
     firstName: string;
     middleName: string;
@@ -190,6 +196,7 @@ export interface IMutation {
     createNotification(createNotificationInput: CreateNotificationInput): Notification | Promise<Notification>;
     updateNotification(updateNotificationInput: UpdateNotificationInput): Notification | Promise<Notification>;
     removeNotification(id: string): Nullable<Notification> | Promise<Nullable<Notification>>;
+    authorizeTelegram(authorizeTelegramInput: AuthorizeTelegramInput): TelegramAccount | Promise<TelegramAccount>;
     createUser(createUserInput: CreateUserInput): User | Promise<User>;
     updateUser(updateUserInput: UpdateUserInput): User | Promise<User>;
     removeUser(id: string): Nullable<User> | Promise<Nullable<User>>;
@@ -209,6 +216,12 @@ export interface Notification {
 
 export interface ISubscription {
     onSubscribe(recipientId: string): Nullable<Notification>[] | Promise<Nullable<Notification>[]>;
+}
+
+export interface TelegramAccount {
+    id: string;
+    first_name: string;
+    user: User;
 }
 
 export interface User {

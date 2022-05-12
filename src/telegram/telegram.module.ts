@@ -1,17 +1,16 @@
 import { HttpModule } from '@nestjs/axios'
-import { forwardRef, Logger, Module, OnModuleInit } from '@nestjs/common'
+import { forwardRef, Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { timer } from 'rxjs'
 import { AppModule } from 'src/app.module'
-import { AppService } from 'src/app/app.service'
-import { TelegramUser } from './entities/telegram-user.entity'
+import { TelegramAccount } from './entities/telegram-account.entity'
+import { TelegramResolver } from './telegram.resolver'
 import { TelegramService } from './telegram.service'
 
 @Module({
-  providers: [TelegramService],
+  providers: [TelegramService, TelegramResolver],
   imports: [
-    TypeOrmModule.forFeature([TelegramUser]),
+    TypeOrmModule.forFeature([TelegramAccount]),
     forwardRef(() => AppModule),
     HttpModule,
     ConfigModule,

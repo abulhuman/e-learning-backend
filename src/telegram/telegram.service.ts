@@ -6,6 +6,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { InjectRepository } from '@nestjs/typeorm'
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
 import {
   catchError,
@@ -21,14 +22,18 @@ import {
   throwError,
 } from 'rxjs'
 import { AppService } from 'src/app/app.service'
+import { Repository } from 'typeorm'
 import * as Telegram from './dtos'
 import {
+  ChatMember,
+  GetChatMemberParams,
   GetUpdatesParams,
   MessageEntity,
   MessageUpdate,
   SendMessageParams,
   Update,
 } from './dtos'
+import { TelegramAccount } from './entities/telegram-account.entity'
 import { Command, MessageEntityType } from './telegram.contants'
 import { TelegramModule } from './telegram.module'
 
@@ -43,6 +48,8 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     private appService: AppService,
     private httpService: HttpService,
     private configService: ConfigService,
+    @InjectRepository(TelegramAccount)
+    private telegramAccountRepo: Repository<TelegramAccount>,
   ) {
     this.apiURL = this.configService
       .get<string>('TELEGRAM_API_URL')
@@ -95,36 +102,111 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       })
   }
   messageDispatcher(update: MessageUpdate) {
+    const { message } = update
     let commandEntity: MessageEntity
     if (
       (commandEntity = update.message.entities.find(
         update => update.type === MessageEntityType.COMMAND,
       ))
     ) {
-      const command = update.message.text.substring(
+      const rawCommand = update.message.text.substring(
         commandEntity.offset,
         commandEntity.length,
       )
+      const [command, ...payload] = rawCommand.split(' ')
+
       switch (command) {
         case Command.START:
-          this.sendMessage({
-            chat_id: update.message.chat.id,
-            text: `Welcome ${update.message.from.first_name}. \n Please authorize your E-Learning account below`,
-            reply_markup: {
-              inline_keyboard: [
-                [
-                  {
-                    text: 'Authorize 🔒',
-                    url: 'https://google.com',
-                  },
-                ],
-              ],
-            },
-          }).subscribe()
+          const isAuthorized = payload.join('') === update.message.from.id
+          if (isAuthorized) {
+            return this.sendMessage({
+              text: 'Successfully Authorized',
+              chat_id: message.chat.id,
+            }).subscribe()
+          } else {
+            from(this.accountExists(update.message.from.id))
+              .pipe(
+                map(account => {
+                  if (account === undefined) {
+                    return {
+                      text: `Welcome ${update.message.from.first_name}. \n Please authorize your E-Learning account below`,
+                      reply_markup: {
+                        inline_keyboard: [
+                          [
+                            {
+                              text: 'Authorize 🔒',
+                              url: `${this.configService.get(
+                                'TELEGRAM_AUTH_URL',
+                              )}?userId=${update.message.from.id}&chatId=${
+                                update.message.chat.id
+                              }&name=${update.message.from.first_name}`,
+                            },
+                          ],
+                        ],
+                      },
+                    }
+                  } else {
+                    return {
+                      text: `Welcome back ${message.from.first_name}`,
+                    }
+                  }
+                }),
+              )
+              .subscribe({
+                next: message =>
+                  this.sendMessage({
+                    ...message,
+                    chat_id: update.message.chat.id,
+                  }).subscribe(),
+              })
+          }
+          //  from([]).pipe(
+          //    switchMap(() => {
+          //      if (!isAuthorized) {
+          //        return {
+          //          text: "Successfully authorized"
+          //        }
+          //      }
+          //      return this.accountExists
+          //    })
+          //  )
+          //     this.accountExists(update.message.from.id)).pipe(
+          //     map((account) : Partial<SendMessageParams> => {
+          //       if (account === undefined) {
+          //         return {
+          //           text: `Welcome ${update.message.from.first_name}. \n Please authorize your E-Learning account below`,
+          //           reply_markup: {
+          //             inline_keyboard: [
+          //               [
+          //                 {
+          //                   text: 'Authorize 🔒',
+          //                   url: `https://7f9c-197-156-73-170.in.ngrok.io/telegramAuth?userId=${update.message.from.id}&chatId=${update.message.chat.id}&name=${update.message.from.first_name}`,
+          //                 },
+          //               ],
+          //             ],
+          //           },
+          //         }
+          //       }
+          //     })
+          //   )
+          //   this.sendMessage({...message, chat_id: update.message.chat.id}).subscribe()
           break
       }
     }
   }
+
+  accountExists(id: string) {
+    return this.telegramAccountRepo.findOne({ id })
+  }
+
+  createAccount(account: TelegramAccount) {
+    return this.telegramAccountRepo.save(account)
+  }
+
+  getChatMember(params: GetChatMemberParams) {
+    return this.telegramApiCall<ChatMember>(this.getChatMember.name, params)
+  }
+
   sendMessage(params: SendMessageParams) {
     return this.telegramApiCall(this.sendMessage.name, params)
   }
