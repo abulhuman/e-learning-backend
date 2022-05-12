@@ -17,7 +17,7 @@ import {
   documentFileFilter,
   editFileName,
 } from 'src/files/utils/file-upload.utils'
-import { join } from 'node:path
+import { join } from 'node:path'
 
 @Resolver('Course')
 export class CourseResolver {

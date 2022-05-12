@@ -10,7 +10,7 @@ import { Session } from './auth/entities/session.entity'
 import { TypeormStore } from 'connect-typeorm/out'
 import * as passport from 'passport'
 import { existsSync, mkdirSync } from 'node:fs'
-import { join } form 'node:path
+import { join } from 'node:path'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
