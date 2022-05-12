@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
+import { graphqlUploadExpress } from 'graphql-upload'
 import { getRepository } from 'typeorm'
 import helmet from 'helmet'
 import { AppModule } from './app.module'
@@ -8,6 +9,9 @@ import * as session from 'express-session'
 import { Session } from './auth/entities/session.entity'
 import { TypeormStore } from 'connect-typeorm/out'
 import * as passport from 'passport'
+import { existsSync, mkdirSync } from 'node:fs'
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const path = require('path')
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -52,6 +56,9 @@ async function bootstrap() {
   )
   app.use(passport.initialize())
   app.use(passport.session())
+  app.use(graphqlUploadExpress())
+  const uploadPath = path.join(__dirname, '../upload')
+  existsSync(uploadPath) || mkdirSync(uploadPath)
   await app.listen(configService.get('PORT') || 5050)
 }
 bootstrap()

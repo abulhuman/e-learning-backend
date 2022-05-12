@@ -12,6 +12,15 @@ import { UpdateCourseInput } from './dto/update-course.input'
 import { UpdateSubChapterInput } from './dto/update-sub-chapter.input'
 import { NotificationType } from 'src/graphql'
 
+import { createWriteStream } from 'node:fs'
+import {
+  documentFileFilter,
+  editFileName,
+} from 'src/files/utils/file-upload.utils'
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const path = require('path')
+
 @Resolver('Course')
 export class CourseResolver {
   constructor(
@@ -125,11 +134,26 @@ export class CourseResolver {
   }
 
   @Mutation('createCourseDocument')
-  createCourseDocument(
+  async createCourseDocument(
     @Args('createCourseDocumentInput')
     createCourseDocumentInput: CreateCourseDocumentInput,
   ) {
-    return this.courseService.createOneCourseDocument(createCourseDocumentInput)
+    const { fileUpload } = createCourseDocumentInput
+    const { createReadStream, filename } = await fileUpload
+    documentFileFilter(filename)
+    const storedFileName = editFileName(filename)
+    await new Promise(response => {
+      const readStream = createReadStream()
+      readStream
+        .pipe(
+          createWriteStream(path.join(__dirname, '../upload', storedFileName)),
+        )
+        .on('close', response)
+    })
+    return this.courseService.createOneCourseDocument(
+      createCourseDocumentInput,
+      storedFileName,
+    )
   }
 
   @Mutation('updateCourseDocument')

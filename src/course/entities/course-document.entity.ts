@@ -25,10 +25,10 @@ export class CourseDocument implements ICourseDocument {
   documentType: string
 
   @Column()
-  documentName: string
+  documentDisplayName: string
 
   @Column()
-  documentURL: string
+  storedFileName: string
 
   @RelationId('course')
   @Column({ nullable: true })

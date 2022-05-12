@@ -57,15 +57,16 @@ export class CourseService {
 
   async createOneCourseDocument(
     createCourseDocumentInput: CreateCourseDocumentInput,
+    storedFileName: string,
   ) {
     const { courseId } = createCourseDocumentInput
     delete createCourseDocumentInput.courseId
-
-    // todo handle fileuplaod??
+    delete createCourseDocumentInput.fileUpload
 
     const newCourseDocument = this.courseDocumentRepository.create(
       createCourseDocumentInput,
     )
+    newCourseDocument.storedFileName = storedFileName
     newCourseDocument.course = await this.findOneCourse(courseId)
     return await this.chapterRepository.save(newCourseDocument)
   }

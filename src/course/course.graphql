@@ -77,23 +77,23 @@ type CourseDocument {
   created_at: Date!
   updated_at: Date
   documentType: String!
-  documentName: String!
-  documentURL: String!
+  documentDisplayName: String!
+  storedFileName: String!
   course: Course!
 }
 
 input CreateCourseDocumentInput {
   documentType: String!
-  documentName: String!
-  documentURL: String!
+  documentDisplayName: String!
+  fileUpload: Upload!
   courseId: ID!
 }
 
 input UpdateCourseDocumentInput {
   id: String!
   documentType: String
-  documentName: String
-  documentURL: String
+  documentDisplayName: String
+  fileUpload: Upload
 }
 
 type Query {

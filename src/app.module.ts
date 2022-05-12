@@ -2,20 +2,22 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { GraphQLModule } from '@nestjs/graphql'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { PassportModule } from '@nestjs/passport'
+import { GraphQLUpload } from 'graphql-upload'
 import * as Joi from 'joi'
 import { join } from 'node:path'
 import { DatabaseModule } from './database/database.module'
 import { AuthModule } from './auth/auth.module'
 import { UsersModule } from './users/users.module'
-import { TypeOrmModule } from '@nestjs/typeorm'
 import { Session } from './auth/entities/session.entity'
-import { PassportModule } from '@nestjs/passport'
 import { CourseModule } from './course/course.module'
 import { MailModule } from './mail/mail.module'
 import appConfigValidation from './app.config'
 import authConfigValidation from './auth/auth.config'
 import { databaseConfigValidation } from './database/database.config'
 import { NotificationModule } from './notification/notification.module'
+import { FilesController } from './files/files.controller'
 
 import emailConfigValidation from './mail/mail.config'
 
@@ -41,6 +43,7 @@ import emailConfigValidation from './mail/mail.config'
         },
         emitTypenameField: true,
         installSubscriptionHandlers: true,
+        resolvers: { Upload: GraphQLUpload },
       }),
     }),
     DatabaseModule,
@@ -54,5 +57,6 @@ import emailConfigValidation from './mail/mail.config'
     MailModule,
     NotificationModule,
   ],
+  controllers: [FilesController],
 })
 export class AppModule {}
