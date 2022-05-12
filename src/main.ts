@@ -10,8 +10,7 @@ import { Session } from './auth/entities/session.entity'
 import { TypeormStore } from 'connect-typeorm/out'
 import * as passport from 'passport'
 import { existsSync, mkdirSync } from 'node:fs'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const path = require('path')
+import { join } form 'node:path
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -57,7 +56,7 @@ async function bootstrap() {
   app.use(passport.initialize())
   app.use(passport.session())
   app.use(graphqlUploadExpress())
-  const uploadPath = path.join(__dirname, '../upload')
+  const uploadPath = join(__dirname, '../upload')
   existsSync(uploadPath) || mkdirSync(uploadPath)
   await app.listen(configService.get('PORT') || 5050)
 }
