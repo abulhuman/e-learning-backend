@@ -17,9 +17,7 @@ import {
   documentFileFilter,
   editFileName,
 } from 'src/files/utils/file-upload.utils'
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const path = require('path')
+import * as path from 'node:path
 
 @Resolver('Course')
 export class CourseResolver {
