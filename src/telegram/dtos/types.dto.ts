@@ -1,5 +1,5 @@
 import { TelegramAccount } from '../entities/telegram-account.entity'
-import { MessageEntityType } from '../telegram.constants'
+import { ChatType, MessageEntityType } from '../telegram.constants'
 
 export class Update {
   update_id: number
@@ -29,20 +29,12 @@ export interface Message {
   new_chat_members?: TelegramAccount[]
 }
 
-export enum ChatType {
-  PRIVATE = 'private',
-  GROUP = 'group',
-  SUPERGROUP = 'supergroup',
-  CHANNEL = 'channel',
-}
-
 export interface Chat {
   id: string
   type: ChatType
   title?: string
   username?: string
 }
-
 export interface ChatMember {
   status:
     | 'creator'
@@ -52,4 +44,8 @@ export interface ChatMember {
     | 'left'
     | 'kicked'
   user: TelegramAccount
+}
+export interface BotCommand {
+  command: string
+  description: string
 }

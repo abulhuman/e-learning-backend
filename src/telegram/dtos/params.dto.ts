@@ -1,13 +1,15 @@
+import { FormattingOption } from '../telegram.constants'
+
 export interface GetUpdatesParams {
   offset?: number
   limit?: number
   timeout?: number
   allowed_updates?: string[]
 }
-
 export interface InlineKeybardButton {
   text: string
   url?: string
+  callback_data?: string
 }
 export interface LoginUrl {
   url: string
@@ -22,6 +24,7 @@ export interface SendMessageParams {
   text: string
   reply_to_message_id?: string
   reply_markup?: InlineKeybardMarkup
+  parse_mode?: FormattingOption
 }
 
 export interface GetChatMemberParams {

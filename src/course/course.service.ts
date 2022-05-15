@@ -77,6 +77,14 @@ export class CourseService {
     })
   }
 
+  findCoursesForUser(userId: string) {
+    return this.courseRepository
+      .createQueryBuilder('course')
+      .leftJoin('course.users', 'user')
+      .where('user.id = :id', { id: userId })
+      .getMany()
+  }
+
   findAllChapters() {
     return this.chapterRepository.find({ relations: ['course', 'subChapters'] })
   }

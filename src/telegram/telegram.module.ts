@@ -3,6 +3,8 @@ import { forwardRef, Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { AppModule } from 'src/app.module'
+import { CourseModule } from 'src/course/course.module'
+import { UsersModule } from 'src/users/users.module'
 import { dispatchers } from './dispatchers'
 import { TelegramAccount } from './entities/telegram-account.entity'
 import { handlers } from './handlers'
@@ -16,6 +18,8 @@ import { TelegramService } from './telegram.service'
     forwardRef(() => AppModule),
     HttpModule,
     ConfigModule,
+    CourseModule,
+    UsersModule,
   ],
   exports: [TelegramService],
 })

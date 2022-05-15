@@ -11,7 +11,6 @@ import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
 import {
   catchError,
   map,
-  mergeMap,
   Observable,
   of,
   repeat,
@@ -22,13 +21,14 @@ import {
   throwError,
 } from 'rxjs'
 import { AppService } from 'src/app/app.service'
-import { Repository } from 'typeorm'
+import { FindConditions, Repository } from 'typeorm'
 import { UpdateDispatcher } from './dispatchers/update.dispatcher'
 import * as Telegram from './dtos'
 import {
   ChatMember,
   GetChatMemberParams,
   GetUpdatesParams,
+  Message,
   SendMessageParams,
   Update,
 } from './dtos'
@@ -81,8 +81,14 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  accountExists(id: string) {
-    return this.telegramAccountRepo.findOne({ id })
+  findOneById(id: string, withUser = false) {
+    return this.findOne({ id }, withUser)
+  }
+
+  private findOne(user: FindConditions<TelegramAccount>, withUser = false) {
+    return this.telegramAccountRepo.findOne(user, {
+      relations: withUser ? ['user'] : undefined,
+    })
   }
 
   createAccount(account: TelegramAccount) {
@@ -94,7 +100,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   sendMessage(params: SendMessageParams) {
-    return this.telegramApiCall(this.sendMessage.name, params)
+    return this.telegramApiCall<Message>(this.sendMessage.name, params)
   }
 
   onModuleDestroy() {

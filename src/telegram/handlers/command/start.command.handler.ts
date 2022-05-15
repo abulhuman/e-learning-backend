@@ -22,7 +22,7 @@ export class StartCommandHandler implements Handler {
         })
         .subscribe()
     } else {
-      from(this.telegramService.accountExists(message.from.id))
+      from(this.telegramService.findOneById(message.from.id))
         .pipe(
           map(account => {
             if (account === undefined) {
