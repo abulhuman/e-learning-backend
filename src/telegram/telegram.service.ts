@@ -58,7 +58,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   onModuleInit() {
     if (this.appService.isInProduction) {
       this.logger.log('Listening on Webhook')
-    } else {
+    } else if (this.configService.get<boolean>('ENABLE_POLLING')) {
       this.$updateSubscription = of({})
         .pipe(
           mergeMap(() =>

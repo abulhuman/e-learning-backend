@@ -9,4 +9,5 @@ export const telegramConfigValidation = {
     otherwise: Joi.optional(),
   }),
   TELEGRAM_AUTH_URL: Joi.string().required(),
+  ENABLE_POLLING: Joi.boolean().default(false),
 }
