@@ -6,19 +6,25 @@ import { Notification } from 'src/notification/entities/notification.entity'
 import { NotificationModule } from 'src/notification/notification.module'
 import { NotificationService } from 'src/notification/notification.service'
 import { Role } from './entities/role.entity'
+import { StudentClass } from './entities/student-class.entity'
 import { User } from './entities/user.entity'
-import { RoleResolver, UserResolver } from './users.resolver'
+import {
+  RoleResolver,
+  StudentClassResolver,
+  UserResolver,
+} from './users.resolver'
 import { UsersService } from './users.service'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Role, Notification]),
+    TypeOrmModule.forFeature([User, Role, StudentClass, Notification]),
     forwardRef(() => AuthModule),
     forwardRef(() => NotificationModule),
   ],
   providers: [
     UserResolver,
     RoleResolver,
+    StudentClassResolver,
     UsersService,
     NotificationService,
     {

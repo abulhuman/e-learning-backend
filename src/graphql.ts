@@ -95,6 +95,10 @@ export interface UpdateNotificationInput {
     status?: Nullable<NotificationStatus>;
 }
 
+export interface UuidArrayDto {
+    ids?: Nullable<Nullable<string>[]>;
+}
+
 export interface AuthorizeTelegramInput {
     userId: string;
     telegramId: string;
@@ -120,8 +124,23 @@ export interface UpdateUserInput {
     roleName?: Nullable<RoleName>;
 }
 
+export interface CreateStudentClassInput {
+    year: string;
+    section: string;
+}
+
+export interface UpdateStudentClassInput {
+    id: string;
+    year?: Nullable<string>;
+    section?: Nullable<string>;
+}
+
 export interface CreateRoleInput {
     name: RoleName;
+}
+
+export interface UUIDArrayDto {
+    ids?: Nullable<Nullable<string>[]>;
 }
 
 export interface Course {
@@ -167,15 +186,6 @@ export interface CourseDocument {
     course: Course;
 }
 
-export interface File {
-    id: string;
-    created_at: Date;
-    updated_at?: Nullable<Date>;
-    filename: string;
-    mimetype: string;
-    encoding: string;
-}
-
 export interface IQuery {
     courses(): Nullable<Course>[] | Promise<Nullable<Course>[]>;
     course(id: string): Nullable<Course> | Promise<Nullable<Course>>;
@@ -185,10 +195,11 @@ export interface IQuery {
     user(id: string): Nullable<User> | Promise<Nullable<User>>;
     roles(): Nullable<Role>[] | Promise<Nullable<Role>[]>;
     role(id: string): Nullable<Role> | Promise<Nullable<Role>>;
+    studentClasses(): Nullable<StudentClass>[] | Promise<Nullable<StudentClass>[]>;
+    studentClass(id: string): StudentClass | Promise<StudentClass>;
 }
 
 export interface IMutation {
-    singleFileUpload(file: Upload): File | Promise<File>;
     createCourse(createCourseInput: CreateCourseInput): Course | Promise<Course>;
     updateCourse(updateCourseInput: UpdateCourseInput): Course | Promise<Course>;
     removeCourse(id: string): Nullable<Course> | Promise<Nullable<Course>>;
@@ -212,6 +223,15 @@ export interface IMutation {
     removeUser(id: string): Nullable<User> | Promise<Nullable<User>>;
     createRole(createRoleInput: CreateRoleInput): Role | Promise<Role>;
     revokeUserRole(userId: string, roleName: RoleName): User | Promise<User>;
+    createStudentClass(createStudentClassInput: CreateStudentClassInput): StudentClass | Promise<StudentClass>;
+    updateStudentClass(updateStudentClassInput: UpdateStudentClassInput): StudentClass | Promise<StudentClass>;
+    removeStudentClass(id: string): StudentClass | Promise<StudentClass>;
+    admitStudentToClass(studentId: string, classId: string): boolean | Promise<boolean>;
+    admitStudentsToClass(studentIds: UuidArrayDto, classId: string): boolean | Promise<boolean>;
+    assignTeacherToClass(teacherId: string, classId: string): boolean | Promise<boolean>;
+    promoteStudentFromClass(studentId: string, classId: string): boolean | Promise<boolean>;
+    promoteStudentsFromClass(studentIds: UuidArrayDto, classId: string): boolean | Promise<boolean>;
+    dismissTeacherFromClass(teacherId: string, classId: string): boolean | Promise<boolean>;
 }
 
 export interface Notification {
@@ -243,9 +263,21 @@ export interface User {
     lastName: string;
     email: string;
     password: string;
+    attendingClass?: Nullable<StudentClass>;
+    learningClasses?: Nullable<Nullable<StudentClass>[]>;
     roles: Nullable<Role>[];
     courses?: Nullable<Nullable<Course>[]>;
     notifications?: Nullable<Nullable<Notification>[]>;
+}
+
+export interface StudentClass {
+    id: string;
+    created_at: Date;
+    updated_at?: Nullable<Date>;
+    year: string;
+    section: string;
+    teachers?: Nullable<Nullable<User>[]>;
+    students?: Nullable<Nullable<User>[]>;
 }
 
 export interface Role {
