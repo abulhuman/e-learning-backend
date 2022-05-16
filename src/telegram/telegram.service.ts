@@ -25,6 +25,7 @@ import { FindConditions, Repository } from 'typeorm'
 import { UpdateDispatcher } from './dispatchers/update.dispatcher'
 import * as Telegram from './dtos'
 import {
+  AnswerCallbackParams,
   ChatMember,
   GetChatMemberParams,
   GetUpdatesParams,
@@ -103,6 +104,9 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     return this.telegramApiCall<Message>(this.sendMessage.name, params)
   }
 
+  answerCallbackQuery(params: AnswerCallbackParams) {
+    return this.telegramApiCall<boolean>(this.answerCallbackQuery.name, params)
+  }
   onModuleDestroy() {
     this.$updateSubscription?.unsubscribe()
   }

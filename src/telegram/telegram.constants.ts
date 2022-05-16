@@ -4,6 +4,10 @@ export enum Command {
   START = '/start',
   MY_COURSES = '/my_courses',
 }
+
+export enum Callback {
+  CHAPTERS = 'chapters',
+}
 export const BOT_COMMANDS: BotCommand[] = [
   {
     command: Command.START,

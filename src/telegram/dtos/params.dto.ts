@@ -31,3 +31,10 @@ export interface GetChatMemberParams {
   user_id: string
   chat_id: string
 }
+
+export interface AnswerCallbackParams {
+  callback_query_id: string
+  text?: string
+  show_alert?: boolean
+  url?: string
+}

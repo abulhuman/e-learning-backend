@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { from, switchMap } from 'rxjs'
 import { CourseService } from 'src/course/course.service'
 import { Message } from 'src/telegram/dtos'
@@ -10,6 +10,7 @@ import { TelegramService } from 'src/telegram/telegram.service'
 export class MyCoursesCommandHandler implements Handler {
   constructor(
     private courseService: CourseService,
+    @Inject(forwardRef(() => TelegramService))
     private telegramService: TelegramService,
   ) {}
 
