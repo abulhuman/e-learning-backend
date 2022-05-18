@@ -12,10 +12,15 @@ import { UpdateUserInput } from './dto/update-user.input'
 import { CreateRoleInput } from './dto/create-role.input'
 import { Role } from './entities/role.entity'
 import { User } from './entities/user.entity'
-import { UseFilters } from '@nestjs/common'
+import { ParseUUIDPipe, UseFilters } from '@nestjs/common'
 import { QueryFailedExceptionFilter } from 'src/database/filters/query-failed-exception.filter'
 import { RoleName } from 'src/graphql'
 import { NotificationService } from 'src/notification/notification.service'
+import { UpdateStudentClassInput } from './dto/update-student-class.input'
+import { StudentClass } from './entities/student-class.entity'
+import { CreateStudentClassInput } from './dto/create-student-class.input'
+import { UUIDArrayDto } from 'src/app/dto/uuid-array.dto'
+import { Department } from './entities/department.entity'
 
 @Resolver('User')
 export class UserResolver {
@@ -56,8 +61,136 @@ export class UserResolver {
   }
 
   @ResolveField('notifications')
-  notifications(@Parent() user: User) {
-    return this.notificationService.findOne(user.id)
+  async notifications(@Parent() user: User) {
+    return (await this.usersService.findOneUserById(user.id, true, true))
+      .notifications
+  }
+
+  @ResolveField('attendingClass')
+  async attendingClass(@Parent() user: User) {
+    return (await this.usersService.findOneUserById(user.id, true, false, true))
+      .attendingClass
+  }
+
+  @ResolveField('learningClasses')
+  async learningClasses(@Parent() user: User) {
+    return (
+      await this.usersService.findOneUserById(user.id, true, false, false, true)
+    ).learningClasses
+  }
+
+  @ResolveField('department')
+  async department(@Parent() user: User) {
+    return (
+      await this.usersService.findOneUserById(
+        user.id,
+        true,
+        false,
+        false,
+        false,
+        true,
+      )
+    ).department
+  }
+}
+
+@Resolver('StudentClass')
+export class StudentClassResolver {
+  constructor(private readonly usersService: UsersService) {}
+  @Mutation('createStudentClass')
+  createStudentClass(
+    @Args('createStudentClassInput')
+    createStudentClassInput: CreateStudentClassInput,
+  ) {
+    return this.usersService.createStudentClass(createStudentClassInput)
+  }
+
+  @Query('studentClass')
+  findOneStudentClass(@Args('id') id: string) {
+    return this.usersService.findOneStudentClass(id)
+  }
+
+  @Query('studentClasses')
+  findStudentClasses() {
+    return this.usersService.findAllStudentClasses()
+  }
+
+  @Mutation('updateStudentClass')
+  updateStudentClass(
+    @Args('updateStudentClassInput')
+    updateStudentClassInput: UpdateStudentClassInput,
+  ): Promise<StudentClass> {
+    return this.usersService.updateStudentClass(updateStudentClassInput)
+  }
+
+  @Mutation('admitStudentToClass')
+  admitStudentToClass(
+    @Args('studentId', ParseUUIDPipe) studentId: string,
+    @Args('classId', ParseUUIDPipe) classId: string,
+  ) {
+    return this.usersService.admitStudentToClass(studentId, classId)
+  }
+
+  @Mutation('admitStudentsToClass')
+  admitStudentsToClass(
+    @Args('studentIds')
+    _studentIds: UUIDArrayDto,
+    @Args('classId', ParseUUIDPipe) classId: string,
+  ) {
+    const studentIds = _studentIds.ids
+    return this.usersService.admitStudentsToClass(studentIds, classId)
+  }
+
+  @Mutation('assignTeacherToClass')
+  assignTeacherToClass(
+    @Args('teacherId', ParseUUIDPipe) teacherId: string,
+    @Args('classId', ParseUUIDPipe) classId: string,
+  ) {
+    return this.usersService.assignTeacherToClass(teacherId, classId)
+  }
+
+  @Mutation('promoteStudentFromClass')
+  promoteStudentFromClass(
+    @Args('studentId', ParseUUIDPipe) studentId: string,
+    @Args('classId', ParseUUIDPipe) classId: string,
+  ) {
+    return this.usersService.promoteStudentFromClass(studentId, classId)
+  }
+
+  @Mutation('promoteStudentsFromClass')
+  promoteStudentsFromClass(
+    @Args('studentIds')
+    _studentIds: UUIDArrayDto,
+    @Args('classId', ParseUUIDPipe) classId: string,
+  ) {
+    const studentIds = _studentIds.ids
+    return this.usersService.promoteStudentsFromClass(studentIds, classId)
+  }
+
+  @Mutation('dismissTeacherFromClass')
+  dismissTeacherFromClass(
+    @Args('teacherId', ParseUUIDPipe) teacherId: string,
+    @Args('classId', ParseUUIDPipe) classId: string,
+  ) {
+    return this.usersService.dismissTeacherFromClass(teacherId, classId)
+  }
+
+  @ResolveField('students')
+  async students(@Parent() studentClass: StudentClass) {
+    return (await this.usersService.findOneStudentClass(studentClass.id))
+      .students
+  }
+
+  @ResolveField('teachers')
+  async teachers(@Parent() studentClass: StudentClass) {
+    return (await this.usersService.findOneStudentClass(studentClass.id))
+      .teachers
+  }
+
+  @ResolveField('department')
+  async department(@Parent() studentClass: StudentClass) {
+    return (await this.usersService.findOneStudentClass(studentClass.id))
+      .department
   }
 }
 
@@ -91,5 +224,89 @@ export class RoleResolver {
   @ResolveField('members')
   owner(@Parent() role: Role) {
     return role.members
+  }
+}
+
+@Resolver('Department')
+export class DepartmentResolver {
+  constructor(private readonly usersService: UsersService) {}
+  @Mutation('createDepartment')
+  createDepartment(@Args('name') name: string) {
+    return this.usersService.createDepartment(name)
+  }
+  @Query('department')
+  findOneDepartment(@Args('id') id: string) {
+    return this.usersService.findOneDepartment(id)
+  }
+
+  @Query('departments')
+  findStudentClasses() {
+    return this.usersService.findAllDepartments()
+  }
+
+  @Mutation('updateDepartment')
+  updateDepartment(
+    @Args('id', ParseUUIDPipe)
+    id: string,
+    @Args('name') name: string,
+  ): Promise<Department> {
+    return this.usersService.updateDepartment(id, name)
+  }
+
+  @Mutation('removeDepartment')
+  removeDepartment(
+    @Args('id', ParseUUIDPipe)
+    id: string,
+  ): Promise<Department> {
+    return this.usersService.removeDepartment(id)
+  }
+
+  @Mutation('addClassToDepartment')
+  addClassToDepartment(
+    @Args('departmentId', ParseUUIDPipe) departmentId: string,
+    @Args('classId', ParseUUIDPipe) classId: string,
+  ) {
+    return this.usersService.addClassToDepartment(departmentId, classId)
+  }
+
+  @Mutation('removeClassFromDepartment')
+  removeClassFromDepartment(
+    @Args('departmentId', ParseUUIDPipe) departmentId: string,
+    @Args('classId', ParseUUIDPipe) classId: string,
+  ) {
+    return this.usersService.removeClassFromDepartment(departmentId, classId)
+  }
+
+  @Mutation('appointDepartmentAdministrator')
+  appointDepartmentAdministrator(
+    @Args('departmentId', ParseUUIDPipe) departmentId: string,
+    @Args('userId', ParseUUIDPipe) userId: string,
+  ) {
+    return this.usersService.appointDepartmentAdministrator(
+      departmentId,
+      userId,
+    )
+  }
+
+  @Mutation('dismissDepartmentAdministrator')
+  dismissDepartmentAdministrator(
+    @Args('departmentId', ParseUUIDPipe) departmentId: string,
+    @Args('userId', ParseUUIDPipe) userId: string,
+  ) {
+    return this.usersService.dismissDepartmentAdministrator(
+      departmentId,
+      userId,
+    )
+  }
+
+  @ResolveField('classes')
+  async classes(@Parent() department: Department) {
+    return (await this.usersService.findOneDepartment(department.id)).classes
+  }
+
+  @ResolveField('departmentAdministrator')
+  async departmentAdministrator(@Parent() department: Department) {
+    return (await this.usersService.findOneDepartment(department.id))
+      .departmentAdministrator
   }
 }

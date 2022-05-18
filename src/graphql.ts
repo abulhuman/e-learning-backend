@@ -95,6 +95,10 @@ export interface UpdateNotificationInput {
     status?: Nullable<NotificationStatus>;
 }
 
+export interface UuidArrayDto {
+    ids?: Nullable<Nullable<string>[]>;
+}
+
 export interface AuthorizeTelegramInput {
     userId: string;
     telegramId: string;
@@ -120,8 +124,23 @@ export interface UpdateUserInput {
     roleName?: Nullable<RoleName>;
 }
 
+export interface CreateStudentClassInput {
+    year: string;
+    section: string;
+}
+
+export interface UpdateStudentClassInput {
+    id: string;
+    year?: Nullable<string>;
+    section?: Nullable<string>;
+}
+
 export interface CreateRoleInput {
     name: RoleName;
+}
+
+export interface UUIDArrayDto {
+    ids?: Nullable<Nullable<string>[]>;
 }
 
 export interface Course {
@@ -176,6 +195,10 @@ export interface IQuery {
     user(id: string): Nullable<User> | Promise<Nullable<User>>;
     roles(): Nullable<Role>[] | Promise<Nullable<Role>[]>;
     role(id: string): Nullable<Role> | Promise<Nullable<Role>>;
+    studentClasses(): Nullable<StudentClass>[] | Promise<Nullable<StudentClass>[]>;
+    studentClass(id: string): StudentClass | Promise<StudentClass>;
+    departments(): Nullable<Department>[] | Promise<Nullable<Department>[]>;
+    department(id: string): Department | Promise<Department>;
 }
 
 export interface IMutation {
@@ -202,6 +225,22 @@ export interface IMutation {
     removeUser(id: string): Nullable<User> | Promise<Nullable<User>>;
     createRole(createRoleInput: CreateRoleInput): Role | Promise<Role>;
     revokeUserRole(userId: string, roleName: RoleName): User | Promise<User>;
+    createStudentClass(createStudentClassInput: CreateStudentClassInput): StudentClass | Promise<StudentClass>;
+    updateStudentClass(updateStudentClassInput: UpdateStudentClassInput): StudentClass | Promise<StudentClass>;
+    removeStudentClass(id: string): StudentClass | Promise<StudentClass>;
+    admitStudentToClass(studentId: string, classId: string): boolean | Promise<boolean>;
+    admitStudentsToClass(studentIds: UuidArrayDto, classId: string): boolean | Promise<boolean>;
+    assignTeacherToClass(teacherId: string, classId: string): boolean | Promise<boolean>;
+    promoteStudentFromClass(studentId: string, classId: string): boolean | Promise<boolean>;
+    promoteStudentsFromClass(studentIds: UuidArrayDto, classId: string): boolean | Promise<boolean>;
+    dismissTeacherFromClass(teacherId: string, classId: string): boolean | Promise<boolean>;
+    createDepartment(name: string): Department | Promise<Department>;
+    updateDepartment(id: string, name?: Nullable<string>): Department | Promise<Department>;
+    removeDepartment(id: string): Nullable<Department> | Promise<Nullable<Department>>;
+    addClassToDepartment(departmentId: string, classId: string): boolean | Promise<boolean>;
+    removeClassFromDepartment(departmentId: string, classId: string): boolean | Promise<boolean>;
+    appointDepartmentAdministrator(departmentId: string, userId: string): boolean | Promise<boolean>;
+    dismissDepartmentAdministrator(departmentId: string, userId: string): boolean | Promise<boolean>;
 }
 
 export interface Notification {
@@ -233,9 +272,23 @@ export interface User {
     lastName: string;
     email: string;
     password: string;
+    attendingClass?: Nullable<StudentClass>;
+    learningClasses?: Nullable<Nullable<StudentClass>[]>;
     roles: Nullable<Role>[];
     courses?: Nullable<Nullable<Course>[]>;
     notifications?: Nullable<Nullable<Notification>[]>;
+    department?: Nullable<Department>;
+}
+
+export interface StudentClass {
+    id: string;
+    created_at: Date;
+    updated_at?: Nullable<Date>;
+    year: string;
+    section: string;
+    teachers?: Nullable<Nullable<User>[]>;
+    students?: Nullable<Nullable<User>[]>;
+    department?: Nullable<Department>;
 }
 
 export interface Role {
@@ -244,6 +297,15 @@ export interface Role {
     updated_at?: Nullable<Date>;
     name: RoleName;
     members: Nullable<User>[];
+}
+
+export interface Department {
+    id: string;
+    created_at: Date;
+    updated_at?: Nullable<Date>;
+    name: string;
+    classes?: Nullable<Nullable<StudentClass>[]>;
+    departmentAdministrator?: Nullable<User>;
 }
 
 export type Upload = any;

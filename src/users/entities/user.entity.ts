@@ -6,11 +6,15 @@ import {
   CreateDateColumn,
   Entity,
   ManyToMany,
+  ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
+import { Department } from './department.entity'
 import { Role } from './role.entity'
+import { StudentClass } from './student-class.entity'
 
 @Entity()
 export class User implements IUser {
@@ -44,9 +48,27 @@ export class User implements IUser {
   @ManyToMany(() => Course, (course: Course) => course.users)
   courses?: Course[]
 
+  @ManyToOne(
+    () => StudentClass,
+    (studentClass: StudentClass) => studentClass.students,
+  )
+  attendingClass: StudentClass
+
+  @ManyToMany(
+    () => StudentClass,
+    (studentClass: StudentClass) => studentClass.teachers,
+  )
+  learningClasses?: StudentClass[]
+
   @OneToMany(
     () => Notification,
     (notification: Notification) => notification.recipient,
   )
   notifications: Notification[]
+
+  @OneToOne(
+    () => Department,
+    (department: Department) => department.departmentAdministrator,
+  )
+  department?: Department
 }
