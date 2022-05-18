@@ -4,12 +4,14 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
 import { StudentClass as IStudentClass } from 'src/graphql'
 import { User } from './user.entity'
+import { Department } from './department.entity'
 
 @Entity()
 export class StudentClass implements IStudentClass {
@@ -34,4 +36,7 @@ export class StudentClass implements IStudentClass {
 
   @OneToMany(() => User, (user: User) => user.attendingClass)
   students: User[]
+
+  @ManyToOne(() => Department)
+  department?: Department
 }

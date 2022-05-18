@@ -20,6 +20,7 @@ import { UpdateStudentClassInput } from './dto/update-student-class.input'
 import { StudentClass } from './entities/student-class.entity'
 import { CreateStudentClassInput } from './dto/create-student-class.input'
 import { UUIDArrayDto } from 'src/app/dto/uuid-array.dto'
+import { Department } from './entities/department.entity'
 
 @Resolver('User')
 export class UserResolver {
@@ -76,6 +77,20 @@ export class UserResolver {
     return (
       await this.usersService.findOneUserById(user.id, true, false, false, true)
     ).learningClasses
+  }
+
+  @ResolveField('department')
+  async department(@Parent() user: User) {
+    return (
+      await this.usersService.findOneUserById(
+        user.id,
+        true,
+        false,
+        false,
+        false,
+        true,
+      )
+    ).department
   }
 }
 
@@ -171,6 +186,12 @@ export class StudentClassResolver {
     return (await this.usersService.findOneStudentClass(studentClass.id))
       .teachers
   }
+
+  @ResolveField('department')
+  async department(@Parent() studentClass: StudentClass) {
+    return (await this.usersService.findOneStudentClass(studentClass.id))
+      .department
+  }
 }
 
 @Resolver('Role')
@@ -203,5 +224,89 @@ export class RoleResolver {
   @ResolveField('members')
   owner(@Parent() role: Role) {
     return role.members
+  }
+}
+
+@Resolver('Department')
+export class DepartmentResolver {
+  constructor(private readonly usersService: UsersService) {}
+  @Mutation('createDepartment')
+  createDepartment(@Args('name') name: string) {
+    return this.usersService.createDepartment(name)
+  }
+  @Query('department')
+  findOneDepartment(@Args('id') id: string) {
+    return this.usersService.findOneDepartment(id)
+  }
+
+  @Query('departments')
+  findStudentClasses() {
+    return this.usersService.findAllDepartments()
+  }
+
+  @Mutation('updateDepartment')
+  updateDepartment(
+    @Args('id', ParseUUIDPipe)
+    id: string,
+    @Args('name') name: string,
+  ): Promise<Department> {
+    return this.usersService.updateDepartment(id, name)
+  }
+
+  @Mutation('removeDepartment')
+  removeDepartment(
+    @Args('id', ParseUUIDPipe)
+    id: string,
+  ): Promise<Department> {
+    return this.usersService.removeDepartment(id)
+  }
+
+  @Mutation('addClassToDepartment')
+  addClassToDepartment(
+    @Args('departmentId', ParseUUIDPipe) departmentId: string,
+    @Args('classId', ParseUUIDPipe) classId: string,
+  ) {
+    return this.usersService.addClassToDepartment(departmentId, classId)
+  }
+
+  @Mutation('removeClassFromDepartment')
+  removeClassFromDepartment(
+    @Args('departmentId', ParseUUIDPipe) departmentId: string,
+    @Args('classId', ParseUUIDPipe) classId: string,
+  ) {
+    return this.usersService.removeClassFromDepartment(departmentId, classId)
+  }
+
+  @Mutation('appointDepartmentAdministrator')
+  appointDepartmentAdministrator(
+    @Args('departmentId', ParseUUIDPipe) departmentId: string,
+    @Args('userId', ParseUUIDPipe) userId: string,
+  ) {
+    return this.usersService.appointDepartmentAdministrator(
+      departmentId,
+      userId,
+    )
+  }
+
+  @Mutation('dismissDepartmentAdministrator')
+  dismissDepartmentAdministrator(
+    @Args('departmentId', ParseUUIDPipe) departmentId: string,
+    @Args('userId', ParseUUIDPipe) userId: string,
+  ) {
+    return this.usersService.dismissDepartmentAdministrator(
+      departmentId,
+      userId,
+    )
+  }
+
+  @ResolveField('classes')
+  async classes(@Parent() department: Department) {
+    return (await this.usersService.findOneDepartment(department.id)).classes
+  }
+
+  @ResolveField('departmentAdministrator')
+  async departmentAdministrator(@Parent() department: Department) {
+    return (await this.usersService.findOneDepartment(department.id))
+      .departmentAdministrator
   }
 }

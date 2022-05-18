@@ -8,9 +8,11 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
+import { Department } from './department.entity'
 import { Role } from './role.entity'
 import { StudentClass } from './student-class.entity'
 
@@ -63,4 +65,10 @@ export class User implements IUser {
     (notification: Notification) => notification.recipient,
   )
   notifications: Notification[]
+
+  @OneToOne(
+    () => Department,
+    (department: Department) => department.departmentAdministrator,
+  )
+  department?: Department
 }

@@ -17,6 +17,7 @@ import { CreateUserInput } from './dto/create-user.input'
 import { FindUserDto } from './dto/find-user.dto'
 import { UpdateStudentClassInput } from './dto/update-student-class.input'
 import { UpdateUserInput } from './dto/update-user.input'
+import { Department } from './entities/department.entity'
 import { Role } from './entities/role.entity'
 import { StudentClass } from './entities/student-class.entity'
 import { User } from './entities/user.entity'
@@ -28,8 +29,10 @@ export class UsersService {
     @InjectRepository(Role) private roleRepository: Repository<Role>,
     @InjectRepository(StudentClass)
     private studentClassRepository: Repository<StudentClass>,
+    @InjectRepository(Department)
+    private departmentRepository: Repository<Department>,
     @Inject(forwardRef(() => AuthService))
-    private authService: AuthService,
+    private _authService: AuthService,
   ) {}
 
   async createUser(createUserInput: CreateUserInput) {
@@ -59,6 +62,7 @@ export class UsersService {
     withNotifications = false,
     withAttendingClass = false,
     withLearningClasses = false,
+    withDepartment = false,
   ): Promise<User> {
     return this.findOne(
       { id },
@@ -66,6 +70,7 @@ export class UsersService {
       withNotifications,
       withAttendingClass,
       withLearningClasses,
+      withDepartment,
     )
   }
 
@@ -85,12 +90,14 @@ export class UsersService {
     withNotifications = false,
     withAttendingClass = false,
     withLearningClasses = false,
+    withDepartment = false,
   ): Promise<User> {
     const relations = []
     if (withRoles) relations.push('roles')
     if (withNotifications) relations.push('notifications')
     if (withAttendingClass) relations.push('attendingClass')
     if (withLearningClasses) relations.push('learningClasses')
+    if (withDepartment) relations.push('department')
     return this.userRepository.findOne(findUserDto, {
       relations,
     })
@@ -200,7 +207,7 @@ export class UsersService {
   }
   async findOneStudentClass(id: string) {
     return this.studentClassRepository.findOne(id, {
-      relations: ['students', 'teachers', 'teachers.roles'],
+      relations: ['students', 'teachers', 'teachers.roles', 'department'],
     })
   }
 
@@ -373,5 +380,138 @@ export class UsersService {
     if (!studentClassToRemove)
       throw new NotFoundException(`Class with id": ${id} was not found.`)
     return this.studentClassRepository.remove(studentClassToRemove)
+  }
+
+  async createDepartment(name: string) {
+    const newDepartment = this.departmentRepository.create({ name })
+    return this.departmentRepository.save(newDepartment)
+  }
+  async findOneDepartment(id: string) {
+    return this.departmentRepository.findOne(id, {
+      relations: ['classes', 'departmentAdministrator'],
+    })
+  }
+  async findAllDepartments() {
+    return this.departmentRepository.find()
+  }
+  async updateDepartment(id: string, name: string): Promise<Department> {
+    const departmentToUpdate = await this.findOneDepartment(id)
+    if (!departmentToUpdate)
+      throw new NotFoundException(`Department with id": ${id} was not found.`)
+    Object.assign(departmentToUpdate, { name })
+    return this.departmentRepository.save(departmentToUpdate)
+  }
+  async removeDepartment(id: string): Promise<Department> {
+    const departmentToDelete = await this.findOneDepartment(id)
+    if (!departmentToDelete)
+      throw new NotFoundException(`Department with id": ${id} was not found.`)
+    return this.departmentRepository.remove(departmentToDelete)
+  }
+  async addClassToDepartment(departmentId: string, classId: string) {
+    const department = await this.findOneDepartment(departmentId)
+    if (!department)
+      throw new NotFoundException(
+        `Department with id": ${departmentId} was not found.`,
+      )
+    const studentClass = await this.findOneStudentClass(classId)
+    if (!studentClass)
+      throw new NotFoundException(`Class with id": ${classId} was not found.`)
+    if (!department?.classes?.length) department.classes = []
+    const departmentAlreadyHasClass = department.classes.find(
+      cl => cl.id === classId,
+    )
+    if (departmentAlreadyHasClass)
+      throw new ConflictException(
+        `Class with id": ${classId} was already inside department with id: ${departmentId}.`,
+      )
+    department.classes.push(studentClass)
+    this.departmentRepository.save(department)
+    return true
+  }
+  async removeClassFromDepartment(departmentId: string, classId: string) {
+    const department = await this.findOneDepartment(departmentId)
+    if (!department)
+      throw new NotFoundException(
+        `Department with id": ${departmentId} was not found.`,
+      )
+    const studentClass = await this.findOneStudentClass(classId)
+    if (!studentClass)
+      throw new NotFoundException(`Class with id": ${classId} was not found.`)
+    if (!department?.classes.length) department.classes = []
+    const departmentAlreadyHasClass = department.classes.find(
+      cl => cl.id === classId,
+    )
+    if (!departmentAlreadyHasClass)
+      throw new ConflictException(
+        `Class with id": ${classId} doesn't belong inside department with id: ${departmentId}.`,
+      )
+    const classesIds = department.classes.map(item => item.id)
+    const clsIdx = classesIds.indexOf(classId)
+    department.classes.splice(clsIdx, 1)
+    // department.classes.slice(studentClass)
+    this.departmentRepository.save(department)
+    return true
+  }
+  async appointDepartmentAdministrator(departmentId: string, userId: string) {
+    const department = await this.findOneDepartment(departmentId)
+
+    if (!department)
+      throw new NotFoundException(
+        `Department with id ${departmentId} not found.`,
+      )
+
+    if (department?.departmentAdministrator?.id === userId)
+      throw new ConflictException(
+        `Department has user with id: ${userId} assigned as DEPARTMENT_ADMINISTRATOR.`,
+      )
+    const user = await this.findOneUserById(userId)
+
+    if (!user) throw new NotFoundException(`User with id ${userId} not found.`)
+
+    const userRoles = user.roles.map(role => role.name)
+    const isNotDepartmentAdministrator = !userRoles.includes(
+      RoleName.DEPARTMENT_ADMINSTRATOR,
+    )
+
+    if (isNotDepartmentAdministrator)
+      throw new BadRequestException(
+        `The user with id: ${userId} is not a DEPARTMENT_ADMINISTRATOR user.`,
+      )
+
+    department.departmentAdministrator = user
+    this.departmentRepository.save(department)
+    return true
+  }
+  async dismissDepartmentAdministrator(departmentId: string, userId: string) {
+    const department = await this.findOneDepartment(departmentId)
+
+    if (!department)
+      throw new NotFoundException(
+        `Department with id ${departmentId} not found.`,
+      )
+
+    if (!department.departmentAdministrator)
+      throw new BadRequestException(
+        `Department with id ${departmentId} has no DEPARTMENT_ADMINISTRATOR.`,
+      )
+    const user = await this.findOneUserById(userId)
+    if (!user) throw new NotFoundException(`User with id ${userId} not found.`)
+
+    const userRoles = user.roles.map(role => role.name)
+    const isNotDepartmentAdministrator = !userRoles.includes(
+      RoleName.DEPARTMENT_ADMINSTRATOR,
+    )
+
+    if (isNotDepartmentAdministrator)
+      throw new BadRequestException(
+        `The user with id: ${userId} is not a DEPARTMENT_ADMINISTRATOR user.`,
+      )
+    if (department.departmentAdministrator.id !== userId)
+      throw new BadRequestException(
+        `The user with id: ${userId} is not appointed to the given department.`,
+      )
+    department.departmentAdministrator = null
+    this.departmentRepository.save(department)
+    return true
   }
 }

@@ -12,6 +12,7 @@ type User {
   roles: [Role]!
   courses: [Course]
   notifications: [Notification]
+  department: Department
 }
 
 input CreateUserInput {
@@ -41,6 +42,7 @@ type StudentClass {
   section: String!
   teachers: [User]
   students: [User]
+  department: Department
 }
 
 input CreateStudentClassInput {
@@ -54,6 +56,15 @@ input UpdateStudentClassInput {
   section: String
 }
 
+type Department {
+  id: ID!
+  created_at: Date!
+  updated_at: Date
+  name: String!
+  classes: [StudentClass]
+  departmentAdministrator: User
+}
+
 type Query {
   users: [User]!
   user(id: ID!): User
@@ -61,6 +72,8 @@ type Query {
   role(id: ID!): Role
   studentClasses: [StudentClass]!
   studentClass(id: ID!): StudentClass!
+  departments: [Department]!
+  department(id: ID!): Department!
 }
 
 type Mutation {
@@ -86,6 +99,16 @@ type Mutation {
   promoteStudentFromClass(studentId: ID!, classId: ID!): Boolean!
   promoteStudentsFromClass(studentIds: UUIDArrayDto!, classId: ID!): Boolean!
   dismissTeacherFromClass(teacherId: ID!, classId: ID!): Boolean!
+
+  createDepartment(name: String!): Department!
+  updateDepartment(id: ID!, name: String): Department!
+  removeDepartment(id: ID!): Department
+
+  addClassToDepartment(departmentId: ID!, classId: ID!): Boolean!
+  removeClassFromDepartment(departmentId: ID!, classId: ID!): Boolean!
+
+  appointDepartmentAdministrator(departmentId: ID!, userId: ID!): Boolean!
+  dismissDepartmentAdministrator(departmentId: ID!, userId: ID!): Boolean!
 }
 
 type Role {
