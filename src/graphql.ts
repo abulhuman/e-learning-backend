@@ -167,15 +167,6 @@ export interface CourseDocument {
     course: Course;
 }
 
-export interface File {
-    id: string;
-    created_at: Date;
-    updated_at?: Nullable<Date>;
-    filename: string;
-    mimetype: string;
-    encoding: string;
-}
-
 export interface IQuery {
     courses(): Nullable<Course>[] | Promise<Nullable<Course>[]>;
     course(id: string): Nullable<Course> | Promise<Nullable<Course>>;
@@ -188,7 +179,6 @@ export interface IQuery {
 }
 
 export interface IMutation {
-    singleFileUpload(file: Upload): File | Promise<File>;
     createCourse(createCourseInput: CreateCourseInput): Course | Promise<Course>;
     updateCourse(updateCourseInput: UpdateCourseInput): Course | Promise<Course>;
     removeCourse(id: string): Nullable<Course> | Promise<Nullable<Course>>;

@@ -10,31 +10,32 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
 import {
   catchError,
-  from,
   map,
-  mergeMap,
   Observable,
   of,
   repeat,
   retry,
   Subscription,
+  switchMap,
   tap,
   throwError,
 } from 'rxjs'
 import { AppService } from 'src/app/app.service'
-import { Repository } from 'typeorm'
+import { FindConditions, Repository } from 'typeorm'
+import { UpdateDispatcher } from './dispatchers/update.dispatcher'
 import * as Telegram from './dtos'
 import {
+  AnswerCallbackParams,
   ChatMember,
   GetChatMemberParams,
   GetUpdatesParams,
-  MessageEntity,
-  MessageUpdate,
+  Message,
   SendMessageParams,
+  SetMenuButtonParams,
+  SetMyCommandsParams,
   Update,
 } from './dtos'
 import { TelegramAccount } from './entities/telegram-account.entity'
-import { Command, MessageEntityType } from './telegram.constants'
 import { TelegramModule } from './telegram.module'
 
 @Injectable()
@@ -50,6 +51,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     private configService: ConfigService,
     @InjectRepository(TelegramAccount)
     private telegramAccountRepo: Repository<TelegramAccount>,
+    private dispatcher: UpdateDispatcher,
   ) {
     this.apiURL = this.configService
       .get<string>('TELEGRAM_API_URL')
@@ -61,7 +63,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     } else if (this.configService.get<boolean>('ENABLE_POLLING')) {
       this.$updateSubscription = of({})
         .pipe(
-          mergeMap(() =>
+          switchMap(() =>
             this.getUpdates({
               offset: this.offset,
             }),
@@ -76,103 +78,20 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           retry(3),
         )
         .subscribe({
-          next: updates => this.dispatcher(updates),
+          next: updates => this.dispatcher.dispatch(updates),
           error: error => this.logger.error(error.message),
         })
     }
   }
-  dispatcher(updates: Update[]): void {
-    from(updates)
-      .pipe(
-        map(update => {
-          if (update.hasOwnProperty('message')) {
-            update.type = 'message'
-          }
-          return update
-        }),
-      )
-      .subscribe({
-        next: update => {
-          switch (update.type) {
-            case 'message':
-              this.messageDispatcher(update as MessageUpdate)
-              break
-          }
-        },
-      })
-  }
-  messageDispatcher(update: MessageUpdate) {
-    const { message } = update
-    let commandEntity: MessageEntity
-    if (
-      (commandEntity = update.message.entities.find(
-        update => update.type === MessageEntityType.COMMAND,
-      ))
-    ) {
-      const rawCommand = update.message.text.substring(
-        commandEntity.offset,
-        commandEntity.length,
-      )
-      const [command, ...payload] = rawCommand.split(' ')
 
-      switch (command) {
-        case Command.START:
-          const isAuthorized = payload.join('') === update.message.from.id
-          if (isAuthorized) {
-            return this.sendMessage({
-              text: 'Successfully Authorized',
-              chat_id: message.chat.id,
-            }).subscribe()
-          } else {
-            from(this.accountExists(update.message.from.id))
-              .pipe(
-                map(account => {
-                  if (account === undefined) {
-                    return {
-                      text: `Welcome ${update.message.from.first_name}. \n Please authorize your E-Learning account below`,
-                      reply_markup: {
-                        inline_keyboard: [
-                          [
-                            {
-                              text: 'Authorize 🔒',
-                              url: `${this.configService.get(
-                                'TELEGRAM_AUTH_URL',
-                              )}?userId=${update.message.from.id}&chatId=${
-                                update.message.chat.id
-                              }&name=${update.message.from.first_name}`,
-                            },
-                          ],
-                        ],
-                      },
-                    }
-                  } else {
-                    return {
-                      text: `Welcome back ${message.from.first_name}`,
-                    }
-                  }
-                }),
-              )
-              .subscribe({
-                next: message =>
-                  this.sendMessage({
-                    ...message,
-                    chat_id: update.message.chat.id,
-                  }).subscribe(),
-              })
-          }
-          break
-        default:
-          this.sendMessage({
-            text: 'Unknown Command',
-            chat_id: message.chat.id,
-          })
-          break
-      }
-    }
+  findOneById(id: string, withUser = false) {
+    return this.findOne({ id }, withUser)
   }
 
-  accountExists(id: string) {
-    return this.telegramAccountRepo.findOne({ id })
+  private findOne(user: FindConditions<TelegramAccount>, withUser = false) {
+    return this.telegramAccountRepo.findOne(user, {
+      relations: withUser ? ['user'] : undefined,
+    })
   }
 
   createAccount(account: TelegramAccount) {
@@ -184,7 +103,19 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   sendMessage(params: SendMessageParams) {
-    return this.telegramApiCall(this.sendMessage.name, params)
+    return this.telegramApiCall<Message>(this.sendMessage.name, params)
+  }
+
+  setMyCommands(params: SetMyCommandsParams) {
+    return this.telegramApiCall<boolean>(this.setMyCommands.name, params)
+  }
+
+  answerCallbackQuery(params: AnswerCallbackParams) {
+    return this.telegramApiCall<boolean>(this.answerCallbackQuery.name, params)
+  }
+
+  setChatMenuButton(params: SetMenuButtonParams) {
+    return this.telegramApiCall<boolean>(this.setChatMenuButton.name, params)
   }
 
   onModuleDestroy() {

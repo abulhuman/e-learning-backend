@@ -1,5 +1,10 @@
+import { User } from 'src/users/entities/user.entity'
 import { TelegramAccount } from '../entities/telegram-account.entity'
-import { MessageEntityType } from '../telegram.constants'
+import {
+  BotCommandScopeType,
+  ChatType,
+  MessageEntityType,
+} from '../telegram.constants'
 
 export class Update {
   update_id: number
@@ -8,7 +13,10 @@ export class Update {
 
 export class MessageUpdate extends Update {
   message: Message
-  type = 'message'
+}
+
+export class CallbackQueryUpdate extends Update {
+  callback_query: CallbackQuery
 }
 
 export interface MessageEntity {
@@ -29,20 +37,12 @@ export interface Message {
   new_chat_members?: TelegramAccount[]
 }
 
-export enum ChatType {
-  PRIVATE = 'private',
-  GROUP = 'group',
-  SUPERGROUP = 'supergroup',
-  CHANNEL = 'channel',
-}
-
 export interface Chat {
   id: string
   type: ChatType
   title?: string
   username?: string
 }
-
 export interface ChatMember {
   status:
     | 'creator'
@@ -52,4 +52,27 @@ export interface ChatMember {
     | 'left'
     | 'kicked'
   user: TelegramAccount
+}
+export interface BotCommand {
+  command: string
+  description: string
+}
+
+export interface CallbackQuery {
+  id: string
+  from: User
+  message?: Message
+  chat_instance: string
+  data?: string
+}
+
+export interface MenuButton {
+  type: 'commands' | 'web_app' | 'default'
+  text?: string
+}
+
+export interface BotCommandScope {
+  type: BotCommandScopeType
+  chat_id?: string
+  user_id?: string
 }
