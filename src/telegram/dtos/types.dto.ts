@@ -1,6 +1,10 @@
 import { User } from 'src/users/entities/user.entity'
 import { TelegramAccount } from '../entities/telegram-account.entity'
-import { ChatType, MessageEntityType } from '../telegram.constants'
+import {
+  BotCommandScopeType,
+  ChatType,
+  MessageEntityType,
+} from '../telegram.constants'
 
 export class Update {
   update_id: number
@@ -60,4 +64,15 @@ export interface CallbackQuery {
   message?: Message
   chat_instance: string
   data?: string
+}
+
+export interface MenuButton {
+  type: 'commands' | 'web_app' | 'default'
+  text?: string
+}
+
+export interface BotCommandScope {
+  type: BotCommandScopeType
+  chat_id?: string
+  user_id?: string
 }

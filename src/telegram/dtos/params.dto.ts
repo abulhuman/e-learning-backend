@@ -1,4 +1,5 @@
 import { FormattingOption } from '../telegram.constants'
+import { BotCommand, BotCommandScope, MenuButton } from './types.dto'
 
 export interface GetUpdatesParams {
   offset?: number
@@ -37,4 +38,14 @@ export interface AnswerCallbackParams {
   text?: string
   show_alert?: boolean
   url?: string
+}
+
+export interface SetMenuButtonParams {
+  chat_id: string
+  menu_button?: MenuButton
+}
+
+export interface SetMyCommandsParams {
+  commands: BotCommand[]
+  scope: BotCommandScope
 }

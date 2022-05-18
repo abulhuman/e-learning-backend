@@ -31,6 +31,8 @@ import {
   GetUpdatesParams,
   Message,
   SendMessageParams,
+  SetMenuButtonParams,
+  SetMyCommandsParams,
   Update,
 } from './dtos'
 import { TelegramAccount } from './entities/telegram-account.entity'
@@ -104,9 +106,18 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     return this.telegramApiCall<Message>(this.sendMessage.name, params)
   }
 
+  setMyCommands(params: SetMyCommandsParams) {
+    return this.telegramApiCall<boolean>(this.setMyCommands.name, params)
+  }
+
   answerCallbackQuery(params: AnswerCallbackParams) {
     return this.telegramApiCall<boolean>(this.answerCallbackQuery.name, params)
   }
+
+  setChatMenuButton(params: SetMenuButtonParams) {
+    return this.telegramApiCall<boolean>(this.setChatMenuButton.name, params)
+  }
+
   onModuleDestroy() {
     this.$updateSubscription?.unsubscribe()
   }
