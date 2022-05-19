@@ -143,9 +143,7 @@ export class CourseResolver {
     await new Promise(response => {
       const readStream = createReadStream()
       readStream
-        .pipe(
-          createWriteStream(join(__dirname, '../upload', storedFileName)),
-        )
+        .pipe(createWriteStream(join(__dirname, '../upload', storedFileName)))
         .on('close', response)
     })
     return this.courseService.createOneCourseDocument(

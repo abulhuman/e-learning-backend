@@ -13,7 +13,7 @@ import {
   RoleResolver,
   StudentClassResolver,
   UserResolver,
-  DepartmentResolver
+  DepartmentResolver,
 } from './users.resolver'
 import { UsersService } from './users.service'
 

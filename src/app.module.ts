@@ -49,7 +49,6 @@ import { telegramConfigValidation } from './telegram/telegram.config'
         emitTypenameField: true,
         installSubscriptionHandlers: true,
         resolvers: { Upload: GraphQLUpload },
-
       }),
     }),
     DatabaseModule,
