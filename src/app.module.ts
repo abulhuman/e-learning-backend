@@ -2,27 +2,26 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { GraphQLModule } from '@nestjs/graphql'
-import { TypeOrmModule } from '@nestjs/typeorm'
 import { PassportModule } from '@nestjs/passport'
+import { ServeStaticModule } from '@nestjs/serve-static'
+import { TypeOrmModule } from '@nestjs/typeorm'
 import { GraphQLUpload } from 'graphql-upload'
 import * as Joi from 'joi'
 import { join } from 'node:path'
-import { DatabaseModule } from './database/database.module'
+import appConfigValidation from './app.config'
+import { AppService } from './app/app.service'
+import authConfigValidation from './auth/auth.config'
 import { AuthModule } from './auth/auth.module'
-import { UsersModule } from './users/users.module'
 import { Session } from './auth/entities/session.entity'
 import { CourseModule } from './course/course.module'
-import { MailModule } from './mail/mail.module'
-import appConfigValidation from './app.config'
-import authConfigValidation from './auth/auth.config'
 import { databaseConfigValidation } from './database/database.config'
-import { TelegramModule } from './telegram/telegram.module'
-import { AppService } from './app/app.service'
-import { NotificationModule } from './notification/notification.module'
-import { FilesController } from './files/files.controller'
-
+import { DatabaseModule } from './database/database.module'
 import emailConfigValidation from './mail/mail.config'
+import { MailModule } from './mail/mail.module'
+import { NotificationModule } from './notification/notification.module'
 import { telegramConfigValidation } from './telegram/telegram.config'
+import { TelegramModule } from './telegram/telegram.module'
+import { UsersModule } from './users/users.module'
 
 @Module({
   imports: [
@@ -62,8 +61,11 @@ import { telegramConfigValidation } from './telegram/telegram.config'
     MailModule,
     TelegramModule,
     NotificationModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, 'upload'),
+      serveRoot: '/upload',
+    }),
   ],
-  controllers: [FilesController],
   providers: [AppService],
   exports: [AppService],
 })

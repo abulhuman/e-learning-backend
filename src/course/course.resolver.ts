@@ -140,11 +140,12 @@ export class CourseResolver {
     const { createReadStream, filename } = await fileUpload
     documentFileFilter(filename)
     const storedFileName = editFileName(filename)
-    await new Promise(response => {
+    await new Promise((resolve, reject) => {
       const readStream = createReadStream()
       readStream
         .pipe(createWriteStream(join(__dirname, '../upload', storedFileName)))
-        .on('close', response)
+        .on('close', resolve)
+        .on('error', reject)
     })
     return this.courseService.createOneCourseDocument(
       createCourseDocumentInput,
