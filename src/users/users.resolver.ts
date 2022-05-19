@@ -45,7 +45,6 @@ export class UserResolver {
     @Args('classId', ParseUUIDPipe) classId: string,
   ) {
     return this.usersService.findAllStudentsByClassId(classId)
-    return
   }
 
   @Query('user')
