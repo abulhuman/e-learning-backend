@@ -97,6 +97,14 @@ export class CourseService {
     return this.courseDocumentRepository.find({ relations: ['course'] })
   }
 
+  findCourseDocumentsForCourse(courseId: string) {
+    return this.courseDocumentRepository
+      .createQueryBuilder('courseDocument')
+      .leftJoin('courseDocument.course', 'course')
+      .where('course.id = :id', { id: courseId })
+      .getMany()
+  }
+
   findOneCourse(id: string) {
     return this.courseRepository.findOne(id, {
       relations: ['chapters', 'chapters.subChapters', 'users', 'users.roles'],
