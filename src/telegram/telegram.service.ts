@@ -1,5 +1,7 @@
 import { HttpService } from '@nestjs/axios'
 import {
+  forwardRef,
+  Inject,
   Injectable,
   Logger,
   OnModuleDestroy,
@@ -30,6 +32,7 @@ import {
   GetChatMemberParams,
   GetUpdatesParams,
   Message,
+  SendDocumentParams,
   SendMessageParams,
   SetMenuButtonParams,
   SetMyCommandsParams,
@@ -51,6 +54,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     private configService: ConfigService,
     @InjectRepository(TelegramAccount)
     private telegramAccountRepo: Repository<TelegramAccount>,
+    @Inject(forwardRef(() => UpdateDispatcher))
     private dispatcher: UpdateDispatcher,
   ) {
     this.apiURL = this.configService
@@ -104,6 +108,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
 
   sendMessage(params: SendMessageParams) {
     return this.telegramApiCall<Message>(this.sendMessage.name, params)
+  }
+
+  sendDocument(params: SendDocumentParams) {
+    return this.telegramApiCall<Message>(this.sendDocument.name, params)
   }
 
   setMyCommands(params: SetMyCommandsParams) {

@@ -8,6 +8,7 @@ export enum Command {
 
 export enum Callback {
   CHAPTERS = 'chapters',
+  COURSE_FILES = 'course_files',
 }
 export const DEFAULT_COMMANDS: BotCommand[] = [
   {

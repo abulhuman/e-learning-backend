@@ -49,3 +49,9 @@ export interface SetMyCommandsParams {
   commands: BotCommand[]
   scope: BotCommandScope
 }
+
+export interface SendDocumentParams {
+  chat_id: string
+  document: string
+  caption?: string
+}

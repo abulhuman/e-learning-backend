@@ -60,7 +60,7 @@ export interface BotCommand {
 
 export interface CallbackQuery {
   id: string
-  from: User
+  from: TelegramAccount
   message?: Message
   chat_instance: string
   data?: string

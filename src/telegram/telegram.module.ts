@@ -18,7 +18,7 @@ import { TelegramService } from './telegram.service'
     forwardRef(() => AppModule),
     HttpModule,
     ConfigModule,
-    CourseModule,
+    forwardRef(() => CourseModule),
     UsersModule,
   ],
   exports: [TelegramService],

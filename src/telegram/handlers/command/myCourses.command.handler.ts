@@ -3,7 +3,7 @@ import { from, switchMap } from 'rxjs'
 import { CourseService } from 'src/course/course.service'
 import { Message } from 'src/telegram/dtos'
 import { Handler } from 'src/telegram/interfaces/hanlder.interface'
-import { FormattingOption } from 'src/telegram/telegram.constants'
+import { Callback, FormattingOption } from 'src/telegram/telegram.constants'
 import { TelegramService } from 'src/telegram/telegram.service'
 
 @Injectable()
@@ -50,11 +50,11 @@ export class MyCoursesCommandHandler implements Handler {
                     [
                       {
                         text: 'Chapters 📖',
-                        callback_data: `chapters ${course.id}`,
+                        callback_data: `${Callback.CHAPTERS} ${course.id}`,
                       },
                       {
                         text: 'Files 📁',
-                        callback_data: `files ${course.id}`,
+                        callback_data: `${Callback.COURSE_FILES} ${course.id}`,
                       },
                     ],
                   ],
