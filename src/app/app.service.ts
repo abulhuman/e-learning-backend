@@ -8,4 +8,8 @@ export class AppService {
   public get isInProduction() {
     return this.configService.get('NODE_ENV') === 'production'
   }
+
+  public get appUrl() {
+    return this.configService.get('HEROKU_URL')
+  }
 }
