@@ -1,4 +1,3 @@
-import { User } from 'src/users/entities/user.entity'
 import { TelegramAccount } from '../entities/telegram-account.entity'
 import {
   BotCommandScopeType,
