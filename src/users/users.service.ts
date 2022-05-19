@@ -53,7 +53,9 @@ export class UsersService {
   }
 
   async findAllUsers() {
-    return this.userRepository.find({ relations: ['roles', 'notifications'] })
+    return this.userRepository.find({
+      relations: ['roles', 'notifications', 'attendingClass'],
+    })
   }
 
   findOneUserById(
@@ -77,6 +79,23 @@ export class UsersService {
   findOneUserByEmail(email: string, withRoles = true): Promise<User> {
     const user = this.findOne({ email }, withRoles)
     return user
+  }
+
+  async findAllStudentsByClassId(classId: string) {
+    const studentClass = await this.findOneStudentClass(classId)
+    if (!studentClass)
+      throw new NotFoundException(`Class with id: ${classId} was not found.`)
+
+    const allUsers = await this.findAllUsers()
+
+    const studentUsers = allUsers.filter(user => {
+      const userRoles = user.roles.map(role => role.name)
+      return userRoles.includes(RoleName.STUDENT)
+    })
+    const studentsInClass = studentUsers.filter(
+      student => student.attendingClass?.id === classId,
+    )
+    return studentsInClass
   }
 
   async getRoles(id: string): Promise<Role[]> {
