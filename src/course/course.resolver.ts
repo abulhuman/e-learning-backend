@@ -1,5 +1,12 @@
 import { ParseUUIDPipe } from '@nestjs/common'
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql'
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql'
 import { NotificationService } from 'src/notification/notification.service'
 import { CourseService } from './course.service'
 import { CreateChapterInput } from './dto/create-chapter.input'
@@ -18,6 +25,7 @@ import {
   editFileName,
 } from 'src/files/utils/file-upload.utils'
 import { join } from 'node:path'
+import { Course } from './entities/course.entity'
 
 @Resolver('Course')
 export class CourseResolver {
@@ -56,6 +64,10 @@ export class CourseResolver {
   @Query('course')
   findOne(@Args('id', ParseUUIDPipe) id: string) {
     return this.courseService.findOneCourse(id)
+  }
+  @ResolveField('courseDocuments')
+  findCourseDocuments(@Parent() course: Course) {
+    return this.courseService.findCourseDocumentsForCourse(course.id)
   }
 
   @Mutation('assignUserToCourse')
