@@ -68,7 +68,7 @@ export class CourseService {
     )
     newCourseDocument.storedFileName = storedFileName
     newCourseDocument.course = await this.findOneCourse(courseId)
-    return await this.chapterRepository.save(newCourseDocument)
+    return await this.courseDocumentRepository.save(newCourseDocument)
   }
 
   findAllCourses() {
