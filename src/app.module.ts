@@ -22,6 +22,7 @@ import { NotificationModule } from './notification/notification.module'
 import { telegramConfigValidation } from './telegram/telegram.config'
 import { TelegramModule } from './telegram/telegram.module'
 import { UsersModule } from './users/users.module'
+import { QuizModule } from './quiz/quiz.module'
 
 @Module({
   imports: [
@@ -65,6 +66,7 @@ import { UsersModule } from './users/users.module'
       rootPath: join(__dirname, 'upload'),
       serveRoot: '/upload',
     }),
+    QuizModule,
   ],
   providers: [AppService],
   exports: [AppService],

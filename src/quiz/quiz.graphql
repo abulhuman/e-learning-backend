@@ -1,0 +1,26 @@
+type Quiz {
+  id: ID!
+  title: String!
+  description: String
+  start: Date!
+  end: Date!
+  created_at: Date!
+  duration: Int!
+}
+
+input CreateQuizInput {
+  title: String!
+  description: String
+  start: Date!
+  end: Date!
+  duration: Int!
+}
+
+type Mutation {
+  createQuiz(input: CreateQuizInput): Quiz!
+}
+
+type Query {
+  quiz(id: ID!): Quiz
+  quizzes: [Quiz]
+}
