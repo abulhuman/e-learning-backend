@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { UsersService } from 'src/users/users.service'
 import { Repository } from 'typeorm'
@@ -119,8 +123,13 @@ export class CourseService {
     return this.subChapterRepository.findOne(id)
   }
 
-  findOneCourseDocument(id: string) {
-    return this.courseDocumentRepository.findOne(id)
+  async findOneCourseDocument(id: string) {
+    const courseDocument = await this.courseDocumentRepository.findOne(id)
+    if (!courseDocument)
+      throw new NotFoundException(
+        `Course document with id: ${id} was not found.`,
+      )
+    return courseDocument
   }
 
   async updateCourse(id: string, updateCourseInput: UpdateCourseInput) {

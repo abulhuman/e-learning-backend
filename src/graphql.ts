@@ -95,7 +95,7 @@ export interface UpdateNotificationInput {
     status?: Nullable<NotificationStatus>;
 }
 
-export interface UUIDArrayDto {
+export interface UuidArrayDto {
     ids?: Nullable<Nullable<string>[]>;
 }
 
@@ -139,6 +139,35 @@ export interface CreateRoleInput {
     name: RoleName;
 }
 
+export interface CreateAssignmentDefinitionInput {
+    submissionDeadline: Date;
+    instructionsFileId: string;
+    courseId: string;
+}
+
+export interface UpdateAssignmentDefinitionInput {
+    id: string;
+    submissionDeadline?: Nullable<Date>;
+    instructionsFileId?: Nullable<string>;
+}
+
+export interface CreateAssignmentSubmissionInput {
+    submissionDate: Date;
+    submissionFileId: string;
+    assignmentDefinitionId: string;
+    studentId: string;
+}
+
+export interface UpdateAssignmentSubmissionInput {
+    id: string;
+    submissionDate?: Nullable<Date>;
+    submissionFileId?: Nullable<string>;
+}
+
+export interface UUIDArrayDto {
+    ids?: Nullable<Nullable<string>[]>;
+}
+
 export interface Course {
     id: string;
     created_at: Date;
@@ -151,6 +180,7 @@ export interface Course {
     users?: Nullable<Nullable<User>[]>;
     chapters: Nullable<Chapter>[];
     courseDocuments: Nullable<CourseDocument>[];
+    assignmentDefinitions?: Nullable<Nullable<AssignmentDefinition>[]>;
 }
 
 export interface Chapter {
@@ -180,6 +210,8 @@ export interface CourseDocument {
     documentDisplayName: string;
     storedFileName: string;
     course: Course;
+    assignmentDefinition?: Nullable<AssignmentDefinition>;
+    assignmentSubmission?: Nullable<AssignmentSubmission>;
 }
 
 export interface IQuery {
@@ -193,6 +225,10 @@ export interface IQuery {
     role(id: string): Nullable<Role> | Promise<Nullable<Role>>;
     studentClasses(): Nullable<StudentClass>[] | Promise<Nullable<StudentClass>[]>;
     studentClass(id: string): StudentClass | Promise<StudentClass>;
+    assignmentDefinitions(courseId: string): Nullable<AssignmentDefinition>[] | Promise<Nullable<AssignmentDefinition>[]>;
+    assignmentDefinition(id: string): Nullable<AssignmentDefinition> | Promise<Nullable<AssignmentDefinition>>;
+    assignmentSubmissions(assignmentDefinitionId: string): Nullable<AssignmentSubmission>[] | Promise<Nullable<AssignmentSubmission>[]>;
+    assignmentSubmission(id: string): Nullable<AssignmentSubmission> | Promise<Nullable<AssignmentSubmission>>;
     departments(): Nullable<Department>[] | Promise<Nullable<Department>[]>;
     department(id: string): Department | Promise<Department>;
 }
@@ -225,11 +261,17 @@ export interface IMutation {
     updateStudentClass(updateStudentClassInput: UpdateStudentClassInput): StudentClass | Promise<StudentClass>;
     removeStudentClass(id: string): StudentClass | Promise<StudentClass>;
     admitStudentToClass(studentId: string, classId: string): boolean | Promise<boolean>;
-    admitStudentsToClass(studentIds: UUIDArrayDto, classId: string): boolean | Promise<boolean>;
+    admitStudentsToClass(studentIds: UuidArrayDto, classId: string): boolean | Promise<boolean>;
     assignTeacherToClass(teacherId: string, classId: string): boolean | Promise<boolean>;
     promoteStudentFromClass(studentId: string, classId: string): boolean | Promise<boolean>;
-    promoteStudentsFromClass(studentIds: UUIDArrayDto, classId: string): boolean | Promise<boolean>;
+    promoteStudentsFromClass(studentIds: UuidArrayDto, classId: string): boolean | Promise<boolean>;
     dismissTeacherFromClass(teacherId: string, classId: string): boolean | Promise<boolean>;
+    createAssignmentDefinition(createAssignmentDefinitionInput: CreateAssignmentDefinitionInput): AssignmentDefinition | Promise<AssignmentDefinition>;
+    updateAssignmentDefinition(updateAssignmentDefinitionInput: UpdateAssignmentDefinitionInput): AssignmentDefinition | Promise<AssignmentDefinition>;
+    removeAssignmentDefinition(id: string): Nullable<boolean> | Promise<Nullable<boolean>>;
+    createAssignmentSubmission(createAssignmentSubmissionInput: CreateAssignmentSubmissionInput): AssignmentSubmission | Promise<AssignmentSubmission>;
+    updateAssignmentSubmission(updateAssignmentSubmissionInput: UpdateAssignmentSubmissionInput): AssignmentSubmission | Promise<AssignmentSubmission>;
+    removeAssignmentSubmission(id: string): boolean | Promise<boolean>;
     createDepartment(name: string): Department | Promise<Department>;
     updateDepartment(id: string, name?: Nullable<string>): Department | Promise<Department>;
     removeDepartment(id: string): Nullable<Department> | Promise<Nullable<Department>>;
@@ -274,6 +316,7 @@ export interface User {
     courses?: Nullable<Nullable<Course>[]>;
     notifications?: Nullable<Nullable<Notification>[]>;
     department?: Nullable<Department>;
+    assignmentSubmissions?: Nullable<Nullable<AssignmentSubmission>[]>;
 }
 
 export interface StudentClass {
@@ -287,6 +330,34 @@ export interface StudentClass {
     department?: Nullable<Department>;
 }
 
+export interface Role {
+    id: string;
+    created_at: Date;
+    updated_at?: Nullable<Date>;
+    name: RoleName;
+    members: Nullable<User>[];
+}
+
+export interface AssignmentDefinition {
+    id: string;
+    created_at: Date;
+    updated_at?: Nullable<Date>;
+    submissionDeadline: Date;
+    instructionsFile: CourseDocument;
+    submissions?: Nullable<Nullable<AssignmentSubmission>[]>;
+    course: Course;
+}
+
+export interface AssignmentSubmission {
+    id: string;
+    created_at: Date;
+    updated_at?: Nullable<Date>;
+    submissionDate: Date;
+    submissionFile: CourseDocument;
+    assignmentDefinition: AssignmentDefinition;
+    submittedBy: User;
+}
+
 export interface Department {
     id: string;
     created_at: Date;
@@ -294,14 +365,6 @@ export interface Department {
     name: string;
     classes?: Nullable<Nullable<StudentClass>[]>;
     departmentAdministrator?: Nullable<User>;
-}
-
-export interface Role {
-    id: string;
-    created_at: Date;
-    updated_at?: Nullable<Date>;
-    name: RoleName;
-    members: Nullable<User>[];
 }
 
 export type Upload = any;

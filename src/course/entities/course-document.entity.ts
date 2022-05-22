@@ -1,3 +1,5 @@
+import { AssignmentDefinition } from 'src/assignment/entities/assignment-definition.entity'
+import { AssignmentSubmission } from 'src/assignment/entities/assignment-submission.entity'
 import { CourseDocument as ICourseDocument } from 'src/graphql'
 import {
   Column,
@@ -36,4 +38,18 @@ export class CourseDocument implements ICourseDocument {
 
   @ManyToOne(() => Course, (course: Course) => course.courseDocuments)
   course: Course
+
+  @ManyToOne(
+    () => AssignmentDefinition,
+    (assignmentDefinition: AssignmentDefinition) =>
+      assignmentDefinition.instructionsFile,
+  )
+  assignmentDefinition?: AssignmentDefinition
+
+  @ManyToOne(
+    () => AssignmentDefinition,
+    (assignmentDefinition: AssignmentDefinition) =>
+      assignmentDefinition.submissionFiles,
+  )
+  assignmentSubmission?: AssignmentSubmission
 }
