@@ -17,6 +17,11 @@ export enum NotificationStatus {
     ARCHIVED = "ARCHIVED"
 }
 
+export enum QuizSectionType {
+    OBJECTIVE = "OBJECTIVE",
+    SUBJECTIVE = "SUBJECTIVE"
+}
+
 export enum RoleName {
     DEV = "DEV",
     ADMINISTRATOR = "ADMINISTRATOR",
@@ -101,6 +106,12 @@ export interface CreateQuizInput {
     start: Date;
     end: Date;
     duration: number;
+    sections: Nullable<CreateQuizSectionInput>[];
+}
+
+export interface CreateQuizSectionInput {
+    sectionType: QuizSectionType;
+    description?: Nullable<string>;
 }
 
 export interface UUIDArrayDto {
@@ -197,6 +208,7 @@ export interface IQuery {
     notification(id: string): Nullable<Notification> | Promise<Nullable<Notification>>;
     quiz(id: string): Nullable<Quiz> | Promise<Nullable<Quiz>>;
     quizzes(): Nullable<Nullable<Quiz>[]> | Promise<Nullable<Nullable<Quiz>[]>>;
+    quizSections(): Nullable<Nullable<QuizSection>[]> | Promise<Nullable<Nullable<QuizSection>[]>>;
     users(): Nullable<User>[] | Promise<Nullable<User>[]>;
     getAllStudentsByClassId(classId: string): Nullable<Nullable<User>[]> | Promise<Nullable<Nullable<User>[]>>;
     user(id: string): Nullable<User> | Promise<Nullable<User>>;
@@ -273,6 +285,14 @@ export interface Quiz {
     end: Date;
     created_at: Date;
     duration: number;
+    sections?: Nullable<Nullable<QuizSection>[]>;
+}
+
+export interface QuizSection {
+    id: string;
+    description?: Nullable<string>;
+    sectionType?: Nullable<string>;
+    quiz: Quiz;
 }
 
 export interface TelegramAccount {

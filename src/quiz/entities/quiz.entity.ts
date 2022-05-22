@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm'
 import { Quiz as IQuiz } from 'src/graphql'
+import { QuizSection } from './quiz-section.entity'
 @Entity()
 export class Quiz implements IQuiz {
   @PrimaryGeneratedColumn('uuid')
@@ -27,4 +29,7 @@ export class Quiz implements IQuiz {
 
   @Column({ type: 'int' })
   duration: number
+
+  @OneToMany(() => QuizSection, section => section.quiz, { cascade: true })
+  sections: QuizSection[]
 }

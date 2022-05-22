@@ -1,8 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import * as moment from 'moment'
-import { CreateQuizInput } from 'src/graphql'
+import { CreateQuizInput, QuizSectionType } from 'src/graphql'
 import { FindConditions, Repository } from 'typeorm'
+import {
+  ObjectiveQuizSection,
+  QuizSection,
+  SubjectiveQuizSection,
+} from './entities/quiz-section.entity'
 import { Quiz } from './entities/quiz.entity'
 
 @Injectable()
@@ -13,7 +18,7 @@ export class QuizService {
   ) {}
 
   create(input: CreateQuizInput) {
-    if (moment().diff(moment(input.start))) {
+    if (!moment().diff(moment(input.start))) {
       throw new BadRequestException('Invalid input: bad "start" date')
     }
     const diff = moment(input.end).diff(moment(input.start))
@@ -28,6 +33,14 @@ export class QuizService {
       )
     }
     const newQuiz = this.quizRepo.create(input)
+    newQuiz.sections = input.sections.map(sectionInput => {
+      const newSection =
+        sectionInput.sectionType === QuizSectionType.OBJECTIVE
+          ? new ObjectiveQuizSection()
+          : new SubjectiveQuizSection()
+      newSection.description = sectionInput.description
+      return newSection
+    })
     return this.quizRepo.save(newQuiz)
   }
 
