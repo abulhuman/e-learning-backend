@@ -1,3 +1,4 @@
+import { AssignmentSubmission } from 'src/assignment/entities/assignment-submission.entity'
 import { Course } from 'src/course/entities/course.entity'
 import { User as IUser } from 'src/graphql'
 import { Notification } from 'src/notification/entities/notification.entity'
@@ -71,4 +72,11 @@ export class User implements IUser {
     (department: Department) => department.departmentAdministrator,
   )
   department?: Department
+
+  @ManyToOne(
+    () => AssignmentSubmission,
+    (assignmentSubmission: AssignmentSubmission) =>
+      assignmentSubmission.submittedBy,
+  )
+  assignmentSubmissions?: AssignmentSubmission[]
 }

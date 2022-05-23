@@ -1,3 +1,4 @@
+import { AssignmentDefinition } from 'src/assignment/entities/assignment-definition.entity'
 import { Course as ICourse } from 'src/graphql'
 import { User } from 'src/users/entities/user.entity'
 import {
@@ -51,4 +52,10 @@ export class Course implements ICourse {
     (courseDocument: CourseDocument) => courseDocument.course,
   )
   courseDocuments: CourseDocument[]
+
+  @OneToMany(
+    () => CourseDocument,
+    (courseDocument: CourseDocument) => courseDocument.course,
+  )
+  assignmentDefinitions?: AssignmentDefinition[]
 }

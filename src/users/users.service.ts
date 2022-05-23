@@ -65,15 +65,19 @@ export class UsersService {
     withAttendingClass = false,
     withLearningClasses = false,
     withDepartment = false,
+    withSubmissions = false,
   ): Promise<User> {
-    return this.findOne(
+    const user = this.findOne(
       { id },
       withRoles,
       withNotifications,
       withAttendingClass,
       withLearningClasses,
       withDepartment,
+      withSubmissions,
     )
+    if (!user) throw new NotFoundException(`User with id: ${id} was not found.`)
+    return user
   }
 
   findOneUserByEmail(email: string, withRoles = true): Promise<User> {
@@ -110,6 +114,7 @@ export class UsersService {
     withAttendingClass = false,
     withLearningClasses = false,
     withDepartment = false,
+    withSubmissions = false,
   ): Promise<User> {
     const relations = []
     if (withRoles) relations.push('roles')
@@ -117,6 +122,7 @@ export class UsersService {
     if (withAttendingClass) relations.push('attendingClass')
     if (withLearningClasses) relations.push('learningClasses')
     if (withDepartment) relations.push('department')
+    if (withSubmissions) relations.push('assignmentSubmissions')
     return this.userRepository.findOne(findUserDto, {
       relations,
     })

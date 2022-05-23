@@ -13,6 +13,7 @@ type User {
   courses: [Course]
   notifications: [Notification]
   department: Department
+  assignmentSubmissions: [AssignmentSubmission]
 }
 
 input CreateUserInput {
