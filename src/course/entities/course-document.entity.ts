@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   RelationId,
   UpdateDateColumn,
@@ -39,17 +40,17 @@ export class CourseDocument implements ICourseDocument {
   @ManyToOne(() => Course, (course: Course) => course.courseDocuments)
   course: Course
 
-  @ManyToOne(
+  @OneToOne(
     () => AssignmentDefinition,
     (assignmentDefinition: AssignmentDefinition) =>
       assignmentDefinition.instructionsFile,
   )
   assignmentDefinition?: AssignmentDefinition
 
-  @ManyToOne(
-    () => AssignmentDefinition,
-    (assignmentDefinition: AssignmentDefinition) =>
-      assignmentDefinition.submissionFiles,
+  @OneToOne(
+    () => AssignmentSubmission,
+    (assignmentSubmission: AssignmentSubmission) =>
+      assignmentSubmission.submissionFile,
   )
   assignmentSubmission?: AssignmentSubmission
 }

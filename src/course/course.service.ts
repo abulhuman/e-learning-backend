@@ -124,7 +124,9 @@ export class CourseService {
   }
 
   async findOneCourseDocument(id: string) {
-    const courseDocument = await this.courseDocumentRepository.findOne(id)
+    const courseDocument = await this.courseDocumentRepository.findOne(id, {
+      relations: ['assignmentSubmission'],
+    })
     if (!courseDocument)
       throw new NotFoundException(
         `Course document with id: ${id} was not found.`,

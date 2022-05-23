@@ -1,7 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { CourseService } from 'src/course/course.service'
-import { CourseDocument } from 'src/course/entities/course-document.entity'
 import { Repository } from 'typeorm'
 import { CreateAssignmentDefinitionInput } from '../dto/create-assignment-definition.input'
 import { UpdateAssignmentDefinitionInput } from '../dto/update-assignment-definition.input'
@@ -12,8 +11,6 @@ export class AssignmentDefinitionService {
   constructor(
     @InjectRepository(AssignmentDefinition)
     private readonly assignmentDefinitionRepository: Repository<AssignmentDefinition>,
-    @InjectRepository(CourseDocument)
-    private readonly courseDocumentRepository: Repository<CourseDocument>,
     @Inject(CourseService)
     private readonly courseService: CourseService,
   ) {}
@@ -38,7 +35,7 @@ export class AssignmentDefinitionService {
   }
   findAllAssignmentDefinitions(courseId: string) {
     return this.assignmentDefinitionRepository.find({
-      relations: ['course', 'instructionsFile'],
+      relations: ['course', 'instructionsFile', 'submissions'],
       where: {
         course: {
           id: courseId,
@@ -48,7 +45,9 @@ export class AssignmentDefinitionService {
   }
   async findOneAssignmentDefinition(id: string) {
     const assignmentDefinition =
-      await this.assignmentDefinitionRepository.findOne(id)
+      await this.assignmentDefinitionRepository.findOne(id, {
+        relations: ['course', 'instructionsFile', 'submissions'],
+      })
     if (!assignmentDefinition)
       throw new NotFoundException(
         `Assignment definition with id: ${id} was not found.`,
@@ -83,10 +82,14 @@ export class AssignmentDefinitionService {
     const assignmentDefinitionToRemove = await this.findOneAssignmentDefinition(
       id,
     )
-    return this.assignmentDefinitionRepository
-      .remove(assignmentDefinitionToRemove)
-      .then(res => {
-        return !!res
-      })
+    return (
+      this.assignmentDefinitionRepository
+        .remove(assignmentDefinitionToRemove)
+        .then(res => {
+          return !!res
+        })
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .catch(_err => false)
+    )
   }
 }

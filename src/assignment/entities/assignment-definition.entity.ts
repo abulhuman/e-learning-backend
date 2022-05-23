@@ -12,6 +12,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
+import { AssignmentSubmission } from './assignment-submission.entity'
 
 @Entity()
 export class AssignmentDefinition implements IAssignmentDefinition {
@@ -38,8 +39,8 @@ export class AssignmentDefinition implements IAssignmentDefinition {
   course: Course
 
   @OneToMany(
-    () => CourseDocument,
-    (courseDocument: CourseDocument) => courseDocument.assignmentSubmission,
+    () => AssignmentSubmission,
+    (submission: AssignmentSubmission) => submission.definition,
   )
-  submissionFiles?: CourseDocument[]
+  submissions?: AssignmentSubmission[]
 }

@@ -6,8 +6,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
@@ -15,7 +17,7 @@ import { AssignmentDefinition } from './assignment-definition.entity'
 
 @Entity()
 export class AssignmentSubmission implements IAssignmentSubmission {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string
 
   @CreateDateColumn()
@@ -24,25 +26,23 @@ export class AssignmentSubmission implements IAssignmentSubmission {
   @UpdateDateColumn({ nullable: true })
   updated_at?: Date
 
-  @Column({ type: 'date' })
+  @Column({ type: 'timestamp' })
   submissionDate: Date
 
-  @OneToMany(
+  @OneToOne(
     () => CourseDocument,
     (courseDocument: CourseDocument) => courseDocument.assignmentSubmission,
   )
+  @JoinColumn()
   submissionFile: CourseDocument
 
-  @OneToMany(
+  @ManyToOne(
     () => AssignmentDefinition,
     (assignmentDefinition: AssignmentDefinition) =>
-      assignmentDefinition.submissionFiles,
+      assignmentDefinition.submissions,
   )
-  assignmentDefinition: AssignmentDefinition
+  definition: AssignmentDefinition
 
-  @OneToMany(
-    () => CourseDocument,
-    (courseDocument: CourseDocument) => courseDocument.assignmentDefinition,
-  )
+  @ManyToOne(() => User, (user: User) => user.assignmentSubmissions)
   submittedBy: User
 }

@@ -92,6 +92,21 @@ export class UserResolver {
       )
     ).department
   }
+
+  @ResolveField('assignmentSubmissions')
+  async assignmentSubmissions(@Parent() user: User) {
+    return (
+      await this.usersService.findOneUserById(
+        user.id,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+      )
+    ).assignmentSubmissions
+  }
 }
 
 @Resolver('StudentClass')

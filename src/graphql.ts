@@ -154,14 +154,16 @@ export interface UpdateAssignmentDefinitionInput {
 export interface CreateAssignmentSubmissionInput {
     submissionDate: Date;
     submissionFileId: string;
-    assignmentDefinitionId: string;
+    definitionId: string;
     studentId: string;
+    replaceFile?: Nullable<boolean>;
 }
 
 export interface UpdateAssignmentSubmissionInput {
     id: string;
     submissionDate?: Nullable<Date>;
     submissionFileId?: Nullable<string>;
+    replaceFile?: Nullable<boolean>;
 }
 
 export interface UUIDArrayDto {
@@ -354,7 +356,7 @@ export interface AssignmentSubmission {
     updated_at?: Nullable<Date>;
     submissionDate: Date;
     submissionFile: CourseDocument;
-    assignmentDefinition: AssignmentDefinition;
+    definition: AssignmentDefinition;
     submittedBy: User;
 }
 

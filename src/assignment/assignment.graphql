@@ -26,21 +26,23 @@ type AssignmentSubmission {
   updated_at: Date
   submissionDate: Date!
   submissionFile: CourseDocument!
-  assignmentDefinition: AssignmentDefinition!
+  definition: AssignmentDefinition!
   submittedBy: User!
 }
 
 input CreateAssignmentSubmissionInput {
   submissionDate: Date!
   submissionFileId: ID!
-  assignmentDefinitionId: ID!
+  definitionId: ID!
   studentId: ID!
+  replaceFile: Boolean = false
 }
 
 input UpdateAssignmentSubmissionInput {
   id: ID!
   submissionDate: Date
   submissionFileId: ID
+  replaceFile: Boolean = false
 }
 
 type Query {
