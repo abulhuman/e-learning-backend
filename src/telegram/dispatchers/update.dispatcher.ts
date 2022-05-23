@@ -1,5 +1,4 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { from, map } from 'rxjs'
 import { CallbackQueryUpdate, MessageUpdate, Update } from '../dtos'
 import { Dispatcher } from '../interfaces/dispatcher.interface'
 import { CallbackDispatcher } from './callback.dispatcher'

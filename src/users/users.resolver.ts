@@ -40,6 +40,13 @@ export class UserResolver {
     return this.usersService.findAllUsers()
   }
 
+  @Query('getAllStudentsByClassId')
+  async getAllStudentsByClassId(
+    @Args('classId', ParseUUIDPipe) classId: string,
+  ) {
+    return this.usersService.findAllStudentsByClassId(classId)
+  }
+
   @Query('user')
   findOneUser(@Args('id') id: string) {
     return this.usersService.findOneUserById(id)

@@ -1,6 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { Server } from 'http'
-import { from, map, switchMap, tap, throwError } from 'rxjs'
+import { from, switchMap, tap, throwError } from 'rxjs'
 import { AppService } from 'src/app/app.service'
 import { CourseService } from 'src/course/course.service'
 import { CallbackQuery } from 'src/telegram/dtos'
