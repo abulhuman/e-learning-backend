@@ -22,6 +22,13 @@ export enum QuizSectionType {
     SUBJECTIVE = "SUBJECTIVE"
 }
 
+export enum QuestionType {
+    MULTIPLE_CHOICE = "MULTIPLE_CHOICE",
+    TRUE_FALSE = "TRUE_FALSE",
+    CLOZE = "CLOZE",
+    ESSAY = "ESSAY"
+}
+
 export enum RoleName {
     DEV = "DEV",
     ADMINISTRATOR = "ADMINISTRATOR",
@@ -293,6 +300,60 @@ export interface QuizSection {
     description?: Nullable<string>;
     sectionType?: Nullable<string>;
     quiz: Quiz;
+}
+
+export interface Question {
+    id: string;
+    text: string;
+    number: number;
+    questionType?: Nullable<QuestionType>;
+}
+
+export interface TrueFalse {
+    id: string;
+    text: string;
+    number: number;
+    questionType: QuestionType;
+    answer?: Nullable<boolean>;
+}
+
+export interface MultipleChoice {
+    id: string;
+    text: string;
+    number: number;
+    questionType: QuestionType;
+    choices: Nullable<Choice>[];
+    answer?: Nullable<string>;
+}
+
+export interface Cloze {
+    id: string;
+    text: string;
+    number: number;
+    questionType: QuestionType;
+    subQuestions: Nullable<SubQuestion>[];
+}
+
+export interface Essay {
+    id: string;
+    text: string;
+    number: number;
+    questionType: QuestionType;
+    answer?: Nullable<string>;
+}
+
+export interface Choice {
+    id: string;
+    key: string;
+    text: string;
+    question?: Nullable<MultipleChoice>;
+}
+
+export interface SubQuestion {
+    id: string;
+    number: number;
+    answer?: Nullable<string>;
+    question: Cloze;
 }
 
 export interface TelegramAccount {

@@ -35,6 +35,67 @@ type QuizSection {
   quiz: Quiz!
 }
 
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  CLOZE
+  ESSAY
+}
+
+type Question {
+  id: ID!
+  text: String!
+  number: Int!
+  questionType: QuestionType
+}
+
+type TrueFalse {
+  id: ID!
+  text: String!
+  number: Int!
+  questionType: QuestionType!
+  answer: Boolean
+}
+
+type MultipleChoice {
+  id: ID!
+  text: String!
+  number: Int!
+  questionType: QuestionType!
+  choices: [Choice]!
+  answer: String
+}
+
+type Cloze {
+  id: ID!
+  text: String!
+  number: Int!
+  questionType: QuestionType!
+  subQuestions: [SubQuestion]!
+}
+
+type Essay {
+  id: ID!
+  text: String!
+  number: Int!
+  questionType: QuestionType!
+  answer: String
+}
+
+type Choice {
+  id: ID!
+  key: String!
+  text: String!
+  question: MultipleChoice
+}
+
+type SubQuestion {
+  id: ID!
+  number: Int!
+  answer: String
+  question: Cloze!
+}
+
 type Mutation {
   createQuiz(input: CreateQuizInput): Quiz!
 }
