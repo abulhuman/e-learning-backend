@@ -228,6 +228,10 @@ export class UsersService {
     const newStudentClass = this.studentClassRepository.create(
       createStudentClassInput,
     )
+    const { departmentId } = createStudentClassInput
+    delete createStudentClassInput.departmentId
+    const department = await this.findOneDepartment(departmentId)
+    Object.assign(newStudentClass, { department })
     return this.studentClassRepository.save(newStudentClass)
   }
   async findOneStudentClass(id: string) {
@@ -412,9 +416,12 @@ export class UsersService {
     return this.departmentRepository.save(newDepartment)
   }
   async findOneDepartment(id: string) {
-    return this.departmentRepository.findOne(id, {
+    const department = await this.departmentRepository.findOne(id, {
       relations: ['classes', 'departmentAdministrator'],
     })
+    if (!department)
+      throw new NotFoundException(`Department with id": ${id} was not found.`)
+    return department
   }
   async findAllDepartments() {
     return this.departmentRepository.find()

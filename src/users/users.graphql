@@ -49,6 +49,7 @@ type StudentClass {
 input CreateStudentClassInput {
   year: String!
   section: String!
+  departmentId: ID!
 }
 
 input UpdateStudentClassInput {
