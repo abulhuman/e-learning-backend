@@ -279,7 +279,7 @@ export interface IMutation {
     deleteStudentClass(id: string, removeStudents?: Nullable<boolean>): boolean | Promise<boolean>;
     createDepartment(name: string): Department | Promise<Department>;
     updateDepartment(id: string, name?: Nullable<string>): Department | Promise<Department>;
-    removeDepartment(id: string): Nullable<Department> | Promise<Nullable<Department>>;
+    removeDepartment(id: string, removeClasses?: Nullable<boolean>): Nullable<boolean> | Promise<Nullable<boolean>>;
     addClassToDepartment(departmentId: string, classId: string): boolean | Promise<boolean>;
     removeClassFromDepartment(departmentId: string, classId: string): boolean | Promise<boolean>;
     appointDepartmentAdministrator(departmentId: string, userId: string): boolean | Promise<boolean>;

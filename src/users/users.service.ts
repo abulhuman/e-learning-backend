@@ -450,11 +450,24 @@ export class UsersService {
     Object.assign(departmentToUpdate, { name })
     return this.departmentRepository.save(departmentToUpdate)
   }
-  async removeDepartment(id: string): Promise<Department> {
+  async removeDepartment(id: string, removeClasses = false): Promise<boolean> {
     const departmentToDelete = await this.findOneDepartment(id)
-    if (!departmentToDelete)
-      throw new NotFoundException(`Department with id": ${id} was not found.`)
-    return this.departmentRepository.remove(departmentToDelete)
+    if (departmentToDelete?.classes?.length) {
+      if (!removeClasses)
+        throw new BadRequestException(undefined, `The Department is not empty.`)
+      departmentToDelete.classes.forEach(clazz => {
+        clazz.department = null
+        this.studentClassRepository.save(clazz)
+      })
+      departmentToDelete.classes = []
+    }
+    return (
+      this.departmentRepository
+        .remove(departmentToDelete)
+        .then(res => !!res)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .catch(_err => false)
+    )
   }
   async addClassToDepartment(departmentId: string, classId: string) {
     const department = await this.findOneDepartment(departmentId)

@@ -287,8 +287,9 @@ export class DepartmentResolver {
   removeDepartment(
     @Args('id', ParseUUIDPipe)
     id: string,
-  ): Promise<Department> {
-    return this.usersService.removeDepartment(id)
+    @Args('removeClasses', ParseBoolPipe) removeClasses: boolean,
+  ): Promise<boolean> {
+    return this.usersService.removeDepartment(id, removeClasses)
   }
 
   @Mutation('addClassToDepartment')
