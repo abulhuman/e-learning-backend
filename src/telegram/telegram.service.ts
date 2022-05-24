@@ -98,7 +98,8 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     })
   }
 
-  createAccount(account: TelegramAccount) {
+  createAccount(account: TelegramAccount, chat_id: string) {
+    account.chat_id = chat_id
     return this.telegramAccountRepo.save(account)
   }
 
