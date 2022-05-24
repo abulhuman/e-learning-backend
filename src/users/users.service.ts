@@ -189,7 +189,7 @@ export class UsersService {
   findOneRole(id?: string, roleName?: RoleName) {
     return this.roleRepository.findOne(id, {
       relations: ['members'],
-      where: { name: roleName },
+      where: roleName ? { name: roleName } : undefined,
     })
   }
 

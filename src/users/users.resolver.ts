@@ -239,7 +239,7 @@ export class RoleResolver {
   }
 
   @Query('role')
-  findOneRole(@Args('id') id: string) {
+  findOneRole(@Args('id', ParseUUIDPipe) id: string) {
     return this.usersService.findOneRole(id)
   }
 
