@@ -276,6 +276,7 @@ export interface IMutation {
     createAssignmentSubmission(createAssignmentSubmissionInput: CreateAssignmentSubmissionInput): AssignmentSubmission | Promise<AssignmentSubmission>;
     updateAssignmentSubmission(updateAssignmentSubmissionInput: UpdateAssignmentSubmissionInput): AssignmentSubmission | Promise<AssignmentSubmission>;
     removeAssignmentSubmission(id: string): boolean | Promise<boolean>;
+    deleteStudentClass(id: string, removeStudents?: Nullable<boolean>): boolean | Promise<boolean>;
     createDepartment(name: string): Department | Promise<Department>;
     updateDepartment(id: string, name?: Nullable<string>): Department | Promise<Department>;
     removeDepartment(id: string): Nullable<Department> | Promise<Nullable<Department>>;

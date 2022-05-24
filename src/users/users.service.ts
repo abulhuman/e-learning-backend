@@ -235,9 +235,12 @@ export class UsersService {
     return this.studentClassRepository.save(newStudentClass)
   }
   async findOneStudentClass(id: string) {
-    return this.studentClassRepository.findOne(id, {
+    const studentClass = await this.studentClassRepository.findOne(id, {
       relations: ['students', 'teachers', 'teachers.roles', 'department'],
     })
+    if (!studentClass)
+      throw new NotFoundException(`Class with id": ${id} was not found.`)
+    return studentClass
   }
 
   async findAllStudentClasses() {
@@ -404,11 +407,25 @@ export class UsersService {
     this.userRepository.save(teacherUser)
     return true
   }
-  async removeStudentClass(id: string) {
+  async deleteStudentClass(id: string, removeStudents = false) {
     const studentClassToRemove = await this.findOneStudentClass(id)
-    if (!studentClassToRemove)
-      throw new NotFoundException(`Class with id": ${id} was not found.`)
-    return this.studentClassRepository.remove(studentClassToRemove)
+    if (studentClassToRemove?.students?.length) {
+      if (!removeStudents) {
+        throw new BadRequestException(`The class is not empty.`)
+      }
+      studentClassToRemove.students.forEach(student => {
+        student.attendingClass = null
+        this.userRepository.save(student)
+      })
+      studentClassToRemove.students = []
+    }
+    return (
+      this.studentClassRepository
+        .remove(studentClassToRemove)
+        .then(res => !!res)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .catch(_err => false)
+    )
   }
 
   async createDepartment(name: string) {

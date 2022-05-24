@@ -69,7 +69,7 @@ type Department {
 
 type Query {
   users: [User]!
-  getAllStudentsByClassId(classId: ID!): [User] 
+  getAllStudentsByClassId(classId: ID!): [User]
   user(id: ID!): User
   roles: [Role]!
   role(id: ID!): Role
@@ -93,7 +93,7 @@ type Mutation {
   updateStudentClass(
     updateStudentClassInput: UpdateStudentClassInput!
   ): StudentClass!
-  removeStudentClass(id: ID!): StudentClass!
+  deleteStudentClass(id: ID!, removeStudents: Boolean = false): Boolean!
 
   admitStudentToClass(studentId: ID!, classId: ID!): Boolean!
   admitStudentsToClass(studentIds: UUIDArrayDto!, classId: ID!): Boolean!
