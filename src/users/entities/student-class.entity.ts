@@ -37,6 +37,6 @@ export class StudentClass implements IStudentClass {
   @OneToMany(() => User, (user: User) => user.attendingClass)
   students: User[]
 
-  @ManyToOne(() => Department)
+  @ManyToOne(() => Department, { onDelete: 'CASCADE' })
   department?: Department
 }

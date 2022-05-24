@@ -450,17 +450,8 @@ export class UsersService {
     Object.assign(departmentToUpdate, { name })
     return this.departmentRepository.save(departmentToUpdate)
   }
-  async removeDepartment(id: string, removeClasses = false): Promise<boolean> {
+  async removeDepartment(id: string): Promise<boolean> {
     const departmentToDelete = await this.findOneDepartment(id)
-    if (departmentToDelete?.classes?.length) {
-      if (!removeClasses)
-        throw new BadRequestException(undefined, `The Department is not empty.`)
-      departmentToDelete.classes.forEach(clazz => {
-        clazz.department = null
-        this.studentClassRepository.save(clazz)
-      })
-      departmentToDelete.classes = []
-    }
     return (
       this.departmentRepository
         .remove(departmentToDelete)

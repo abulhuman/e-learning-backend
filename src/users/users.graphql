@@ -105,7 +105,7 @@ type Mutation {
 
   createDepartment(name: String!): Department!
   updateDepartment(id: ID!, name: String): Department!
-  removeDepartment(id: ID!, removeClasses: Boolean = false): Boolean
+  removeDepartment(id: ID!): Boolean
 
   addClassToDepartment(departmentId: ID!, classId: ID!): Boolean!
   removeClassFromDepartment(departmentId: ID!, classId: ID!): Boolean!
