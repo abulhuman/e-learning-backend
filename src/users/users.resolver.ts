@@ -12,7 +12,7 @@ import { UpdateUserInput } from './dto/update-user.input'
 import { CreateRoleInput } from './dto/create-role.input'
 import { Role } from './entities/role.entity'
 import { User } from './entities/user.entity'
-import { ParseUUIDPipe, UseFilters } from '@nestjs/common'
+import { ParseBoolPipe, ParseUUIDPipe, UseFilters } from '@nestjs/common'
 import { QueryFailedExceptionFilter } from 'src/database/filters/query-failed-exception.filter'
 import { RoleName } from 'src/graphql'
 import { NotificationService } from 'src/notification/notification.service'
@@ -195,6 +195,14 @@ export class StudentClassResolver {
     @Args('classId', ParseUUIDPipe) classId: string,
   ) {
     return this.usersService.dismissTeacherFromClass(teacherId, classId)
+  }
+
+  @Mutation('deleteStudentClass')
+  deleteStudentClass(
+    @Args('id', ParseUUIDPipe) id: string,
+    @Args('removeStudents', ParseBoolPipe) removeStudents,
+  ): boolean | Promise<boolean> {
+    return this.usersService.deleteStudentClass(id, removeStudents)
   }
 
   @ResolveField('students')
