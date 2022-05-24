@@ -29,6 +29,7 @@ export class Department implements IDepartment {
   @OneToMany(
     () => StudentClass,
     (studentClass: StudentClass) => studentClass.department,
+    { onDelete: 'CASCADE' },
   )
   classes?: StudentClass[]
 

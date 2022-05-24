@@ -287,7 +287,7 @@ export class DepartmentResolver {
   removeDepartment(
     @Args('id', ParseUUIDPipe)
     id: string,
-  ): Promise<Department> {
+  ): Promise<boolean> {
     return this.usersService.removeDepartment(id)
   }
 
