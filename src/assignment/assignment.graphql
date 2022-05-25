@@ -2,6 +2,7 @@ type AssignmentDefinition {
   id: ID!
   created_at: Date!
   updated_at: Date
+  name: String!
   submissionDeadline: Date!
   instructionsFile: CourseDocument!
   submissions: [AssignmentSubmission]
@@ -12,12 +13,14 @@ input CreateAssignmentDefinitionInput {
   submissionDeadline: Date!
   instructionsFileId: ID!
   courseId: ID!
+  name: String!
 }
 
 input UpdateAssignmentDefinitionInput {
   id: ID!
   submissionDeadline: Date
   instructionsFileId: ID
+  name: String!
 }
 
 type AssignmentSubmission {

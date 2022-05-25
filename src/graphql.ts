@@ -28,6 +28,35 @@ export enum RoleName {
     COURSE_TEACHER = "COURSE_TEACHER"
 }
 
+export interface CreateAssignmentDefinitionInput {
+    submissionDeadline: Date;
+    instructionsFileId: string;
+    courseId: string;
+    name: string;
+}
+
+export interface UpdateAssignmentDefinitionInput {
+    id: string;
+    submissionDeadline?: Nullable<Date>;
+    instructionsFileId?: Nullable<string>;
+    name: string;
+}
+
+export interface CreateAssignmentSubmissionInput {
+    submissionDate: Date;
+    submissionFileId: string;
+    definitionId: string;
+    studentId: string;
+    replaceFile?: Nullable<boolean>;
+}
+
+export interface UpdateAssignmentSubmissionInput {
+    id: string;
+    submissionDate?: Nullable<Date>;
+    submissionFileId?: Nullable<string>;
+    replaceFile?: Nullable<boolean>;
+}
+
 export interface CreateCourseInput {
     code: string;
     name: string;
@@ -95,7 +124,7 @@ export interface UpdateNotificationInput {
     status?: Nullable<NotificationStatus>;
 }
 
-export interface UuidArrayDto {
+export interface UUIDArrayDto {
     ids?: Nullable<Nullable<string>[]>;
 }
 
@@ -140,35 +169,93 @@ export interface CreateRoleInput {
     name: RoleName;
 }
 
-export interface CreateAssignmentDefinitionInput {
+export interface AssignmentDefinition {
+    id: string;
+    created_at: Date;
+    updated_at?: Nullable<Date>;
+    name: string;
     submissionDeadline: Date;
-    instructionsFileId: string;
-    courseId: string;
+    instructionsFile: CourseDocument;
+    submissions?: Nullable<Nullable<AssignmentSubmission>[]>;
+    course: Course;
 }
 
-export interface UpdateAssignmentDefinitionInput {
+export interface AssignmentSubmission {
     id: string;
-    submissionDeadline?: Nullable<Date>;
-    instructionsFileId?: Nullable<string>;
-}
-
-export interface CreateAssignmentSubmissionInput {
+    created_at: Date;
+    updated_at?: Nullable<Date>;
     submissionDate: Date;
-    submissionFileId: string;
-    definitionId: string;
-    studentId: string;
-    replaceFile?: Nullable<boolean>;
+    submissionFile: CourseDocument;
+    definition: AssignmentDefinition;
+    submittedBy: User;
 }
 
-export interface UpdateAssignmentSubmissionInput {
-    id: string;
-    submissionDate?: Nullable<Date>;
-    submissionFileId?: Nullable<string>;
-    replaceFile?: Nullable<boolean>;
+export interface IQuery {
+    assignmentDefinitions(courseId: string): Nullable<AssignmentDefinition>[] | Promise<Nullable<AssignmentDefinition>[]>;
+    assignmentDefinition(id: string): Nullable<AssignmentDefinition> | Promise<Nullable<AssignmentDefinition>>;
+    assignmentSubmissions(assignmentDefinitionId: string): Nullable<AssignmentSubmission>[] | Promise<Nullable<AssignmentSubmission>[]>;
+    assignmentSubmission(id: string): Nullable<AssignmentSubmission> | Promise<Nullable<AssignmentSubmission>>;
+    courses(): Nullable<Course>[] | Promise<Nullable<Course>[]>;
+    course(id: string): Nullable<Course> | Promise<Nullable<Course>>;
+    notifications(): Nullable<Notification>[] | Promise<Nullable<Notification>[]>;
+    notification(id: string): Nullable<Notification> | Promise<Nullable<Notification>>;
+    users(): Nullable<User>[] | Promise<Nullable<User>[]>;
+    getAllStudentsByClassId(classId: string): Nullable<Nullable<User>[]> | Promise<Nullable<Nullable<User>[]>>;
+    user(id: string): Nullable<User> | Promise<Nullable<User>>;
+    roles(): Nullable<Role>[] | Promise<Nullable<Role>[]>;
+    role(id: string): Nullable<Role> | Promise<Nullable<Role>>;
+    studentClasses(): Nullable<StudentClass>[] | Promise<Nullable<StudentClass>[]>;
+    studentClass(id: string): StudentClass | Promise<StudentClass>;
+    departments(): Nullable<Department>[] | Promise<Nullable<Department>[]>;
+    department(id: string): Department | Promise<Department>;
 }
 
-export interface UUIDArrayDto {
-    ids?: Nullable<Nullable<string>[]>;
+export interface IMutation {
+    createAssignmentDefinition(createAssignmentDefinitionInput: CreateAssignmentDefinitionInput): AssignmentDefinition | Promise<AssignmentDefinition>;
+    updateAssignmentDefinition(updateAssignmentDefinitionInput: UpdateAssignmentDefinitionInput): AssignmentDefinition | Promise<AssignmentDefinition>;
+    removeAssignmentDefinition(id: string): Nullable<boolean> | Promise<Nullable<boolean>>;
+    createAssignmentSubmission(createAssignmentSubmissionInput: CreateAssignmentSubmissionInput): AssignmentSubmission | Promise<AssignmentSubmission>;
+    updateAssignmentSubmission(updateAssignmentSubmissionInput: UpdateAssignmentSubmissionInput): AssignmentSubmission | Promise<AssignmentSubmission>;
+    removeAssignmentSubmission(id: string): boolean | Promise<boolean>;
+    createCourse(createCourseInput: CreateCourseInput): Course | Promise<Course>;
+    updateCourse(updateCourseInput: UpdateCourseInput): Course | Promise<Course>;
+    removeCourse(id: string): Nullable<Course> | Promise<Nullable<Course>>;
+    assignUserToCourse(courseId: string, userId: string): boolean | Promise<boolean>;
+    unassignUserFromCourse(courseId: string, userId: string): boolean | Promise<boolean>;
+    createChapter(createChapterInput?: Nullable<CreateChapterInput>): Chapter | Promise<Chapter>;
+    updateChapter(updateChapterInput?: Nullable<UpdateChapterInput>): Chapter | Promise<Chapter>;
+    removeChapter(id: string): Chapter | Promise<Chapter>;
+    createSubChapter(createSubChapterInput?: Nullable<CreateSubChapterInput>): SubChapter | Promise<SubChapter>;
+    updateSubChapter(updateSubChapterInput?: Nullable<UpdateSubChapterInput>): SubChapter | Promise<SubChapter>;
+    removeSubChapter(id: string): SubChapter | Promise<SubChapter>;
+    createCourseDocument(createCourseDocumentInput?: Nullable<CreateCourseDocumentInput>): CourseDocument | Promise<CourseDocument>;
+    updateCourseDocument(updateCourseDocumentInput?: Nullable<UpdateCourseDocumentInput>): CourseDocument | Promise<CourseDocument>;
+    removeCourseDocument(id: string): CourseDocument | Promise<CourseDocument>;
+    createNotification(createNotificationInput: CreateNotificationInput): Notification | Promise<Notification>;
+    updateNotification(updateNotificationInput: UpdateNotificationInput): Notification | Promise<Notification>;
+    removeNotification(id: string): Nullable<Notification> | Promise<Nullable<Notification>>;
+    authorizeTelegram(authorizeTelegramInput: AuthorizeTelegramInput): TelegramAccount | Promise<TelegramAccount>;
+    createUser(createUserInput: CreateUserInput): User | Promise<User>;
+    updateUser(updateUserInput: UpdateUserInput): User | Promise<User>;
+    removeUser(id: string): Nullable<User> | Promise<Nullable<User>>;
+    createRole(createRoleInput: CreateRoleInput): Role | Promise<Role>;
+    revokeUserRole(userId: string, roleName: RoleName): User | Promise<User>;
+    createStudentClass(createStudentClassInput: CreateStudentClassInput): StudentClass | Promise<StudentClass>;
+    updateStudentClass(updateStudentClassInput: UpdateStudentClassInput): StudentClass | Promise<StudentClass>;
+    removeStudentClass(id: string): StudentClass | Promise<StudentClass>;
+    admitStudentToClass(studentId: string, classId: string): boolean | Promise<boolean>;
+    admitStudentsToClass(studentIds: UUIDArrayDto, classId: string): boolean | Promise<boolean>;
+    assignTeacherToClass(teacherId: string, classId: string): boolean | Promise<boolean>;
+    promoteStudentFromClass(studentId: string, classId: string): boolean | Promise<boolean>;
+    promoteStudentsFromClass(studentIds: UUIDArrayDto, classId: string): boolean | Promise<boolean>;
+    dismissTeacherFromClass(teacherId: string, classId: string): boolean | Promise<boolean>;
+    createDepartment(name: string): Department | Promise<Department>;
+    updateDepartment(id: string, name?: Nullable<string>): Department | Promise<Department>;
+    removeDepartment(id: string): Nullable<Department> | Promise<Nullable<Department>>;
+    addClassToDepartment(departmentId: string, classId: string): boolean | Promise<boolean>;
+    removeClassFromDepartment(departmentId: string, classId: string): boolean | Promise<boolean>;
+    appointDepartmentAdministrator(departmentId: string, userId: string): boolean | Promise<boolean>;
+    dismissDepartmentAdministrator(departmentId: string, userId: string): boolean | Promise<boolean>;
 }
 
 export interface Course {
@@ -217,76 +304,6 @@ export interface CourseDocument {
     assignmentSubmission?: Nullable<AssignmentSubmission>;
 }
 
-export interface IQuery {
-    courses(): Nullable<Course>[] | Promise<Nullable<Course>[]>;
-    course(id: string): Nullable<Course> | Promise<Nullable<Course>>;
-    notifications(): Nullable<Notification>[] | Promise<Nullable<Notification>[]>;
-    notification(id: string): Nullable<Notification> | Promise<Nullable<Notification>>;
-    users(): Nullable<User>[] | Promise<Nullable<User>[]>;
-    user(id: string): Nullable<User> | Promise<Nullable<User>>;
-    roles(): Nullable<Role>[] | Promise<Nullable<Role>[]>;
-    role(id: string): Nullable<Role> | Promise<Nullable<Role>>;
-    studentClasses(): Nullable<StudentClass>[] | Promise<Nullable<StudentClass>[]>;
-    studentClass(id: string): StudentClass | Promise<StudentClass>;
-    assignmentDefinitions(courseId: string): Nullable<AssignmentDefinition>[] | Promise<Nullable<AssignmentDefinition>[]>;
-    assignmentDefinition(id: string): Nullable<AssignmentDefinition> | Promise<Nullable<AssignmentDefinition>>;
-    assignmentSubmissions(assignmentDefinitionId: string): Nullable<AssignmentSubmission>[] | Promise<Nullable<AssignmentSubmission>[]>;
-    assignmentSubmission(id: string): Nullable<AssignmentSubmission> | Promise<Nullable<AssignmentSubmission>>;
-    getAllStudentsByClassId(classId: string): Nullable<Nullable<User>[]> | Promise<Nullable<Nullable<User>[]>>;
-    getAllNewDepartmentAdministrators(): Nullable<Nullable<User>[]> | Promise<Nullable<Nullable<User>[]>>;
-    departments(): Nullable<Department>[] | Promise<Nullable<Department>[]>;
-    department(id: string): Department | Promise<Department>;
-}
-
-export interface IMutation {
-    createCourse(createCourseInput: CreateCourseInput): Course | Promise<Course>;
-    updateCourse(updateCourseInput: UpdateCourseInput): Course | Promise<Course>;
-    removeCourse(id: string): Nullable<Course> | Promise<Nullable<Course>>;
-    assignUserToCourse(courseId: string, userId: string): boolean | Promise<boolean>;
-    unassignUserFromCourse(courseId: string, userId: string): boolean | Promise<boolean>;
-    createChapter(createChapterInput?: Nullable<CreateChapterInput>): Chapter | Promise<Chapter>;
-    updateChapter(updateChapterInput?: Nullable<UpdateChapterInput>): Chapter | Promise<Chapter>;
-    removeChapter(id: string): Chapter | Promise<Chapter>;
-    createSubChapter(createSubChapterInput?: Nullable<CreateSubChapterInput>): SubChapter | Promise<SubChapter>;
-    updateSubChapter(updateSubChapterInput?: Nullable<UpdateSubChapterInput>): SubChapter | Promise<SubChapter>;
-    removeSubChapter(id: string): SubChapter | Promise<SubChapter>;
-    createCourseDocument(createCourseDocumentInput?: Nullable<CreateCourseDocumentInput>): CourseDocument | Promise<CourseDocument>;
-    updateCourseDocument(updateCourseDocumentInput?: Nullable<UpdateCourseDocumentInput>): CourseDocument | Promise<CourseDocument>;
-    removeCourseDocument(id: string): CourseDocument | Promise<CourseDocument>;
-    createNotification(createNotificationInput: CreateNotificationInput): Notification | Promise<Notification>;
-    updateNotification(updateNotificationInput: UpdateNotificationInput): Notification | Promise<Notification>;
-    removeNotification(id: string): Nullable<Notification> | Promise<Nullable<Notification>>;
-    authorizeTelegram(authorizeTelegramInput: AuthorizeTelegramInput): TelegramAccount | Promise<TelegramAccount>;
-    createUser(createUserInput: CreateUserInput): User | Promise<User>;
-    updateUser(updateUserInput: UpdateUserInput): User | Promise<User>;
-    removeUser(id: string): Nullable<User> | Promise<Nullable<User>>;
-    createRole(createRoleInput: CreateRoleInput): Role | Promise<Role>;
-    revokeUserRole(userId: string, roleName: RoleName): User | Promise<User>;
-    createStudentClass(createStudentClassInput: CreateStudentClassInput): StudentClass | Promise<StudentClass>;
-    updateStudentClass(updateStudentClassInput: UpdateStudentClassInput): StudentClass | Promise<StudentClass>;
-    removeStudentClass(id: string): StudentClass | Promise<StudentClass>;
-    admitStudentToClass(studentId: string, classId: string): boolean | Promise<boolean>;
-    admitStudentsToClass(studentIds: UuidArrayDto, classId: string): boolean | Promise<boolean>;
-    assignTeacherToClass(teacherId: string, classId: string): boolean | Promise<boolean>;
-    promoteStudentFromClass(studentId: string, classId: string): boolean | Promise<boolean>;
-    promoteStudentsFromClass(studentIds: UuidArrayDto, classId: string): boolean | Promise<boolean>;
-    dismissTeacherFromClass(teacherId: string, classId: string): boolean | Promise<boolean>;
-    createAssignmentDefinition(createAssignmentDefinitionInput: CreateAssignmentDefinitionInput): AssignmentDefinition | Promise<AssignmentDefinition>;
-    updateAssignmentDefinition(updateAssignmentDefinitionInput: UpdateAssignmentDefinitionInput): AssignmentDefinition | Promise<AssignmentDefinition>;
-    removeAssignmentDefinition(id: string): Nullable<boolean> | Promise<Nullable<boolean>>;
-    createAssignmentSubmission(createAssignmentSubmissionInput: CreateAssignmentSubmissionInput): AssignmentSubmission | Promise<AssignmentSubmission>;
-    updateAssignmentSubmission(updateAssignmentSubmissionInput: UpdateAssignmentSubmissionInput): AssignmentSubmission | Promise<AssignmentSubmission>;
-    removeAssignmentSubmission(id: string): boolean | Promise<boolean>;
-    deleteStudentClass(id: string, removeStudents?: Nullable<boolean>): boolean | Promise<boolean>;
-    createDepartment(name: string): Department | Promise<Department>;
-    updateDepartment(id: string, name?: Nullable<string>): Department | Promise<Department>;
-    removeDepartment(id: string): Nullable<boolean> | Promise<Nullable<boolean>>;
-    addClassToDepartment(departmentId: string, classId: string): boolean | Promise<boolean>;
-    removeClassFromDepartment(departmentId: string, classId: string): boolean | Promise<boolean>;
-    appointDepartmentAdministrator(departmentId: string, userId: string): boolean | Promise<boolean>;
-    dismissDepartmentAdministrator(departmentId: string, userId: string): boolean | Promise<boolean>;
-}
-
 export interface Notification {
     id: string;
     created_at: Date;
@@ -305,6 +322,7 @@ export interface TelegramAccount {
     id: string;
     first_name: string;
     user: User;
+    chat_id?: Nullable<string>;
 }
 
 export interface User {
@@ -336,34 +354,6 @@ export interface StudentClass {
     department?: Nullable<Department>;
 }
 
-export interface Role {
-    id: string;
-    created_at: Date;
-    updated_at?: Nullable<Date>;
-    name: RoleName;
-    members: Nullable<User>[];
-}
-
-export interface AssignmentDefinition {
-    id: string;
-    created_at: Date;
-    updated_at?: Nullable<Date>;
-    submissionDeadline: Date;
-    instructionsFile: CourseDocument;
-    submissions?: Nullable<Nullable<AssignmentSubmission>[]>;
-    course: Course;
-}
-
-export interface AssignmentSubmission {
-    id: string;
-    created_at: Date;
-    updated_at?: Nullable<Date>;
-    submissionDate: Date;
-    submissionFile: CourseDocument;
-    definition: AssignmentDefinition;
-    submittedBy: User;
-}
-
 export interface Department {
     id: string;
     created_at: Date;
@@ -371,6 +361,14 @@ export interface Department {
     name: string;
     classes?: Nullable<Nullable<StudentClass>[]>;
     departmentAdministrator?: Nullable<User>;
+}
+
+export interface Role {
+    id: string;
+    created_at: Date;
+    updated_at?: Nullable<Date>;
+    name: RoleName;
+    members: Nullable<User>[];
 }
 
 export type Upload = any;

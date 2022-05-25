@@ -28,6 +28,9 @@ export class AssignmentDefinition implements IAssignmentDefinition {
   @Column({ type: 'timestamp', nullable: true })
   submissionDeadline: Date
 
+  @Column()
+  name: string
+
   @OneToOne(
     () => CourseDocument,
     (courseDocument: CourseDocument) => courseDocument.assignmentDefinition,

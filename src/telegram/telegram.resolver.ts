@@ -37,7 +37,10 @@ export class TelegramResolver {
           }),
       )
       newAccount.user = await this.usersService.findOneUserById(input.userId)
-      const finalAccount = await this.telegramService.createAccount(newAccount)
+      const finalAccount = await this.telegramService.createAccount(
+        newAccount,
+        input.chatId,
+      )
       await new Promise((resolve, reject) => {
         this.telegramService
           .sendMessage({
