@@ -54,6 +54,12 @@ docker run -d --name ngrok -p 4040:4040 -e NGROK_AUTHTOKEN=<NGROK_TOKEN> ngrok/n
 
 ## Running the app
 
+### **[MANDATORY-STEP]** First generate the `ts-schema` via
+```
+$ npm run schema-gen
+```
+### Run the app in the desired mode
+
 ```bash
 # development
 $ npm run start
