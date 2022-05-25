@@ -39,4 +39,4 @@ lerna-debug.log*
 .env.production
 
 # Auto-generated graphql schema as typescript interfaces
-graphql.ts
+src/graphql.ts
