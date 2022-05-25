@@ -92,6 +92,14 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     return this.findOne({ id }, withUser)
   }
 
+  findOneByUserId(userId: string) {
+    return this.findOne({
+      user: {
+        id: userId,
+      },
+    })
+  }
+
   private findOne(user: FindConditions<TelegramAccount>, withUser = false) {
     return this.telegramAccountRepo.findOne(user, {
       relations: withUser ? ['user'] : undefined,
@@ -147,7 +155,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
           return response.data.result
         }),
         catchError(error => {
-          if (error?.isAxiosError) {
+          if (error?.isAxiosError && error?.response) {
             const axiosError = error as AxiosError<Telegram.Response>
             const { data } = axiosError.response
             return throwError(

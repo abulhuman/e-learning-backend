@@ -1,10 +1,13 @@
 import { MailerService } from '@nestjs-modules/mailer'
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { AssignmentDefinition } from 'src/assignment/entities/assignment-definition.entity'
 import { CourseAdditionNotification } from 'src/notification/dto/course-addition-notification.dto'
+import { User } from 'src/users/entities/user.entity'
 
 @Injectable()
 export class MailService {
+  private logger = new Logger(MailService.name)
   constructor(
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
@@ -26,15 +29,41 @@ export class MailService {
 
   async sendCourseAdditionEmail(newNotification: CourseAdditionNotification) {
     const { course, recipient, created_at } = newNotification
-    return this.mailerService.sendMail({
-      to: recipient.email,
-      subject: `Added to course ${course.name}`,
-      template: '/course-addition',
-      context: {
-        course,
-        name: recipient.firstName + recipient.lastName,
-        at: created_at.toDateString(),
-      },
-    })
+    try {
+      await this.mailerService.sendMail({
+        to: recipient.email,
+        subject: `Added to course ${course.name}`,
+        template: '/course-addition',
+        context: {
+          course,
+          name: recipient.firstName + recipient.lastName,
+          at: created_at.toDateString(),
+        },
+      })
+    } catch (error) {
+      this.logger.error(error)
+    }
+  }
+
+  async sendAssignmentDeadlineReminder(
+    user: User,
+    assignment: AssignmentDefinition,
+    deadlineText: string,
+  ) {
+    try {
+      await this.mailerService.sendMail({
+        to: user.email,
+        subject: `Assignment Reminder for ${assignment.name}`,
+        template: '/assignment-reminder',
+        context: {
+          name: user.firstName,
+          assignmentName: assignment.name,
+          courseName: assignment.course.name,
+          deadlineText,
+        },
+      })
+    } catch (error) {
+      this.logger.error(error)
+    }
   }
 }

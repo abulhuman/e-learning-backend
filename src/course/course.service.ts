@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
+import { TelegramAccount } from 'src/telegram/entities/telegram-account.entity'
 import { UsersService } from 'src/users/users.service'
 import { Repository } from 'typeorm'
 import { CreateChapterInput } from './dto/create-chapter.input'
@@ -87,6 +88,20 @@ export class CourseService {
       .leftJoin('course.users', 'user')
       .where('user.id = :id', { id: userId })
       .getMany()
+  }
+
+  findUsersWithAccounts(courseId: string) {
+    return this.courseRepository
+      .createQueryBuilder('course')
+      .leftJoinAndSelect('course.users', 'user')
+      .where('course.id = :id', { id: courseId })
+      .innerJoinAndSelect(
+        TelegramAccount,
+        'account',
+        'account.userId = user.id',
+      )
+      .getOne()
+      .then(course => course.users)
   }
 
   findAllChapters() {
