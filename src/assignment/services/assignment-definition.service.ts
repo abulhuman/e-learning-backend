@@ -1,22 +1,17 @@
-import {
-  forwardRef,
-  Inject,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common'
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { SchedulerRegistry } from '@nestjs/schedule'
 import { InjectRepository } from '@nestjs/typeorm'
+import { CronJob } from 'cron'
+import * as moment from 'moment'
 import { CourseService } from 'src/course/course.service'
+import { MailService } from 'src/mail/mail.service'
+import { FormattingOption } from 'src/telegram/telegram.constants'
+import { TelegramService } from 'src/telegram/telegram.service'
+import { User } from 'src/users/entities/user.entity'
 import { Repository } from 'typeorm'
 import { CreateAssignmentDefinitionInput } from '../dto/create-assignment-definition.input'
 import { UpdateAssignmentDefinitionInput } from '../dto/update-assignment-definition.input'
 import { AssignmentDefinition } from '../entities/assignment-definition.entity'
-import { SchedulerRegistry } from '@nestjs/schedule'
-import { CronJob } from 'cron'
-import * as moment from 'moment'
-import { TelegramService } from 'src/telegram/telegram.service'
-import { MailService } from 'src/mail/mail.service'
-import { FormattingOption } from 'src/telegram/telegram.constants'
 
 @Injectable()
 export class AssignmentDefinitionService {
@@ -50,30 +45,44 @@ export class AssignmentDefinitionService {
     const assignment = await this.assignmentDefinitionRepository.save(
       newAssignmentDefinition,
     )
-    await this.scheduleNotification(assignment)
+    const usersWithTelegram = await this.courseService.findUsersWithAccounts(
+      assignment.course.id,
+    )
+    const allUsers = await this.courseService.findUsersInCourse(
+      assignment.course.id,
+    )
+    await this.scheduleDeadlineNotification(
+      assignment,
+      usersWithTelegram,
+      allUsers,
+    )
+    await this.sendCreationNotification(assignment, usersWithTelegram, allUsers)
     return assignment
   }
 
-  async scheduleNotification(assignment: AssignmentDefinition) {
+  async scheduleDeadlineNotification(
+    assignment: AssignmentDefinition,
+    telegramUsers: User[],
+    allUsers: User[],
+  ) {
     const deadline = moment(assignment.submissionDeadline)
     const notificationTime = deadline.clone().subtract(1, 'day')
     const diffFromNow = notificationTime.diff(moment())
     // if notification time is ahead of current time, schedule notification
     if (diffFromNow) {
-      const users = await this.courseService.findUsersWithAccounts(
-        assignment.course.id,
-      )
       const notificationTimeString = notificationTime
         .format('s m H D MMM')
         .concat(' *')
       const job = new CronJob(notificationTimeString, () => {
         const humanTime = deadline.calendar(moment())
-        users.forEach(user => {
+        allUsers.forEach(user => {
           this.mailService.sendAssignmentDeadlineReminder(
             user,
             assignment,
             humanTime,
           )
+        })
+        telegramUsers.forEach(user => {
           this.telegramService.findOneByUserId(user.id).then(account => {
             this.telegramService
               .sendMessage({
@@ -92,6 +101,33 @@ export class AssignmentDefinitionService {
       this.scheduler.addCronJob(assignment.id, job)
       job.start()
     }
+  }
+
+  async sendCreationNotification(
+    assignment: AssignmentDefinition,
+    telegramUsers: User[],
+    allUsers: User[],
+  ) {
+    allUsers.forEach(user => {
+      this.mailService.sendAssignmentCreationEmail(user, assignment)
+    })
+    telegramUsers.forEach(user => {
+      this.telegramService.findOneByUserId(user.id).then(account => {
+        this.telegramService
+          .sendMessage({
+            text: `<b>❗New Assignment</b> <b>${
+              assignment.name
+            }</b>\nDue on ${moment(assignment.submissionDeadline).calendar(
+              moment(),
+            )}.`,
+            chat_id: account.id,
+            parse_mode: FormattingOption.HTML,
+          })
+          .subscribe({
+            error: error => this.logger.error(error),
+          })
+      })
+    })
   }
 
   findAllAssignmentDefinitions(courseId: string) {

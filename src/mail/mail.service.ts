@@ -1,6 +1,7 @@
 import { MailerService } from '@nestjs-modules/mailer'
 import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import * as moment from 'moment'
 import { AssignmentDefinition } from 'src/assignment/entities/assignment-definition.entity'
 import { CourseAdditionNotification } from 'src/notification/dto/course-addition-notification.dto'
 import { User } from 'src/users/entities/user.entity'
@@ -45,6 +46,26 @@ export class MailService {
     }
   }
 
+  async sendAssignmentCreationEmail(
+    user: User,
+    assignment: AssignmentDefinition,
+  ) {
+    try {
+      this.mailerService.sendMail({
+        to: user.email,
+        subject: `New assignment on ${assignment.course.name}`,
+        template: '/new-assignment',
+        context: {
+          name: user.firstName,
+          courseName: assignment.course.name,
+          assignmentName: assignment.name,
+          deadline: moment(assignment.submissionDeadline).calendar(moment()),
+        },
+      })
+    } catch (error) {
+      this.logger.error(error)
+    }
+  }
   async sendAssignmentDeadlineReminder(
     user: User,
     assignment: AssignmentDefinition,

@@ -90,6 +90,15 @@ export class CourseService {
       .getMany()
   }
 
+  findUsersInCourse(courseId: string) {
+    return this.courseRepository
+      .createQueryBuilder('course')
+      .leftJoinAndSelect('course.users', 'user')
+      .where('course.id = :id', { id: courseId })
+      .getOne()
+      .then(course => course.users)
+  }
+
   findUsersWithAccounts(courseId: string) {
     return this.courseRepository
       .createQueryBuilder('course')
