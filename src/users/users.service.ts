@@ -54,7 +54,7 @@ export class UsersService {
 
   async findAllUsers() {
     return this.userRepository.find({
-      relations: ['roles', 'notifications', 'attendingClass'],
+      relations: ['roles', 'notifications', 'attendingClass', 'department'],
     })
   }
 

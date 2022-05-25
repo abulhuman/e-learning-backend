@@ -233,6 +233,7 @@ export interface IQuery {
     assignmentSubmissions(assignmentDefinitionId: string): Nullable<AssignmentSubmission>[] | Promise<Nullable<AssignmentSubmission>[]>;
     assignmentSubmission(id: string): Nullable<AssignmentSubmission> | Promise<Nullable<AssignmentSubmission>>;
     getAllStudentsByClassId(classId: string): Nullable<Nullable<User>[]> | Promise<Nullable<Nullable<User>[]>>;
+    getAllNewDepartmentAdministrators(): Nullable<Nullable<User>[]> | Promise<Nullable<Nullable<User>[]>>;
     departments(): Nullable<Department>[] | Promise<Nullable<Department>[]>;
     department(id: string): Department | Promise<Department>;
 }

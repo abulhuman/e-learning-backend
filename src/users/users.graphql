@@ -70,6 +70,7 @@ type Department {
 type Query {
   users: [User]!
   getAllStudentsByClassId(classId: ID!): [User]
+  getAllNewDepartmentAdministrators: [User]
   user(id: ID!): User
   roles: [Role]!
   role(id: ID!): Role

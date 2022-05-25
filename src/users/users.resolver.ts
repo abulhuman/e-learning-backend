@@ -47,9 +47,29 @@ export class UserResolver {
     return this.usersService.findAllStudentsByClassId(classId)
   }
 
+  @Query('getAllNewDepartmentAdministrators')
+  async getAllNewDepartmentAdministrators() {
+    const allUsers = await this.usersService.findAllUsers()
+    const allDepartmentAdministrators = allUsers.map(user => {
+      const userRoles = user.roles.map(role => role.name)
+      if (userRoles.includes(RoleName.DEPARTMENT_ADMINSTRATOR)) return user
+    })
+    const allNewDepartmentAdministrators = allDepartmentAdministrators
+      .filter(user => !user?.department)
+      .filter(admin => !!admin)
+    return allNewDepartmentAdministrators
+  }
+
   @Query('user')
   findOneUser(@Args('id') id: string) {
-    return this.usersService.findOneUserById(id)
+    return this.usersService.findOneUserById(
+      id,
+      true,
+      false,
+      false,
+      false,
+      true,
+    )
   }
 
   @Mutation('updateUser')
