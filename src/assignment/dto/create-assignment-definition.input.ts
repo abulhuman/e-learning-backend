@@ -15,4 +15,7 @@ export class CreateAssignmentDefinitionInput
   @IsNotEmpty()
   @IsUUID()
   courseId: string
+
+  @IsNotEmpty()
+  name: string
 }
