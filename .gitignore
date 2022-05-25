@@ -37,3 +37,6 @@ lerna-debug.log*
 # Environment variables
 .env
 .env.production
+
+# Auto-generated graphql schema as typescript interfaces
+graphql.ts
