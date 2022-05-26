@@ -29,6 +29,7 @@ import * as Telegram from './dtos'
 import {
   AnswerCallbackParams,
   ChatMember,
+  EditMessageParams,
   GetChatMemberParams,
   GetUpdatesParams,
   Message,
@@ -104,6 +105,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     return this.telegramAccountRepo.findOne(user, {
       relations: withUser ? ['user'] : undefined,
     })
+  }
+
+  editMessageText(params: EditMessageParams) {
+    return this.telegramApiCall<Message>(this.editMessageText.name, params)
   }
 
   createAccount(account: TelegramAccount, chat_id: string) {

@@ -117,6 +117,15 @@ export class CourseService {
     return this.chapterRepository.find({ relations: ['course', 'subChapters'] })
   }
 
+  findChaptersForCourse(courseId: string) {
+    return this.chapterRepository
+      .createQueryBuilder('chapter')
+      .leftJoin('chapter.course', 'course')
+      .leftJoinAndSelect('chapter.subChapters', 'subChapter')
+      .where('course.id = :id', { id: courseId })
+      .getMany()
+  }
+
   findAllSubChapters() {
     return this.subChapterRepository.find({ relations: ['chapter'] })
   }
