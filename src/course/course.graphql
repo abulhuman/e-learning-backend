@@ -22,7 +22,7 @@ input CreateCourseInput {
 }
 
 input UpdateCourseInput {
-  id: String!
+  id: ID!
   code: String
   name: String
   description: String
@@ -47,7 +47,7 @@ input CreateChapterInput {
 }
 
 input UpdateChapterInput {
-  id: String!
+  id: ID!
   title: String
   sequenceNumber: Int
 }
@@ -68,7 +68,7 @@ input CreateSubChapterInput {
 }
 
 input UpdateSubChapterInput {
-  id: String!
+  id: ID!
   title: String
   sequenceNumber: Int
 }
@@ -93,7 +93,7 @@ input CreateCourseDocumentInput {
 }
 
 input UpdateCourseDocumentInput {
-  id: String!
+  id: ID!
   documentType: String
   documentDisplayName: String
   fileUpload: Upload
