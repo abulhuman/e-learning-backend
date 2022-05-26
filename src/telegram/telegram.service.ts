@@ -32,7 +32,7 @@ import {
   EditMessageParams,
   GetChatMemberParams,
   GetUpdatesParams,
-  Message,
+  TextMessage,
   SendDocumentParams,
   SendMessageParams,
   SetMenuButtonParams,
@@ -108,7 +108,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   editMessageText(params: EditMessageParams) {
-    return this.telegramApiCall<Message>(this.editMessageText.name, params)
+    return this.telegramApiCall<TextMessage>(this.editMessageText.name, params)
   }
 
   createAccount(account: TelegramAccount, chat_id: string) {
@@ -121,11 +121,11 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   sendMessage(params: SendMessageParams) {
-    return this.telegramApiCall<Message>(this.sendMessage.name, params)
+    return this.telegramApiCall<TextMessage>(this.sendMessage.name, params)
   }
 
   sendDocument(params: SendDocumentParams) {
-    return this.telegramApiCall<Message>(this.sendDocument.name, params)
+    return this.telegramApiCall<TextMessage>(this.sendDocument.name, params)
   }
 
   setMyCommands(params: SetMyCommandsParams) {

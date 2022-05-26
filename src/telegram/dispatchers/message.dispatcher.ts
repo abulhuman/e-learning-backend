@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { MessageEntity, MessageUpdate } from '../dtos'
+import { Message, MessageEntity, MessageUpdate, TextMessage } from '../dtos'
 import { LogoutCommandHander } from '../handlers/command/logout.command.handler'
 import { MyCoursesCommandHandler } from '../handlers/command/myCourses.command.handler'
 import { StartCommandHandler } from '../handlers/command/start.command.handler'
@@ -15,7 +15,7 @@ export class MessageDispatcher implements Dispatcher {
     private unknownCommandHandler: UnknownCommandHandler,
     private logoutCommandHandler: LogoutCommandHander,
   ) {}
-  dispatch(update: MessageUpdate) {
+  dispatch(update: MessageUpdate<TextMessage>) {
     const { message } = update
     let commandEntity: MessageEntity
     if (

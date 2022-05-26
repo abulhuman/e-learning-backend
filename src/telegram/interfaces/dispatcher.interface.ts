@@ -1,3 +1,5 @@
+import { Update } from '../dtos'
+
 export interface Dispatcher {
-  dispatch(jobs: any[] | any)
+  dispatch(jobs: Update[] | Update)
 }
