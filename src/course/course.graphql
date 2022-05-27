@@ -118,7 +118,7 @@ type Mutation {
 
   createSubChapter(createSubChapterInput: CreateSubChapterInput): SubChapter!
   updateSubChapter(updateSubChapterInput: UpdateSubChapterInput): SubChapter!
-  removeSubChapter(id: ID!): SubChapter!
+  removeSubChapter(id: ID!): Boolean!
 
   createCourseDocument(
     createCourseDocumentInput: CreateCourseDocumentInput
