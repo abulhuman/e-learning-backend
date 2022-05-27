@@ -63,3 +63,7 @@ export interface EditMessageParams {
   parse_mode?: FormattingOption
   reply_markup?: InlineKeybardMarkup
 }
+
+export interface GetFileParams {
+  file_path: string
+}

@@ -2,7 +2,7 @@ import { BadRequestException } from '@nestjs/common'
 import { extname } from 'node:path'
 
 export const editFileName = (fileName: string) => {
-  const name = fileName.split('.')[0]
+  const name = fileName.split('.').slice(0, -1).join('')
   const fileExtName = extname(fileName)
   const randomName = Array(4)
     .fill(null)

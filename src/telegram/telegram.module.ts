@@ -3,6 +3,7 @@ import { forwardRef, Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { AppModule } from 'src/app.module'
+import { AssignmentDefinition } from 'src/assignment/entities/assignment-definition.entity'
 import { CourseModule } from 'src/course/course.module'
 import { UsersModule } from 'src/users/users.module'
 import { dispatchers } from './dispatchers'
@@ -14,7 +15,7 @@ import { TelegramService } from './telegram.service'
 @Module({
   providers: [TelegramService, TelegramResolver, ...dispatchers, ...handlers],
   imports: [
-    TypeOrmModule.forFeature([TelegramAccount]),
+    TypeOrmModule.forFeature([TelegramAccount, AssignmentDefinition]),
     forwardRef(() => AppModule),
     HttpModule,
     ConfigModule,

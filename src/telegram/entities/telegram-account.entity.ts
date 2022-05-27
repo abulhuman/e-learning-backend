@@ -1,6 +1,7 @@
-import { User } from 'src/users/entities/user.entity'
+import { AssignmentDefinition } from 'src/assignment/entities/assignment-definition.entity'
 import { TelegramAccount as ITelegramAccount } from 'src/graphql'
-import { Entity, JoinColumn, OneToOne, PrimaryColumn, Column } from 'typeorm'
+import { User } from 'src/users/entities/user.entity'
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm'
 
 @Entity()
 export class TelegramAccount implements ITelegramAccount {
@@ -16,4 +17,8 @@ export class TelegramAccount implements ITelegramAccount {
 
   @Column({ nullable: true })
   chat_id?: string
+
+  @OneToOne(() => AssignmentDefinition, { nullable: true, eager: true })
+  @JoinColumn()
+  pendingSubmission?: AssignmentDefinition
 }
