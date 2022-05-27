@@ -126,5 +126,5 @@ type Mutation {
   updateCourseDocument(
     updateCourseDocumentInput: UpdateCourseDocumentInput
   ): CourseDocument!
-  removeCourseDocument(id: ID!): CourseDocument!
+  removeCourseDocument(id: ID!): Boolean!
 }
