@@ -107,7 +107,7 @@ type Query {
 type Mutation {
   createCourse(createCourseInput: CreateCourseInput!): Course!
   updateCourse(updateCourseInput: UpdateCourseInput!): Course!
-  removeCourse(id: ID!): Course
+  removeCourse(id: ID!): Boolean!
 
   assignUserToCourse(courseId: ID!, userId: ID!): Boolean!
   unassignUserFromCourse(courseId: ID!, userId: ID!): Boolean!

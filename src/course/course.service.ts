@@ -199,7 +199,15 @@ export class CourseService {
 
   async removeCourse(id: string) {
     const courseToDelete = await this.findOneCourse(id)
-    return this.courseRepository.remove(courseToDelete)
+    return (
+      this.courseRepository
+        .remove(courseToDelete)
+        .then(res => {
+          return !!res
+        })
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .catch(_err => false)
+    )
   }
 
   async removeChapter(id: string) {
