@@ -225,7 +225,15 @@ export class CourseService {
 
   async removeSubChapter(id: string) {
     const subChapterToDelete = await this.findOneSubChapter(id)
-    return this.subChapterRepository.remove(subChapterToDelete)
+    return (
+      this.subChapterRepository
+        .remove(subChapterToDelete)
+        .then(res => {
+          return !!res
+        })
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .catch(_err => false)
+    )
   }
 
   async removeCourseDocument(id: string) {
