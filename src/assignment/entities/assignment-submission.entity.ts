@@ -40,6 +40,9 @@ export class AssignmentSubmission implements IAssignmentSubmission {
     () => AssignmentDefinition,
     (assignmentDefinition: AssignmentDefinition) =>
       assignmentDefinition.submissions,
+    {
+      onDelete: 'CASCADE',
+    },
   )
   definition: AssignmentDefinition
 

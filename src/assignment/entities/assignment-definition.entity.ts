@@ -38,7 +38,9 @@ export class AssignmentDefinition implements IAssignmentDefinition {
   @JoinColumn()
   instructionsFile: CourseDocument
 
-  @ManyToOne(() => Course, (course: Course) => course.assignmentDefinitions)
+  @ManyToOne(() => Course, (course: Course) => course.assignmentDefinitions, {
+    onDelete: 'CASCADE',
+  })
   course: Course
 
   @OneToMany(
