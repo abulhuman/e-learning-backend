@@ -46,6 +46,8 @@ export class AssignmentSubmission implements IAssignmentSubmission {
   )
   definition: AssignmentDefinition
 
-  @ManyToOne(() => User, (user: User) => user.assignmentSubmissions)
+  @ManyToOne(() => User, (user: User) => user.assignmentSubmissions, {
+    onDelete: 'SET NULL',
+  })
   submittedBy: User
 }

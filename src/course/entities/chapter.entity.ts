@@ -33,7 +33,9 @@ export class Chapter implements IChapter {
   @Column({ nullable: true })
   courseId: string
 
-  @ManyToOne(() => Course, (course: Course) => course.chapters)
+  @ManyToOne(() => Course, (course: Course) => course.chapters, {
+    onDelete: 'CASCADE',
+  })
   course: Course
 
   @OneToMany(() => SubChapter, (subChapter: SubChapter) => subChapter.chapter)

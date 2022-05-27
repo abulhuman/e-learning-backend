@@ -52,6 +52,7 @@ export class User implements IUser {
   @ManyToOne(
     () => StudentClass,
     (studentClass: StudentClass) => studentClass.students,
+    { onDelete: 'SET NULL' },
   )
   attendingClass: StudentClass
 
@@ -77,6 +78,7 @@ export class User implements IUser {
     () => AssignmentSubmission,
     (assignmentSubmission: AssignmentSubmission) =>
       assignmentSubmission.submittedBy,
+    { onDelete: 'CASCADE' },
   )
   assignmentSubmissions?: AssignmentSubmission[]
 }

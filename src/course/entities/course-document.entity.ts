@@ -37,7 +37,9 @@ export class CourseDocument implements ICourseDocument {
   @Column({ nullable: true })
   courseId: string
 
-  @ManyToOne(() => Course, (course: Course) => course.courseDocuments)
+  @ManyToOne(() => Course, (course: Course) => course.courseDocuments, {
+    onDelete: 'CASCADE',
+  })
   course: Course
 
   @OneToOne(
