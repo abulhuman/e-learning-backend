@@ -13,6 +13,8 @@ import { existsSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 
 async function bootstrap() {
+  const uploadPath = join(__dirname, '/upload')
+  existsSync(uploadPath) || mkdirSync(uploadPath)
   const app = await NestFactory.create(AppModule)
   const configService = app.select(ConfigModule).get(ConfigService)
   const sessionRepository = getRepository(Session)
@@ -56,8 +58,6 @@ async function bootstrap() {
   app.use(passport.initialize())
   app.use(passport.session())
   app.use(graphqlUploadExpress())
-  const uploadPath = join(__dirname, '../upload')
-  existsSync(uploadPath) || mkdirSync(uploadPath)
   await app.listen(configService.get('PORT') || 5050)
 }
 bootstrap()
