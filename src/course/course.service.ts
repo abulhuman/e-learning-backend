@@ -238,7 +238,15 @@ export class CourseService {
 
   async removeCourseDocument(id: string) {
     const courseDocumentToDelete = await this.findOneCourseDocument(id)
-    return this.courseDocumentRepository.remove(courseDocumentToDelete)
+    return (
+      this.courseDocumentRepository
+        .remove(courseDocumentToDelete)
+        .then(res => {
+          return !!res
+        })
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .catch(_err => false)
+    )
   }
 
   async assignUserToCourse(courseId: any, userId: any) {
