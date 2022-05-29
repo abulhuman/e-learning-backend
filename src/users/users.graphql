@@ -8,9 +8,11 @@ type User {
   email: String!
   password: String!
   attendingClass: StudentClass
-  learningClasses: [StudentClass]
+  teachingClasses: [StudentClass]
   roles: [Role]!
   courses: [Course]
+  teachingCourses: [Course]
+  attendingCourses: [Course]
   notifications: [Notification]
   department: Department
   assignmentSubmissions: [AssignmentSubmission]
@@ -49,6 +51,7 @@ type StudentClass {
   section: String!
   teachers: [User]
   students: [User]
+  attendingCourses: [Course]
   department: Department
 }
 
@@ -73,8 +76,12 @@ type Department {
   departmentAdministrator: User
 }
 
+input UserFilter {
+  roleName: RoleName
+}
+
 type Query {
-  users: [User]!
+  users(filter: UserFilter): [User]!
   getAllStudentsByClassId(classId: ID!): [User]
   getAllNewDepartmentAdministrators: [User]
   user(id: ID!): User

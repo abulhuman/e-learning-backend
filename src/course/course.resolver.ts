@@ -91,6 +91,75 @@ export class CourseResolver {
     return false
   }
 
+  @Mutation('assignStudentToCourse')
+  async assignStudentToCourse(
+    @Args('courseId', ParseUUIDPipe) courseId: string,
+    @Args('studentId', ParseUUIDPipe) studentId: string,
+  ) {
+    try {
+      this.courseService.assignStudentToCourse(courseId, studentId)
+    } catch (error) {
+      return false
+    }
+    // todo send notification
+    // if (updatedCourse.users.some(user => user.id === userId)) {
+    //   const notification = await this.notificationService.create({
+    //     data: JSON.stringify(updatedCourse),
+    //     recipientId: userId,
+    //     type: NotificationType.COURSE_ADDITION,
+    //   })
+    //   await this.notificationService.dispatch(notification)
+    //   return true
+    // }
+    return true
+  }
+
+  @Mutation('assignTeacherToCourse')
+  async assignTeacherToCourse(
+    @Args('courseId', ParseUUIDPipe) courseId: string,
+    @Args('teacherId', ParseUUIDPipe) teacherId: string,
+  ) {
+    try {
+      this.courseService.assignTeacherToCourse(courseId, teacherId)
+    } catch (error) {
+      return false
+    }
+    // todo send notification
+    // if (updatedCourse.users.some(user => user.id === userId)) {
+    //   const notification = await this.notificationService.create({
+    //     data: JSON.stringify(updatedCourse),
+    //     recipientId: userId,
+    //     type: NotificationType.COURSE_ADDITION,
+    //   })
+    //   await this.notificationService.dispatch(notification)
+    //   return true
+    // }
+    return true
+  }
+
+  @Mutation('assignClassToCourse')
+  async assignClassToCourse(
+    @Args('courseId', ParseUUIDPipe) courseId: string,
+    @Args('classId', ParseUUIDPipe) classId: string,
+  ) {
+    try {
+      this.courseService.assignClassToCourse(courseId, classId)
+    } catch (error) {
+      return false
+    }
+    // todo send notification
+    // if (updatedCourse.users.some(user => user.id === userId)) {
+    //   const notification = await this.notificationService.create({
+    //     data: JSON.stringify(updatedCourse),
+    //     recipientId: userId,
+    //     type: NotificationType.COURSE_ADDITION,
+    //   })
+    //   await this.notificationService.dispatch(notification)
+    //   return true
+    // }
+    return true
+  }
+
   @Mutation('unassignUserFromCourse')
   unassignUserFromCourse(
     @Args('courseId', ParseUUIDPipe) courseId: string,
@@ -179,5 +248,20 @@ export class CourseResolver {
   @Mutation('removeCourseDocument')
   removeCourseDocument(@Args('id', ParseUUIDPipe) id: string) {
     return this.courseService.removeCourseDocument(id)
+  }
+
+  @ResolveField('teachers')
+  async teachers(@Parent() course: Course) {
+    return (await this.courseService.findOneCourse(course.id)).teachers
+  }
+
+  @ResolveField('students')
+  async students(@Parent() course: Course) {
+    return (await this.courseService.findOneCourse(course.id)).students
+  }
+
+  @ResolveField('takingClasses')
+  async takingClasses(@Parent() course: Course) {
+    return (await this.courseService.findOneCourse(course.id)).takingClasses
   }
 }
