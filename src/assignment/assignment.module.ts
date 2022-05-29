@@ -8,6 +8,7 @@ import { Course } from 'src/course/entities/course.entity'
 import { SubChapter } from 'src/course/entities/sub-chapter.entity'
 import { MailModule } from 'src/mail/mail.module'
 import { TelegramModule } from 'src/telegram/telegram.module'
+import { StudentClass } from 'src/users/entities/student-class.entity'
 import { User } from 'src/users/entities/user.entity'
 import { UsersModule } from 'src/users/users.module'
 import {
@@ -37,6 +38,7 @@ import { AssignmentSubmission } from './entities/assignment-submission.entity'
       SubChapter,
       CourseDocument,
       User,
+      StudentClass,
     ]),
     forwardRef(() => TelegramModule),
     MailModule,

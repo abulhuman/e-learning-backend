@@ -53,6 +53,12 @@ export class User implements IUser {
   @ManyToMany(() => Course, (course: Course) => course.users)
   courses?: Course[]
 
+  @ManyToMany(() => Course, (course: Course) => course.teachers)
+  teachingCourses?: Course[]
+
+  @ManyToMany(() => Course, (course: Course) => course.students)
+  attendingCourses?: Course[]
+
   @ManyToOne(
     () => StudentClass,
     (studentClass: StudentClass) => studentClass.students,
@@ -64,7 +70,7 @@ export class User implements IUser {
     () => StudentClass,
     (studentClass: StudentClass) => studentClass.teachers,
   )
-  learningClasses?: StudentClass[]
+  teachingClasses?: StudentClass[]
 
   @OneToMany(
     () => Notification,

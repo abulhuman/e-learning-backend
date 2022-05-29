@@ -9,11 +9,20 @@ import { CourseDocument } from './entities/course-document.entity'
 import { UsersModule } from 'src/users/users.module'
 import { NotificationModule } from 'src/notification/notification.module'
 import { AssignmentModule } from 'src/assignment/assignment.module'
+import { StudentClass } from 'src/users/entities/student-class.entity'
+import { User } from 'src/users/entities/user.entity'
 
 @Module({
   imports: [
     UsersModule,
-    TypeOrmModule.forFeature([Course, Chapter, SubChapter, CourseDocument]),
+    TypeOrmModule.forFeature([
+      Course,
+      Chapter,
+      SubChapter,
+      CourseDocument,
+      StudentClass,
+      User,
+    ]),
     NotificationModule,
     forwardRef(() => AssignmentModule),
   ],
