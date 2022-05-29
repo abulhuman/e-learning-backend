@@ -17,7 +17,6 @@ import { UpdateChapterInput } from './dto/update-chapter.input'
 import { UpdateCourseDocumentInput } from './dto/update-course-document.input'
 import { UpdateCourseInput } from './dto/update-course.input'
 import { UpdateSubChapterInput } from './dto/update-sub-chapter.input'
-import { NotificationType } from 'src/graphql'
 
 import { createWriteStream } from 'node:fs'
 import {
@@ -26,6 +25,7 @@ import {
 } from 'src/files/utils/file-upload.utils'
 import { join } from 'node:path'
 import { Course } from './entities/course.entity'
+import { UUIDArrayDto } from 'src/app/dto/uuid-array.dto'
 
 @Resolver('Course')
 export class CourseResolver {
@@ -123,6 +123,29 @@ export class CourseResolver {
   ) {
     try {
       this.courseService.assignClassToCourse(courseId, classId)
+    } catch (error) {
+      return false
+    }
+    // todo send notification
+    // if (updatedCourse.users.some(user => user.id === userId)) {
+    //   const notification = await this.notificationService.create({
+    //     data: JSON.stringify(updatedCourse),
+    //     recipientId: userId,
+    //     type: NotificationType.COURSE_ADDITION,
+    //   })
+    //   await this.notificationService.dispatch(notification)
+    //   return true
+    // }
+    return true
+  }
+
+  @Mutation('assignClassesToCourses')
+  async assignClassesToCourses(
+    @Args('coursesIds') _coursesIds: UUIDArrayDto,
+    @Args('classesIds') _classesIds: UUIDArrayDto,
+  ) {
+    try {
+      this.courseService.assignClassesToCourses(_coursesIds, _classesIds)
     } catch (error) {
       return false
     }
