@@ -1,5 +1,4 @@
 import { CourseDocument } from 'src/course/entities/course-document.entity'
-import { Course } from 'src/course/entities/course.entity'
 import { AssignmentSubmission as IAssignmentSubmission } from 'src/graphql'
 import { User } from 'src/users/entities/user.entity'
 import {
@@ -8,7 +7,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,

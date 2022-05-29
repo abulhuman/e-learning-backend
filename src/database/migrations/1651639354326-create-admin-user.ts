@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt'
 import { ADMIN_ROLE_SEED } from '../seeds/role.seed'
 
 export class seedAdminUser1651639354326 implements MigrationInterface {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async up(queryRunner: QueryRunner): Promise<void> {
     const roleRepository = getRepository(Role)
     const userRepository = getRepository(User)
@@ -19,6 +20,7 @@ export class seedAdminUser1651639354326 implements MigrationInterface {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async down(queryRunner: QueryRunner): Promise<void> {
     const userRepository = getRepository(User)
     await userRepository.delete(ADMIN_USER_SEED)
