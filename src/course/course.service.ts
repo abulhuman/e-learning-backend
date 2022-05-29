@@ -267,15 +267,6 @@ export class CourseService {
     )
   }
 
-  async assignUserToCourse(courseId: any, userId: any) {
-    const user = await this.usersService.findOneUserById(userId, true)
-    const course = await this.findOneCourse(courseId)
-
-    course?.users.push(user)
-
-    return this.courseRepository.save(course)
-  }
-
   async assignStudentToCourse(
     courseId: any,
     studentId: any,
@@ -303,9 +294,8 @@ export class CourseService {
     if (!user?.attendingCourses) user.attendingCourses = []
     user.attendingCourses.push(course)
     try {
-      this.userRepository.save(user)
-      this.courseRepository.save(course)
-      return true
+      const updatedCourse = await this.courseRepository.save(course)
+      return !!updatedCourse
     } catch (error) {
       return false
     }
@@ -370,25 +360,5 @@ export class CourseService {
     // console.log(debug)
 
     return true
-  }
-
-  async unassignUserFromCourse(courseId: string, userId: string) {
-    const userToUnassign = await this.usersService.findOneUserById(userId, true)
-    const course = await this.findOneCourse(courseId)
-
-    const courseAlreadyHasUser = course.users
-      .map(user => user.id)
-      .includes(userId)
-
-    if (!courseAlreadyHasUser)
-      throw new BadRequestException(
-        `User with id ${userId} dosen't have course with id ${courseId}.`,
-      )
-
-    course.users = course.users.filter(user => user.id !== userId)
-
-    const updatedCourse = await this.courseRepository.save(course)
-
-    return !updatedCourse.users.includes(userToUnassign)
   }
 }
