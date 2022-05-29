@@ -330,14 +330,12 @@ export class CourseService {
     const clazz = await this.usersService.findOneStudentClass(classId)
     if (!course?.takingClasses) course.takingClasses = []
     course.takingClasses.push(clazz)
-    clazz.attendingCourses.push(course)
     let updatedCourse: Course
     try {
       if (!course?.students) course.students = []
       clazz.students.forEach(student => {
         course.students.push(student)
       })
-      console.log(course)
 
       updatedCourse = await this.courseRepository.save(course)
       return !!updatedCourse
@@ -346,20 +344,6 @@ export class CourseService {
       console.log(`error: `, { message, detail })
       return false
     }
-
-    // if (!clazz?.students) clazz.students = []
-    // const debug = clazz?.students.forEach(async student => {
-    //   const { id } = student
-    //   try {
-    //     this.assignStudentToCourse(courseId, id, course)
-    //     return true
-    //   } catch (error) {
-    //     return false
-    //   }
-    // })
-    // console.log(debug)
-
-    return true
   }
 
   async unassignStudentFromCourse(courseId: string, studentId: string) {
@@ -439,5 +423,34 @@ export class CourseService {
     const updatedCourse = await this.courseRepository.save(courseToUpdate)
 
     return !updatedCourse.teachers.includes(teacherToUnassign)
+  }
+
+  async unassignClassFromCourse(courseId: string, classId: string) {
+    const course = await this.findOneCourse(courseId)
+    const clazz = await this.usersService.findOneStudentClass(classId)
+    if (!course?.takingClasses)
+      throw new BadRequestException(
+        `This class currently does not take any courses.`,
+      )
+
+    course.takingClasses = course.takingClasses.filter(
+      clazz => clazz.id !== classId,
+    )
+    let updatedCourse: Course
+    try {
+      clazz.students.forEach(clazzStudent => {
+        course.students = course.students.filter(
+          courseStudent => courseStudent.id !== clazzStudent.id,
+        )
+      })
+      console.log(course)
+
+      updatedCourse = await this.courseRepository.save(course)
+      return !!updatedCourse
+    } catch (error) {
+      const { message, detail } = error
+      console.log(`error: `, { message, detail })
+      return false
+    }
   }
 }
