@@ -1,11 +1,4 @@
-import {
-  Allow,
-  IsBooleanString,
-  IsDateString,
-  IsNotEmpty,
-  IsOptional,
-  IsUUID,
-} from 'class-validator'
+import { IsDateString, IsNotEmpty, IsUUID } from 'class-validator'
 import { CreateAssignmentSubmissionInput as ICreateAssignmentSubmissionInput } from 'src/graphql'
 
 export class CreateAssignmentSubmissionInput
