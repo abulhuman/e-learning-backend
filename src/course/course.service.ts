@@ -361,4 +361,42 @@ export class CourseService {
 
     return true
   }
+
+  async unassignStudentFromCourse(courseId: string, studentId: string) {
+    const _ = false
+    const studentToUnassign = await this.usersService.findOneUserById(
+      studentId,
+      true,
+      _,
+      _,
+      _,
+      _,
+      _,
+      _,
+      true,
+    )
+    const studentRoles = studentToUnassign.roles.map(role => role.name)
+    if (!studentRoles.includes(RoleName.STUDENT))
+      throw new BadRequestException(
+        `User with id: ${studentId} is not a student.`,
+      )
+    const courseToUpdate = await this.findOneCourse(courseId)
+
+    const studentIsEnrolledToTheCourse = courseToUpdate.students
+      .map(student => student.id)
+      .includes(studentId)
+
+    if (!studentIsEnrolledToTheCourse)
+      throw new BadRequestException(
+        `Student with id: (${studentId}) is not currently enrolled in course with id: (${courseId}).`,
+      )
+
+    courseToUpdate.students = courseToUpdate.students.filter(
+      student => student.id !== studentId,
+    )
+
+    const updatedCourse = await this.courseRepository.save(courseToUpdate)
+
+    return !updatedCourse.students.includes(studentToUnassign)
+  }
 }
