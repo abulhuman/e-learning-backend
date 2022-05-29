@@ -70,27 +70,6 @@ export class CourseResolver {
     return this.courseService.findCourseDocumentsForCourse(course.id)
   }
 
-  @Mutation('assignUserToCourse')
-  async assignUserToCourse(
-    @Args('courseId', ParseUUIDPipe) courseId: string,
-    @Args('userId', ParseUUIDPipe) userId: string,
-  ) {
-    const updatedCourse = await this.courseService.assignUserToCourse(
-      courseId,
-      userId,
-    )
-    if (updatedCourse.users.some(user => user.id === userId)) {
-      const notification = await this.notificationService.create({
-        data: JSON.stringify(updatedCourse),
-        recipientId: userId,
-        type: NotificationType.COURSE_ADDITION,
-      })
-      await this.notificationService.dispatch(notification)
-      return true
-    }
-    return false
-  }
-
   @Mutation('assignStudentToCourse')
   async assignStudentToCourse(
     @Args('courseId', ParseUUIDPipe) courseId: string,
@@ -158,14 +137,6 @@ export class CourseResolver {
     //   return true
     // }
     return true
-  }
-
-  @Mutation('unassignUserFromCourse')
-  unassignUserFromCourse(
-    @Args('courseId', ParseUUIDPipe) courseId: string,
-    @Args('userId', ParseUUIDPipe) userId: string,
-  ) {
-    return this.courseService.unassignUserFromCourse(courseId, userId)
   }
 
   @Mutation('createChapter')
