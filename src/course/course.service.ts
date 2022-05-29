@@ -4,7 +4,10 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
+import { RoleName } from 'src/graphql'
 import { TelegramAccount } from 'src/telegram/entities/telegram-account.entity'
+import { StudentClass } from 'src/users/entities/student-class.entity'
+import { User } from 'src/users/entities/user.entity'
 import { UsersService } from 'src/users/users.service'
 import { Repository } from 'typeorm'
 import { CreateChapterInput } from './dto/create-chapter.input'
@@ -34,6 +37,10 @@ export class CourseService {
 
     @InjectRepository(CourseDocument)
     private courseDocumentRepository: Repository<CourseDocument>,
+
+    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(StudentClass)
+    private studentClassRepository: Repository<StudentClass>,
 
     private usersService: UsersService,
   ) {}
@@ -142,10 +149,21 @@ export class CourseService {
       .getMany()
   }
 
-  findOneCourse(id: string) {
-    return this.courseRepository.findOne(id, {
-      relations: ['chapters', 'chapters.subChapters', 'users', 'users.roles'],
+  async findOneCourse(id: string) {
+    const course = await this.courseRepository.findOne(id, {
+      relations: [
+        'chapters',
+        'chapters.subChapters',
+        'users',
+        'users.roles',
+        'students',
+        'teachers',
+        'takingClasses',
+      ],
     })
+    if (!course)
+      throw new NotFoundException(`Course with id: ${id} was not found.`)
+    return course
   }
 
   findOneChapter(id: string) {
@@ -256,6 +274,102 @@ export class CourseService {
     course?.users.push(user)
 
     return this.courseRepository.save(course)
+  }
+
+  async assignStudentToCourse(
+    courseId: any,
+    studentId: any,
+    nestedCourse: Course = null,
+  ) {
+    const user = await this.usersService.findOneUserById(
+      studentId,
+      true,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      true,
+    )
+    const userRoles = user.roles.map(role => role.name)
+    if (!userRoles.includes(RoleName.STUDENT))
+      throw new BadRequestException(
+        `User with id: ${studentId} is not a student.`,
+      )
+    const course = nestedCourse ?? (await this.findOneCourse(courseId))
+
+    course?.students.push(user)
+    if (!user?.attendingCourses) user.attendingCourses = []
+    user.attendingCourses.push(course)
+    try {
+      this.userRepository.save(user)
+      this.courseRepository.save(course)
+      return true
+    } catch (error) {
+      return false
+    }
+  }
+
+  async assignTeacherToCourse(courseId: any, teacherId: any) {
+    const user = await this.usersService.findOneUserById(teacherId, true)
+    const userRoles = user.roles.map(role => role.name)
+    if (
+      !userRoles.includes(RoleName.COURSE_TEACHER) ||
+      !userRoles.includes(RoleName.TEACHER)
+    )
+      throw new BadRequestException(
+        `User with id: ${teacherId} is not a teacher.`,
+      )
+    const course = await this.findOneCourse(courseId)
+
+    course?.teachers.push(user)
+    if (!user?.teachingCourses) user.teachingCourses = []
+    user.teachingCourses.push(course)
+    try {
+      this.userRepository.save(user)
+      this.courseRepository.save(course)
+      return true
+    } catch (error) {
+      return false
+    }
+  }
+
+  async assignClassToCourse(courseId: string, classId: string) {
+    const course = await this.findOneCourse(courseId)
+    const clazz = await this.usersService.findOneStudentClass(classId)
+    if (!course?.takingClasses) course.takingClasses = []
+    course.takingClasses.push(clazz)
+    clazz.attendingCourses.push(course)
+    let updatedCourse: Course
+    try {
+      if (!course?.students) course.students = []
+      clazz.students.forEach(student => {
+        course.students.push(student)
+      })
+      console.log(course)
+
+      updatedCourse = await this.courseRepository.save(course)
+      return !!updatedCourse
+    } catch (error) {
+      const { message, detail } = error
+      console.log(`error: `, { message, detail })
+      return false
+    }
+
+    // if (!clazz?.students) clazz.students = []
+    // const debug = clazz?.students.forEach(async student => {
+    //   const { id } = student
+    //   try {
+    //     this.assignStudentToCourse(courseId, id, course)
+    //     return true
+    //   } catch (error) {
+    //     return false
+    //   }
+    // })
+    // console.log(debug)
+
+    return true
   }
 
   async unassignUserFromCourse(courseId: string, userId: string) {

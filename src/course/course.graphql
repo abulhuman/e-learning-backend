@@ -8,6 +8,9 @@ type Course {
   overview: String!
   creditHour: Int!
   users: [User]
+  teachers: [User]
+  students: [User]
+  takingClasses: [StudentClass]
   chapters: [Chapter]!
   courseDocuments: [CourseDocument]!
   assignmentDefinitions: [AssignmentDefinition]
@@ -110,7 +113,14 @@ type Mutation {
   removeCourse(id: ID!): Boolean!
 
   assignUserToCourse(courseId: ID!, userId: ID!): Boolean!
+  assignStudentToCourse(courseId: ID!, studentId: ID!): Boolean!
+  assignTeacherToCourse(courseId: ID!, teacherId: ID!): Boolean!
+  assignClassToCourse(courseId: ID!, classId: ID!): Boolean!
+
   unassignUserFromCourse(courseId: ID!, userId: ID!): Boolean!
+  #unassignStudentFromCourse(courseId: ID!, userId: ID!): Boolean!
+  #unassignTeacherFromCourse(courseId: ID!, userId: ID!): Boolean!
+  #unassignClassFromCourse(courseId: ID!, classId: ID!): Boolean!
 
   createChapter(createChapterInput: CreateChapterInput): Chapter!
   updateChapter(updateChapterInput: UpdateChapterInput): Chapter!

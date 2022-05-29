@@ -63,18 +63,22 @@ export class UsersService {
     withRoles = true,
     withNotifications = false,
     withAttendingClass = false,
-    withLearningClasses = false,
+    withTeachingClasses = false,
     withDepartment = false,
     withSubmissions = false,
+    withTeachingCourses = false,
+    withAttendingCourses = false,
   ): Promise<User> {
     const user = this.findOne(
       { id },
       withRoles,
       withNotifications,
       withAttendingClass,
-      withLearningClasses,
+      withTeachingClasses,
       withDepartment,
       withSubmissions,
+      withTeachingCourses,
+      withAttendingCourses,
     )
     if (!user) throw new NotFoundException(`User with id: ${id} was not found.`)
     return user
@@ -112,17 +116,21 @@ export class UsersService {
     withRoles = false,
     withNotifications = false,
     withAttendingClass = false,
-    withLearningClasses = false,
+    withTeachingClasses = false,
     withDepartment = false,
     withSubmissions = false,
+    withTeachingCourses = false,
+    withAttendingCourses = false,
   ): Promise<User> {
     const relations = []
     if (withRoles) relations.push('roles')
     if (withNotifications) relations.push('notifications')
     if (withAttendingClass) relations.push('attendingClass')
-    if (withLearningClasses) relations.push('learningClasses')
+    if (withTeachingClasses) relations.push('teachingClasses')
     if (withDepartment) relations.push('department')
     if (withSubmissions) relations.push('assignmentSubmissions')
+    if (withTeachingCourses) relations.push('teachingCourses')
+    if (withAttendingCourses) relations.push('attendingCourses')
     return this.userRepository.findOne(findUserDto, {
       relations,
     })
@@ -236,7 +244,14 @@ export class UsersService {
   }
   async findOneStudentClass(id: string) {
     const studentClass = await this.studentClassRepository.findOne(id, {
-      relations: ['students', 'teachers', 'teachers.roles', 'department'],
+      relations: [
+        'students',
+        'students.courses',
+        'teachers',
+        'teachers.roles',
+        'department',
+        'attendingCourses',
+      ],
     })
     if (!studentClass)
       throw new NotFoundException(`Class with id": ${id} was not found.`)
@@ -318,17 +333,17 @@ export class UsersService {
       throw new NotFoundException(`Class with id": ${classId} was not found.`)
 
     if (
-      teacherUser.learningClasses
+      teacherUser.teachingClasses
         ?.map(studentClass => studentClass.id)
         ?.includes(classId)
     )
       throw new BadRequestException(
         `This teacher is already assigned to the class: (Year: ${teacherClass.year}, Section: ${teacherClass.section}).`,
       )
-    if (!teacherUser.learningClasses) teacherUser.learningClasses = []
+    if (!teacherUser.teachingClasses) teacherUser.teachingClasses = []
     if (!teacherClass.teachers) teacherClass.teachers = []
 
-    teacherUser.learningClasses.push(teacherClass)
+    teacherUser.teachingClasses.push(teacherClass)
     teacherClass.teachers.push(teacherUser)
 
     await this.userRepository.save(teacherUser)
@@ -395,7 +410,7 @@ export class UsersService {
 
     if (!teacherClass)
       throw new NotFoundException(`Class with id": ${classId} was not found.`)
-    const learningClassIds = teacherUser.learningClasses.map(
+    const learningClassIds = teacherUser.teachingClasses.map(
       learningClass => learningClass.id,
     )
     if (!learningClassIds.find(learningClassId => learningClassId === classId))
@@ -403,7 +418,7 @@ export class UsersService {
         `This teacher is not assigned to the class: (Year: ${teacherClass.year}, Section: ${teacherClass.section}).`,
       )
     const classIndex = learningClassIds.indexOf(classId)
-    teacherUser.learningClasses.splice(classIndex, 1)
+    teacherUser.teachingClasses.splice(classIndex, 1)
     this.userRepository.save(teacherUser)
     return true
   }
