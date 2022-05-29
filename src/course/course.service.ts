@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
+import { UUIDArrayDto } from 'src/app/dto/uuid-array.dto'
 import { RoleName } from 'src/graphql'
 import { TelegramAccount } from 'src/telegram/entities/telegram-account.entity'
 import { StudentClass } from 'src/users/entities/student-class.entity'
@@ -344,6 +345,19 @@ export class CourseService {
       console.log(`error: `, { message, detail })
       return false
     }
+  }
+
+  async assignClassesToCourses(
+    _coursesIds: UUIDArrayDto,
+    _classesIds: UUIDArrayDto,
+  ) {
+    const { ids: coursesIds } = _coursesIds
+    const { ids: classesIds } = _classesIds
+    coursesIds.forEach(courseId => {
+      classesIds.forEach(classId => {
+        this.assignClassToCourse(courseId, classId)
+      })
+    })
   }
 
   async unassignStudentFromCourse(courseId: string, studentId: string) {
