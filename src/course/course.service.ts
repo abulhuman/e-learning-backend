@@ -399,4 +399,45 @@ export class CourseService {
 
     return !updatedCourse.students.includes(studentToUnassign)
   }
+
+  async unassignTeacherFromCourse(courseId: string, teacherId: string) {
+    const _ = false
+    const teacherToUnassign = await this.usersService.findOneUserById(
+      teacherId,
+      true,
+      _,
+      _,
+      _,
+      _,
+      _,
+      true,
+      _,
+    )
+    const teacherRoles = teacherToUnassign.roles.map(role => role.name)
+    if (
+      !teacherRoles.includes(RoleName.COURSE_TEACHER) ||
+      !teacherRoles.includes(RoleName.TEACHER)
+    )
+      throw new BadRequestException(
+        `User with id: ${teacherId} is not a teacher.`,
+      )
+    const courseToUpdate = await this.findOneCourse(courseId)
+
+    const teacherIsEnrolledToTheCourse = courseToUpdate.teachers
+      .map(teacher => teacher.id)
+      .includes(teacherId)
+
+    if (!teacherIsEnrolledToTheCourse)
+      throw new BadRequestException(
+        `teacher with id: (${teacherId}) is not currently enrolled in course with id: (${courseId}).`,
+      )
+
+    courseToUpdate.teachers = courseToUpdate.teachers.filter(
+      teacher => teacher.id !== teacherId,
+    )
+
+    const updatedCourse = await this.courseRepository.save(courseToUpdate)
+
+    return !updatedCourse.teachers.includes(teacherToUnassign)
+  }
 }

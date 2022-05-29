@@ -147,6 +147,14 @@ export class CourseResolver {
     return this.courseService.unassignStudentFromCourse(courseId, studentId)
   }
 
+  @Mutation('unassignTeacherFromCourse')
+  unassignTeacherFromCourse(
+    @Args('courseId', ParseUUIDPipe) courseId: string,
+    @Args('teacherId', ParseUUIDPipe) teacherId: string,
+  ) {
+    return this.courseService.unassignTeacherFromCourse(courseId, teacherId)
+  }
+
   @Mutation('createChapter')
   createChapter(
     @Args('createChapterInput') createChapterInput: CreateChapterInput,
