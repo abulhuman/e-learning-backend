@@ -425,4 +425,10 @@ export class DepartmentResolver {
     return (await this.usersService.findOneDepartment(department.id))
       .departmentAdministrator
   }
+
+  @ResolveField('ownedCourses')
+  async ownedCourses(@Parent() department: Department) {
+    return (await this.usersService.findOneDepartment(department.id))
+      .ownedCourses
+  }
 }

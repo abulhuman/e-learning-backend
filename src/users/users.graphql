@@ -74,6 +74,7 @@ type Department {
   name: String!
   classes: [StudentClass]
   departmentAdministrator: User
+  ownedCourses: [Course]
 }
 
 input UserFilter {

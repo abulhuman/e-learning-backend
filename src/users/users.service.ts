@@ -465,7 +465,7 @@ export class UsersService {
   }
   async findOneDepartment(id: string) {
     const department = await this.departmentRepository.findOne(id, {
-      relations: ['classes', 'departmentAdministrator'],
+      relations: ['classes', 'departmentAdministrator', 'ownedCourses'],
     })
     if (!department)
       throw new NotFoundException(`Department with id": ${id} was not found.`)

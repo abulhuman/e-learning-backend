@@ -45,8 +45,13 @@ export class CourseService {
 
     private usersService: UsersService,
   ) {}
-  createOneCourse(createCourseInput: CreateCourseInput) {
+  async createOneCourse(createCourseInput: CreateCourseInput) {
+    const { departmentId } = createCourseInput
     const newCourse = this.courseRepository.create(createCourseInput)
+    const owningDepartment = await this.usersService.findOneDepartment(
+      departmentId,
+    )
+    newCourse.owningDepartment = owningDepartment
     return this.courseRepository.save(newCourse)
   }
 
@@ -160,6 +165,7 @@ export class CourseService {
         'students',
         'teachers',
         'takingClasses',
+        'owningDepartment',
       ],
     })
     if (!course)
