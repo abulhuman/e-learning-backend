@@ -79,7 +79,7 @@ export class UserResolver {
     const allUsers = await this.usersService.findAllUsers()
     const allDepartmentAdministrators = allUsers.map(user => {
       const userRoles = user.roles.map(role => role.name)
-      if (userRoles.includes(RoleName.DEPARTMENT_ADMINSTRATOR)) return user
+      if (userRoles.includes(RoleName.DEPARTMENT_ADMINISTRATOR)) return user
     })
     const allNewDepartmentAdministrators = allDepartmentAdministrators
       .filter(user => !user?.department)
