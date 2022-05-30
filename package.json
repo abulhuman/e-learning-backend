@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "prebuild": "rimraf dist",
+    "prebuild": "npm run schema:gen && rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "node dist/main",
