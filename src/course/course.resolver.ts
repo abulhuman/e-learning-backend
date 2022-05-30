@@ -282,4 +282,9 @@ export class CourseResolver {
   async takingClasses(@Parent() course: Course) {
     return (await this.courseService.findOneCourse(course.id)).takingClasses
   }
+
+  @ResolveField('owningDepartment')
+  async owningDepartment(@Parent() course: Course) {
+    return (await this.courseService.findOneCourse(course.id)).owningDepartment
+  }
 }
