@@ -482,4 +482,18 @@ export class CourseService {
       return false
     }
   }
+
+  async unassignCourseFromDepartment(courseId: string, departmentId: string) {
+    const course = await this.findOneCourse(courseId)
+    const department = await this.usersService.findOneDepartment(departmentId)
+
+    if (course.owningDepartment.id !== department.id)
+      throw new BadRequestException(
+        `The department with id: ${departmentId} does not own the course with id: ${courseId}.`,
+      )
+
+    course.owningDepartment = null
+
+    return !!(await this.courseRepository.save(course))
+  }
 }
