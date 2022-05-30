@@ -126,6 +126,7 @@ type Mutation {
   unassignStudentFromCourse(courseId: ID!, studentId: ID!): Boolean!
   unassignTeacherFromCourse(courseId: ID!, teacherId: ID!): Boolean!
   unassignClassFromCourse(courseId: ID!, classId: ID!): Boolean!
+  unassignCourseFromDepartment(courseId: ID!, departmentId: ID!): Boolean!
 
   createChapter(createChapterInput: CreateChapterInput): Chapter!
   updateChapter(updateChapterInput: UpdateChapterInput): Chapter!
