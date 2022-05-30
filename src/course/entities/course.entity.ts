@@ -1,5 +1,6 @@
 import { AssignmentDefinition } from 'src/assignment/entities/assignment-definition.entity'
 import { Course as ICourse } from 'src/graphql'
+import { Department } from 'src/users/entities/department.entity'
 import { StudentClass } from 'src/users/entities/student-class.entity'
 import { User } from 'src/users/entities/user.entity'
 import {
@@ -8,6 +9,7 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -74,4 +76,10 @@ export class Course implements ICourse {
     (courseDocument: CourseDocument) => courseDocument.course,
   )
   assignmentDefinitions?: AssignmentDefinition[]
+
+  @ManyToOne(
+    () => Department,
+    (department: Department) => department.ownedCourses,
+  )
+  owningDepartment: Department
 }

@@ -11,6 +11,7 @@ import {
 import { Department as IDepartment } from 'src/graphql'
 import { StudentClass } from './student-class.entity'
 import { User } from './user.entity'
+import { Course } from 'src/course/entities/course.entity'
 
 @Entity()
 export class Department implements IDepartment {
@@ -36,4 +37,7 @@ export class Department implements IDepartment {
   @OneToOne(() => User, (user: User) => user.department)
   @JoinColumn()
   departmentAdministrator?: User
+
+  @OneToMany(() => Course, (course: Course) => course.owningDepartment)
+  ownedCourses: Course[]
 }

@@ -14,6 +14,7 @@ type Course {
   chapters: [Chapter]!
   courseDocuments: [CourseDocument]!
   assignmentDefinitions: [AssignmentDefinition]
+  owningDepartment: Department
 }
 
 input CreateCourseInput {
@@ -22,6 +23,7 @@ input CreateCourseInput {
   description: String!
   overview: String!
   creditHour: Int!
+  departmentId: ID!
 }
 
 input UpdateCourseInput {
