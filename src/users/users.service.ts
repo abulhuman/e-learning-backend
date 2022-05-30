@@ -538,7 +538,7 @@ export class UsersService {
 
     const userRoles = user.roles.map(role => role.name)
     const isNotDepartmentAdministrator = !userRoles.includes(
-      RoleName.DEPARTMENT_ADMINSTRATOR,
+      RoleName.DEPARTMENT_ADMINISTRATOR,
     )
 
     if (isNotDepartmentAdministrator)
@@ -567,7 +567,7 @@ export class UsersService {
 
     const userRoles = user.roles.map(role => role.name)
     const isNotDepartmentAdministrator = !userRoles.includes(
-      RoleName.DEPARTMENT_ADMINSTRATOR,
+      RoleName.DEPARTMENT_ADMINISTRATOR,
     )
 
     if (isNotDepartmentAdministrator)
