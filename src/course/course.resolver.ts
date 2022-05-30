@@ -162,6 +162,19 @@ export class CourseResolver {
     return true
   }
 
+  @Mutation('assignCourseToDepartment')
+  async assignCourseToDepartment(
+    @Args('courseId', ParseUUIDPipe) courseId: string,
+    @Args('departmentId', ParseUUIDPipe) departmentId: string,
+  ) {
+    try {
+      this.courseService.assignCourseToDepartment(courseId, departmentId)
+    } catch (error) {
+      return false
+    }
+    return true
+  }
+
   @Mutation('unassignStudentFromCourse')
   unassignStudentFromCourse(
     @Args('courseId', ParseUUIDPipe) courseId: string,
