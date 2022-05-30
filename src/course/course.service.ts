@@ -366,6 +366,15 @@ export class CourseService {
     })
   }
 
+  async assignCourseToDepartment(courseId: string, departmentId: string) {
+    const course = await this.findOneCourse(courseId)
+    const department = await this.usersService.findOneDepartment(departmentId)
+
+    course.owningDepartment = department
+
+    return !!(await this.courseRepository.save(course))
+  }
+
   async unassignStudentFromCourse(courseId: string, studentId: string) {
     const _ = false
     const studentToUnassign = await this.usersService.findOneUserById(
