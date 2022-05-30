@@ -1,4 +1,4 @@
-import { ParseUUIDPipe } from '@nestjs/common'
+import { HttpException, ParseUUIDPipe } from '@nestjs/common'
 import {
   Resolver,
   Query,
@@ -197,6 +197,23 @@ export class CourseResolver {
     @Args('classId', ParseUUIDPipe) classId: string,
   ) {
     return this.courseService.unassignClassFromCourse(courseId, classId)
+  }
+
+  @Mutation('unassignCourseFromDepartment')
+  async unassignCourseFromDepartment(
+    @Args('courseId', ParseUUIDPipe) courseId: string,
+    @Args('departmentId', ParseUUIDPipe) departmentId: string,
+  ) {
+    try {
+      await this.courseService.unassignCourseFromDepartment(
+        courseId,
+        departmentId,
+      )
+    } catch (error) {
+      const { status } = error
+      throw new HttpException(error, status)
+    }
+    return true
   }
 
   @Mutation('createChapter')
