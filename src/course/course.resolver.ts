@@ -175,6 +175,19 @@ export class CourseResolver {
     return true
   }
 
+  @Mutation('assignOwnerToCourse')
+  async assignOwnerToCourse(
+    @Args('courseId', ParseUUIDPipe) courseId: string,
+    @Args('ownerId', ParseUUIDPipe) ownerId: string,
+  ) {
+    try {
+      this.courseService.assignOwnerToCourse(courseId, ownerId)
+    } catch (error) {
+      return false
+    }
+    return true
+  }
+
   @Mutation('unassignStudentFromCourse')
   unassignStudentFromCourse(
     @Args('courseId', ParseUUIDPipe) courseId: string,
