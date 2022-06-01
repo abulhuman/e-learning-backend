@@ -181,9 +181,10 @@ export class CourseResolver {
     @Args('ownerId', ParseUUIDPipe) ownerId: string,
   ) {
     try {
-      this.courseService.assignOwnerToCourse(courseId, ownerId)
+      await this.courseService.assignOwnerToCourse(courseId, ownerId)
     } catch (error) {
-      return false
+      const { status } = error
+      throw new HttpException(error, status)
     }
     return true
   }
@@ -222,6 +223,20 @@ export class CourseResolver {
         courseId,
         departmentId,
       )
+    } catch (error) {
+      const { status } = error
+      throw new HttpException(error, status)
+    }
+    return true
+  }
+
+  @Mutation('unassignOwnerFromCourse')
+  async unassignOwnerFromCourse(
+    @Args('courseId', ParseUUIDPipe) courseId: string,
+    @Args('ownerId', ParseUUIDPipe) ownerId: string,
+  ) {
+    try {
+      await this.courseService.unassignOwnerFromCourse(courseId, ownerId)
     } catch (error) {
       const { status } = error
       throw new HttpException(error, status)
