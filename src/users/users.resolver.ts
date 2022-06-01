@@ -36,8 +36,10 @@ export class UserResolver {
   }
 
   @Query('users')
-  async findAllUsers(@Args('filter') { roleName }: { roleName: RoleName }) {
+  async findAllUsers(@Args('filter') filter: { roleName: RoleName }) {
     const users = await this.usersService.findAllUsers()
+    let roleName: RoleName
+    if (filter?.roleName) ({ roleName } = filter)
     return roleName
       ? users.filter(user => {
           const userRoles = user.roles.map(role => role.name)
