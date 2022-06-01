@@ -164,6 +164,7 @@ export class CourseService {
         'users.roles',
         'students',
         'teachers',
+        'owner',
         'takingClasses',
         'owningDepartment',
       ],

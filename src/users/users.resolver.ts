@@ -145,6 +145,25 @@ export class UserResolver {
     ).attendingCourses
   }
 
+  @ResolveField('ownedCourses')
+  async ownedCourses(@Parent() user: User) {
+    const _ = false
+    return (
+      await this.usersService.findOneUserById(
+        user.id,
+        true,
+        _,
+        _,
+        _,
+        _,
+        _,
+        _,
+        _,
+        true,
+      )
+    ).ownedCourses
+  }
+
   @ResolveField('department')
   async department(@Parent() user: User) {
     return (

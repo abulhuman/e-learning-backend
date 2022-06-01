@@ -55,6 +55,9 @@ export class Course implements ICourse {
   @JoinTable()
   students?: User[]
 
+  @ManyToOne(() => User, (user: User) => user.ownedCourses)
+  owner: User
+
   @ManyToMany(
     () => StudentClass,
     (studentClass: StudentClass) => studentClass.attendingCourses,

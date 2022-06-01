@@ -55,6 +55,9 @@ export class User implements IUser {
   @ManyToMany(() => Course, (course: Course) => course.students)
   attendingCourses?: Course[]
 
+  @OneToMany(() => Course, (course: Course) => course.owner)
+  ownedCourses: Course[]
+
   @ManyToOne(
     () => StudentClass,
     (studentClass: StudentClass) => studentClass.students,
