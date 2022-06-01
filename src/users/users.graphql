@@ -13,6 +13,7 @@ type User {
   courses: [Course]
   teachingCourses: [Course]
   attendingCourses: [Course]
+  ownedCourses: [Course]
   notifications: [Notification]
   department: Department
   assignmentSubmissions: [AssignmentSubmission]
