@@ -382,9 +382,10 @@ export class CourseService {
 
     const userRoles = user.roles.map(role => role.name)
     if (!userRoles.includes(RoleName.COURSE_OWNER))
-      throw new BadRequestException(
-        `User with id: ${ownerId} is not a course owner.`,
-      )
+      this.usersService.updateUser(user.id, {
+        id: user.id,
+        roleName: RoleName.COURSE_OWNER,
+      })
     course.owner = user
 
     return !!(await this.courseRepository.save(course))
@@ -514,14 +515,28 @@ export class CourseService {
 
   async unassignOwnerFromCourse(courseId: string, ownerId: string) {
     const course = await this.findOneCourse(courseId)
-    const user = await this.usersService.findOneUserById(ownerId)
+    const _ = false
+    const user = await this.usersService.findOneUserById(
+      ownerId,
+      true,
+      _,
+      _,
+      _,
+      _,
+      _,
+      _,
+      _,
+      true,
+    )
 
     const userRoles = user.roles.map(role => role.name)
     if (!userRoles.includes(RoleName.COURSE_OWNER))
       throw new BadRequestException(
         `User with id: ${ownerId} is not a course owner.`,
       )
-    const ownedCourseIDs = user.ownedCourses.map(course => course.id)
+    const ownedCourseIDs = user.ownedCourses
+      ? user.ownedCourses.map(course => course.id)
+      : []
     if (!ownedCourseIDs.includes(course.id))
       throw new BadRequestException(
         `The user with id: ${ownerId} does not own the course with id: ${courseId}.`,
