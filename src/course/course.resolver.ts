@@ -308,6 +308,11 @@ export class CourseResolver {
     return (await this.courseService.findOneCourse(course.id)).students
   }
 
+  @ResolveField('owner')
+  async owner(@Parent() course: Course) {
+    return (await this.courseService.findOneCourse(course.id)).owner
+  }
+
   @ResolveField('takingClasses')
   async takingClasses(@Parent() course: Course) {
     return (await this.courseService.findOneCourse(course.id)).takingClasses

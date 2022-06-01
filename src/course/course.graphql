@@ -10,6 +10,7 @@ type Course {
   users: [User]
   teachers: [User]
   students: [User]
+  owner: User
   takingClasses: [StudentClass]
   chapters: [Chapter]!
   courseDocuments: [CourseDocument]!

@@ -86,6 +86,7 @@ export class UsersService {
     withSubmissions = false,
     withTeachingCourses = false,
     withAttendingCourses = false,
+    withOwnedCourses = false,
   ): Promise<User> {
     const user = this.findOne(
       { id },
@@ -97,6 +98,7 @@ export class UsersService {
       withSubmissions,
       withTeachingCourses,
       withAttendingCourses,
+      withOwnedCourses,
     )
     if (!user) throw new NotFoundException(`User with id: ${id} was not found.`)
     return user
@@ -139,6 +141,7 @@ export class UsersService {
     withSubmissions = false,
     withTeachingCourses = false,
     withAttendingCourses = false,
+    withOwnedCourses = false,
   ): Promise<User> {
     const relations = []
     if (withRoles) relations.push('roles')
@@ -149,6 +152,7 @@ export class UsersService {
     if (withSubmissions) relations.push('assignmentSubmissions')
     if (withTeachingCourses) relations.push('teachingCourses')
     if (withAttendingCourses) relations.push('attendingCourses')
+    if (withOwnedCourses) relations.push('ownedCourses')
     return this.userRepository.findOne(findUserDto, {
       relations,
     })
