@@ -511,4 +511,29 @@ export class CourseService {
 
     return !!(await this.courseRepository.save(course))
   }
+
+  async unassignOwnerFromCourse(courseId: string, ownerId: string) {
+    const course = await this.findOneCourse(courseId)
+    const user = await this.usersService.findOneUserById(ownerId)
+
+    const userRoles = user.roles.map(role => role.name)
+    if (!userRoles.includes(RoleName.COURSE_OWNER))
+      throw new BadRequestException(
+        `User with id: ${ownerId} is not a course owner.`,
+      )
+    const ownedCourseIDs = user.ownedCourses.map(course => course.id)
+    if (!ownedCourseIDs.includes(course.id))
+      throw new BadRequestException(
+        `The user with id: ${ownerId} does not own the course with id: ${courseId}.`,
+      )
+    course.owner = null
+
+    const unassignOwner = this.courseRepository.save(course)
+    const revokeRole = this.usersService.revokeUserRole(
+      user.id,
+      RoleName.COURSE_OWNER,
+    )
+
+    return !!(await Promise.all([unassignOwner, revokeRole]))
+  }
 }
