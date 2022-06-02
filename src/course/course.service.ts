@@ -91,14 +91,19 @@ export class CourseService {
 
   findAllCourses() {
     return this.courseRepository.find({
-      relations: ['chapters', 'chapters.subChapters', 'users', 'users.roles'],
+      relations: [
+        'chapters',
+        'chapters.subChapters',
+        'students',
+        'students.roles',
+      ],
     })
   }
 
   findCoursesForUser(userId: string) {
     return this.courseRepository
       .createQueryBuilder('course')
-      .leftJoin('course.users', 'user')
+      .leftJoin('course.students', 'user')
       .where('user.id = :id', { id: userId })
       .getMany()
   }
@@ -106,16 +111,16 @@ export class CourseService {
   findUsersInCourse(courseId: string) {
     return this.courseRepository
       .createQueryBuilder('course')
-      .leftJoinAndSelect('course.users', 'user')
+      .leftJoinAndSelect('course.students', 'user')
       .where('course.id = :id', { id: courseId })
       .getOne()
-      .then(course => course.users)
+      .then(course => course.students)
   }
 
   findUsersWithAccounts(courseId: string) {
     return this.courseRepository
       .createQueryBuilder('course')
-      .leftJoinAndSelect('course.users', 'user')
+      .leftJoinAndSelect('course.students', 'user')
       .where('course.id = :id', { id: courseId })
       .innerJoinAndSelect(
         TelegramAccount,
@@ -123,7 +128,7 @@ export class CourseService {
         'account.userId = user.id',
       )
       .getOne()
-      .then(course => course.users)
+      .then(course => course.students)
   }
 
   findAllChapters() {
@@ -160,8 +165,7 @@ export class CourseService {
       relations: [
         'chapters',
         'chapters.subChapters',
-        'users',
-        'users.roles',
+        'students.roles',
         'students',
         'teachers',
         'owner',
