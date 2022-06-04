@@ -39,6 +39,7 @@
     "@types/graphql-upload": "^8.0.11",
     "@types/helmet": "^4.0.0",
     "apollo-server-express": "^3.6.3",
+    "arrayify-stream": "^2.0.0",
     "axios": "^0.26.1",
     "bcrypt": "^5.0.1",
     "connect-typeorm": "^1.1.4",
@@ -55,12 +56,14 @@
     "passport": "^0.5.2",
     "passport-local": "^1.0.0",
     "pg": "^8.7.3",
+    "randomstring": "^1.2.2",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
     "typeorm": "^0.2.45",
     "typeorm-static": "^1.1.1",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@commitlint/cli": "^16.2.3",
@@ -77,6 +80,7 @@
     "@types/node": "^16.0.0",
     "@types/nodemailer": "^6.4.4",
     "@types/passport-local": "^1.0.34",
+    "@types/randomstring": "^1.1.8",
     "@types/supertest": "^2.0.11",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",

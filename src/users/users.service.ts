@@ -8,19 +8,23 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import * as bcrypt from 'bcrypt'
+import { validateSync } from 'class-validator'
 import { AuthService } from 'src/auth/auth.service'
-import { RoleName } from 'src/graphql'
-import { Repository } from 'typeorm'
+import { CreateMultipleUsersInput, RoleName } from 'src/graphql'
+import { FindConditions, Repository } from 'typeorm'
+import { read, utils } from 'xlsx'
 import { CreateRoleInput } from './dto/create-role.input'
 import { CreateStudentClassInput } from './dto/create-student-class.input'
 import { CreateUserInput } from './dto/create-user.input'
 import { FindUserDto } from './dto/find-user.dto'
 import { UpdateStudentClassInput } from './dto/update-student-class.input'
 import { UpdateUserInput } from './dto/update-user.input'
+import { UserEntry } from './dto/user-entry.dto'
 import { Department } from './entities/department.entity'
 import { Role } from './entities/role.entity'
 import { StudentClass } from './entities/student-class.entity'
 import { User } from './entities/user.entity'
+import { generate } from 'randomstring'
 
 @Injectable()
 export class UsersService {
@@ -50,6 +54,20 @@ export class UsersService {
     newUser.roles = [roleToAssign]
     // await this.authService.sendVerificationLink(newUser)
     return this.userRepository.save(newUser)
+  }
+  async createMany(users: Partial<User>[], roleName: RoleName) {
+    let roleToAssign = await this.findOneRole({ name: roleName })
+    if (!roleToAssign) {
+      roleToAssign = await this.createRole(new CreateRoleInput(roleName))
+    }
+
+    const usersToSave = users.map(user => {
+      user.roles = [roleToAssign]
+      user.password = bcrypt.hashSync(user.password, 10)
+      return user
+    })
+
+    return this.userRepository.save(usersToSave).then(users => users.length + 1)
   }
 
   async findAllUsers() {
@@ -564,5 +582,42 @@ export class UsersService {
     department.departmentAdministrator = null
     this.departmentRepository.save(department)
     return true
+  }
+
+  parseWorkbook(fileBuffer: any[], input: CreateMultipleUsersInput) {
+    const REQUIRED_FIELDS = ['firstName', 'middleName', 'lastName', 'email']
+
+    const workbook = read(fileBuffer)
+
+    const users: UserEntry[] = []
+    Object.entries(workbook.Sheets).forEach(([sheetName, sheet]) => {
+      const usersToImport = utils.sheet_to_json(sheet, {
+        header: [...REQUIRED_FIELDS, 'password'],
+        defval: undefined,
+      })
+      usersToImport.forEach((userJSON: Partial<UserEntry>, index) => {
+        const newUser = new UserEntry()
+        newUser.email = userJSON.email
+        newUser.firstName = userJSON.firstName
+        newUser.middleName = userJSON.middleName
+        newUser.lastName = userJSON.lastName
+        if (input.password) {
+          newUser.password = input.password
+        } else if (!userJSON.password || userJSON.password.length < 8) {
+          newUser.password = generate({
+            length: 8,
+            capitalization: 'uppercase',
+          })
+        }
+        const errors = validateSync(newUser, { stopAtFirstError: true })
+        if (errors.length) {
+          throw new BadRequestException(
+            `Error on row ${index + 1} of sheet ${sheetName}: Invalid entry`,
+          )
+        }
+        users.push(newUser)
+      })
+    })
+    return users
   }
 }
