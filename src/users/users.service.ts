@@ -39,7 +39,7 @@ export class UsersService {
     createUserInput.password = await bcrypt.hash(createUserInput.password, 10)
     const { roleName, ...rest } = createUserInput
 
-    let roleToAssign = await this.findOneRole(undefined, roleName)
+    let roleToAssign = await this.findOneRole({ name: roleName })
 
     if (!roleToAssign) {
       const newRoleInput = new CreateRoleInput(createUserInput.roleName)
@@ -154,10 +154,9 @@ export class UsersService {
       )
 
     if (updateUserInput.roleName) {
-      let roleToAssign = await this.findOneRole(
-        undefined,
-        updateUserInput.roleName,
-      )
+      let roleToAssign = await this.findOneRole({
+        name: updateUserInput.roleName,
+      })
 
       if (!roleToAssign) {
         roleToAssign = await this.createRole(
@@ -186,15 +185,14 @@ export class UsersService {
     return this.roleRepository.find({ relations: ['members'] })
   }
 
-  findOneRole(id?: string, roleName?: RoleName) {
-    return this.roleRepository.findOne(id, {
-      relations: ['members'],
-      where: roleName ? { name: roleName } : undefined,
+  findOneRole(options: FindConditions<Role>, relations?: string[]) {
+    return this.roleRepository.findOne(options, {
+      relations,
     })
   }
 
   async removeRole(id: string) {
-    const roleToDelete = await this.findOneRole(id)
+    const roleToDelete = await this.findOneRole({ id })
 
     return this.roleRepository.remove(roleToDelete)
   }
@@ -213,7 +211,7 @@ export class UsersService {
         `User role ${roleName} was not found on User with id ${userId}.`,
       )
 
-    const roleToRevoke = await this.findOneRole(undefined, roleName)
+    const roleToRevoke = await this.findOneRole({ name: roleName })
 
     if (!roleToRevoke)
       throw new NotFoundException(`Role with name ${roleName} was not found.`)
