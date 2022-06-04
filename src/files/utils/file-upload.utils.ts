@@ -27,3 +27,19 @@ export const documentFileFilter = (fileName: string) => {
     )
   return true
 }
+
+export const spreadSheetFileFilter = (fileName: string) => {
+  const fileExtName = extname(fileName)
+  const allowedExtensions = ['xlsx', 'csv']
+  if (!allowedExtensions.includes(fileExtName.slice(1))) {
+    throw new BadRequestException(
+      'Only one of these document formats (xlsx, csv) are allowed.',
+    )
+  }
+  // optional guard
+  if (!fileName.match(/.*\.(xlsx|csv)$/gim))
+    throw new BadRequestException(
+      'Only one of these document formats (xlsx, csv) are allowed.',
+    )
+  return true
+}
