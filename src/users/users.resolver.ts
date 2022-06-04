@@ -260,7 +260,7 @@ export class RoleResolver {
 
   @Query('role')
   findOneRole(@Args('id', ParseUUIDPipe) id: string) {
-    return this.usersService.findOneRole(id)
+    return this.usersService.findOneRole({ id }, ['members'])
   }
 
   @Mutation('revokeUserRole')
