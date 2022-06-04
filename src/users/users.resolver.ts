@@ -28,11 +28,8 @@ import { CreateStudentClassInput } from './dto/create-student-class.input'
 import { UUIDArrayDto } from 'src/app/dto/uuid-array.dto'
 import { Department } from './entities/department.entity'
 import { FileUpload } from 'graphql-upload'
-import { pipeline, Writable } from 'stream'
-import toArray from 'stream-to-array'
-import BufferList from 'bl/BufferList'
-import BufferListStream from 'bl'
 import arrayifyStream from 'arrayify-stream'
+import { spreadSheetFileFilter } from 'src/files/utils/file-upload.utils'
 
 @Resolver('User')
 export class UserResolver {
@@ -51,17 +48,9 @@ export class UserResolver {
   @Mutation('createMultipleUsers')
   async createMultipleUsers(@Args('input') input: CreateMultipleUsersInput) {
     const { file } = input
-    const { createReadStream }: FileUpload = await file
+    const { createReadStream, filename }: FileUpload = await file
+    spreadSheetFileFilter(filename)
     const readStream = createReadStream()
-    // const fileBuffer =
-    // const fileBuffer: Buffer = await new Promise((resolve, reject) => {
-    //   readStream.pipe(
-    //     new BufferListStream((err, data) => {
-    //       if (err) return reject(err)
-    //       resolve(data)
-    //     }),
-    //   )
-    // })
     const fileBuffer = await arrayifyStream(readStream)
     const users = this.usersService.parseWorkbook(fileBuffer[0], input)
     return this.usersService.createMany(users, input.roleName)
