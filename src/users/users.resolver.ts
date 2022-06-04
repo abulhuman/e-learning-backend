@@ -12,18 +12,31 @@ import { UpdateUserInput } from './dto/update-user.input'
 import { CreateRoleInput } from './dto/create-role.input'
 import { Role } from './entities/role.entity'
 import { User } from './entities/user.entity'
-import { ParseBoolPipe, ParseUUIDPipe, UseFilters } from '@nestjs/common'
+import {
+  InternalServerErrorException,
+  Logger,
+  ParseBoolPipe,
+  ParseUUIDPipe,
+  UseFilters,
+} from '@nestjs/common'
 import { QueryFailedExceptionFilter } from 'src/database/filters/query-failed-exception.filter'
-import { RoleName } from 'src/graphql'
+import { CreateMultipleUsersInput, RoleName } from 'src/graphql'
 import { NotificationService } from 'src/notification/notification.service'
 import { UpdateStudentClassInput } from './dto/update-student-class.input'
 import { StudentClass } from './entities/student-class.entity'
 import { CreateStudentClassInput } from './dto/create-student-class.input'
 import { UUIDArrayDto } from 'src/app/dto/uuid-array.dto'
 import { Department } from './entities/department.entity'
+import { FileUpload } from 'graphql-upload'
+import { pipeline, Writable } from 'stream'
+import toArray from 'stream-to-array'
+import BufferList from 'bl/BufferList'
+import BufferListStream from 'bl'
+import arrayifyStream from 'arrayify-stream'
 
 @Resolver('User')
 export class UserResolver {
+  private readonly logger = new Logger(UserResolver.name)
   constructor(
     private readonly usersService: UsersService,
     private notificationService: NotificationService,
@@ -33,6 +46,25 @@ export class UserResolver {
   @Mutation('createUser')
   createUser(@Args('createUserInput') createUserInput: CreateUserInput) {
     return this.usersService.createUser(createUserInput)
+  }
+
+  @Mutation('createMultipleUsers')
+  async createMultipleUsers(@Args('input') input: CreateMultipleUsersInput) {
+    const { file } = input
+    const { createReadStream }: FileUpload = await file
+    const readStream = createReadStream()
+    // const fileBuffer =
+    // const fileBuffer: Buffer = await new Promise((resolve, reject) => {
+    //   readStream.pipe(
+    //     new BufferListStream((err, data) => {
+    //       if (err) return reject(err)
+    //       resolve(data)
+    //     }),
+    //   )
+    // })
+    const fileBuffer = await arrayifyStream(readStream)
+    const users = this.usersService.parseWorkbook(fileBuffer[0], input)
+    return this.usersService.createMany(users, input.roleName)
   }
 
   @Query('users')

@@ -25,6 +25,12 @@ input CreateUserInput {
   password: String!
 }
 
+input CreateMultipleUsersInput {
+  file: Upload!
+  roleName: RoleName!
+  password: String
+}
+
 input UpdateUserInput {
   id: ID!
   firstName: String
@@ -82,6 +88,7 @@ type Query {
 
 type Mutation {
   createUser(createUserInput: CreateUserInput!): User!
+  createMultipleUsers(input: CreateMultipleUsersInput!): Int!
   updateUser(updateUserInput: UpdateUserInput!): User!
   removeUser(id: ID!): User
 
