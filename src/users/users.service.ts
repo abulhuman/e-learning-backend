@@ -58,7 +58,7 @@ export class UsersService {
     })
   }
 
-  findOneUserById(
+  async findOneUserById(
     id: string,
     withRoles = true,
     withNotifications = false,
@@ -70,7 +70,7 @@ export class UsersService {
     withAttendingCourses = false,
     withOwnedCourses = false,
   ): Promise<User> {
-    const user = this.findOne(
+    const user = await this.findOne(
       { id },
       withRoles,
       withNotifications,
