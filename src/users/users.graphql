@@ -11,6 +11,9 @@ type User {
   teachingClasses: [StudentClass]
   roles: [Role]!
   courses: [Course]
+    @deprecated(
+      reason: "Use `teachingCourses` for teachers; `attendingCourses` for students; `ownedCourses` for courseOnwer."
+    )
   teachingCourses: [Course]
   attendingCourses: [Course]
   ownedCourses: [Course]
