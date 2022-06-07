@@ -7,7 +7,7 @@ type Course {
   description: String!
   overview: String!
   creditHour: Int!
-  users: [User]
+  users: [User] @deprecated(reason: "Use `teachers` or `students` or `owner`")
   teachers: [User]
   students: [User]
   owner: User
