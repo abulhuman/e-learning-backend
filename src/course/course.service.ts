@@ -328,10 +328,6 @@ export class CourseService {
       const course = await this.findOneCourse(courseId)
 
       course?.teachers.push(user)
-      if (!user?.teachingCourses) user.teachingCourses = []
-      user.teachingCourses.push(course)
-
-      await this.userRepository.save(user)
       await this.courseRepository.save(course)
     } catch (error) {
       const { status } = error
