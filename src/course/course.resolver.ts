@@ -1,4 +1,9 @@
-import { HttpException, ParseUUIDPipe } from '@nestjs/common'
+import {
+  BadRequestException,
+  HttpException,
+  NotFoundException,
+  ParseUUIDPipe,
+} from '@nestjs/common'
 import {
   Resolver,
   Query,
@@ -99,9 +104,12 @@ export class CourseResolver {
     @Args('teacherId', ParseUUIDPipe) teacherId: string,
   ) {
     try {
-      this.courseService.assignTeacherToCourse(courseId, teacherId)
+      await this.courseService.assignTeacherToCourse(courseId, teacherId)
     } catch (error) {
-      return false
+      const { status } = error
+      throw status === 404
+        ? new NotFoundException(error.response, status)
+        : new BadRequestException(error.response)
     }
     // todo send notification
     // if (updatedCourse.users.some(user => user.id === userId)) {
