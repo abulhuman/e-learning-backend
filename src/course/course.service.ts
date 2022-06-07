@@ -314,27 +314,33 @@ export class CourseService {
   }
 
   async assignTeacherToCourse(courseId: any, teacherId: any) {
-    const user = await this.usersService.findOneUserById(teacherId, true)
-    const userRoles = user.roles.map(role => role.name)
-    if (
-      !userRoles.includes(RoleName.COURSE_TEACHER) ||
-      !userRoles.includes(RoleName.TEACHER)
-    )
-      throw new BadRequestException(
-        `User with id: ${teacherId} is not a teacher.`,
-      )
-    const course = await this.findOneCourse(courseId)
-
-    course?.teachers.push(user)
-    if (!user?.teachingCourses) user.teachingCourses = []
-    user.teachingCourses.push(course)
+    let user: User
     try {
-      this.userRepository.save(user)
-      this.courseRepository.save(course)
-      return true
+      user = await this.usersService.findOneUserById(teacherId, true)
+      const userRoles = user.roles.map(role => role.name)
+      if (
+        !userRoles.includes(RoleName.COURSE_TEACHER) ||
+        !userRoles.includes(RoleName.TEACHER)
+      )
+        throw new BadRequestException(
+          `User with id: ${teacherId} is not a teacher.`,
+        )
+      const course = await this.findOneCourse(courseId)
+
+      course?.teachers.push(user)
+      if (!user?.teachingCourses) user.teachingCourses = []
+      user.teachingCourses.push(course)
+
+      await this.userRepository.save(user)
+      await this.courseRepository.save(course)
     } catch (error) {
-      return false
+      const { status } = error
+
+      throw status === 404
+        ? new NotFoundException(error.response)
+        : new BadRequestException(error.response)
     }
+    return true
   }
 
   async assignClassToCourse(courseId: string, classId: string) {
