@@ -5,9 +5,11 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   TableInheritance,
 } from 'typeorm'
+import { Question } from './question.entity'
 import { Quiz } from './quiz.entity'
 
 @Entity()
@@ -31,6 +33,11 @@ export class QuizSection implements IQuizSection {
     onDelete: 'CASCADE',
   })
   quiz: Quiz
+
+  @OneToMany(() => Question, (question: Question) => question.section, {
+    cascade: true,
+  })
+  questions: Question[]
 }
 
 @ChildEntity()

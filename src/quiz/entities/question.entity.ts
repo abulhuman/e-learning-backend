@@ -18,6 +18,7 @@ import {
   PrimaryGeneratedColumn,
   TableInheritance,
 } from 'typeorm'
+import { QuizSection } from './quiz-section.entity'
 
 @Entity()
 @TableInheritance({ column: { name: 'type', type: 'varchar' } })
@@ -30,6 +31,11 @@ export class Question implements IQuestion {
 
   @Column()
   number: number
+
+  @ManyToOne(() => QuizSection, section => section.questions, {
+    onDelete: 'CASCADE',
+  })
+  section: QuizSection
 }
 
 @ChildEntity()

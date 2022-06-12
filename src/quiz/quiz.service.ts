@@ -1,11 +1,24 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import * as moment from 'moment'
-import { CreateQuizInput, QuizSectionType } from 'src/graphql'
+import {
+  AnswerTrueFalse,
+  CreateQuizInput,
+  QuestionType,
+  QuizSectionType,
+} from 'src/graphql'
 import { FindConditions, Repository } from 'typeorm'
 import {
+  Essay,
+  TrueFalse,
+  Cloze,
+  MultipleChoice,
+  SubQuestion,
+  Choice,
+  Question,
+} from './entities/question.entity'
+import {
   ObjectiveQuizSection,
-  QuizSection,
   SubjectiveQuizSection,
 } from './entities/quiz-section.entity'
 import { Quiz } from './entities/quiz.entity'
@@ -35,10 +48,142 @@ export class QuizService {
     const newQuiz = this.quizRepo.create(input)
     newQuiz.sections = input.sections.map(sectionInput => {
       const newSection =
-        sectionInput.sectionType === QuizSectionType.OBJECTIVE
+        sectionInput.type === QuizSectionType.OBJECTIVE
           ? new ObjectiveQuizSection()
           : new SubjectiveQuizSection()
       newSection.description = sectionInput.description
+      newSection.number = sectionInput.number
+      newSection.questions = sectionInput.questions.map(questionInput => {
+        if (sectionInput.type === QuizSectionType.OBJECTIVE) {
+          if (
+            questionInput.type !== QuestionType.TRUE_FALSE &&
+            questionInput.type !== QuestionType.MULTIPLE_CHOICE
+          ) {
+            throw new BadRequestException(
+              `Bad Question type, must be Objective question : ${questionText(
+                questionInput.number,
+                sectionInput.number,
+              )}`,
+            )
+          }
+        } else {
+          if (
+            questionInput.type !== QuestionType.CLOZE &&
+            questionInput.type !== QuestionType.ESSAY
+          ) {
+            ;`Bad Question type, must be Subjective Question : ${questionText(
+              questionInput.number,
+              sectionInput.number,
+            )}`
+          }
+        }
+        switch (questionInput.type) {
+          case QuestionType.TRUE_FALSE: {
+            const { number, text, answer } = questionInput
+            if (!answer) {
+              throw new BadRequestException(
+                `Missing 'answer' value : ${questionText(
+                  number,
+                  sectionInput.number,
+                )}`,
+              )
+            }
+            if (
+              answer !== AnswerTrueFalse.TRUE &&
+              answer !== AnswerTrueFalse.FALSE
+            ) {
+              throw new BadRequestException(
+                `Invalid answer value. Must be 'TRUE' or 'FALSE' : ${questionText(
+                  number,
+                  sectionInput.number,
+                )}`,
+              )
+            }
+            const trueFalseQuestion = new TrueFalse()
+            trueFalseQuestion.text = text
+            trueFalseQuestion.number = number
+            trueFalseQuestion.answer =
+              answer === AnswerTrueFalse.TRUE
+                ? AnswerTrueFalse.TRUE
+                : AnswerTrueFalse.FALSE
+            return trueFalseQuestion
+          }
+          case QuestionType.ESSAY: {
+            const { text, number, answer } = questionInput
+            if (!answer) {
+              throw new BadRequestException(
+                `Missing 'answer' value : ${questionText(
+                  number,
+                  sectionInput.number,
+                )}`,
+              )
+            }
+            const essayQuestion = new Essay()
+            essayQuestion.number = number
+            essayQuestion.text = text
+            essayQuestion.answer = answer
+            return essayQuestion
+          }
+          case QuestionType.CLOZE: {
+            const { number, text, subQuestions } = questionInput
+            if (!subQuestions || !subQuestions.length) {
+              throw new BadRequestException(
+                `Missing sub questions : ${questionText(
+                  number,
+                  sectionInput.number,
+                )}`,
+              )
+            }
+            const essayQuestion = new Cloze()
+            essayQuestion.number = number
+            essayQuestion.text = text
+            essayQuestion.subQuestions = subQuestions.map(subQuestionInput => {
+              const { answer, number } = subQuestionInput
+              const subQuestion = new SubQuestion()
+              subQuestion.number = number
+              subQuestion.answer = answer
+              return subQuestion
+            })
+            return essayQuestion
+          }
+          case QuestionType.MULTIPLE_CHOICE: {
+            const { number, text, answer, choices } = questionInput
+            if (!answer) {
+              throw new BadRequestException(
+                `Missing 'answer' value : ${questionText(
+                  number,
+                  sectionInput.number,
+                )}`,
+              )
+            }
+            if (!choices || !choices.length) {
+              throw new BadRequestException(
+                `Missing choices : ${questionText}for question ${number} of section ${sectionInput.number}`,
+              )
+            }
+            //answer text is one of the keys of the choices
+            const answerIsInKeys = choices.some(choice => choice.key === answer)
+            if (!answerIsInKeys) {
+              throw new BadRequestException(
+                `Question answer must be one of the choice : ${questionText(
+                  number,
+                  sectionInput.number,
+                )}`,
+              )
+            }
+            const multipleChoiceQuestion = new MultipleChoice()
+            multipleChoiceQuestion.text = text
+            multipleChoiceQuestion.number = number
+            multipleChoiceQuestion.choices = choices.map(choiceInput => {
+              const choice = new Choice()
+              choice.key = choiceInput.key
+              choice.text = choiceInput.text
+              return choice
+            })
+            return multipleChoiceQuestion
+          }
+        }
+      })
       return newSection
     })
     return this.quizRepo.save(newQuiz)
@@ -59,4 +204,8 @@ export class QuizService {
   private findMany(quizzes?: FindConditions<Quiz>) {
     return this.quizRepo.find(quizzes)
   }
+}
+
+function questionText(questionNumber: number, sectionNumber: number) {
+  return `Question ${questionNumber} of Section ${sectionNumber}`
 }

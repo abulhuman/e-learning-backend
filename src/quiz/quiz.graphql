@@ -21,6 +21,7 @@ input CreateQuizInput {
 input CreateQuizSectionInput {
   type: QuizSectionType!
   description: String
+  questions: [CreateQuestionInput]!
   number: Int!
 }
 
@@ -35,6 +36,26 @@ type QuizSection {
   sectionType: String
   number: Int!
   quiz: Quiz!
+  questions: [Question]!
+}
+
+input CreateSubQuestionInput {
+  number: Int!
+  answer: String!
+}
+
+input CreateChoiceInput {
+  key: String!
+  text: String!
+}
+
+input CreateQuestionInput {
+  type: QuestionType!
+  text: String!
+  number: Int!
+  answer: String
+  subQuestions: [CreateSubQuestionInput]
+  choices: [CreateChoiceInput]
 }
 
 enum QuestionType {
