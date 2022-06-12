@@ -112,8 +112,8 @@ export class UserResolver {
   }
 
   @ResolveField('roles')
-  roles(@Parent() user: User) {
-    return user.roles
+  async roles(@Parent() user: User) {
+    return (await this.usersService.findOneUserById(user.id, true)).roles
   }
 
   @ResolveField('notifications')
