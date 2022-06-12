@@ -7,8 +7,13 @@ type User {
   lastName: String!
   email: String!
   password: String!
+  attendingClass: StudentClass
+  learningClasses: [StudentClass]
   roles: [Role]!
   courses: [Course]
+  notifications: [Notification]
+  department: Department
+  assignmentSubmissions: [AssignmentSubmission]
 }
 
 input CreateUserInput {
@@ -18,6 +23,12 @@ input CreateUserInput {
   roleName: RoleName!
   email: String!
   password: String!
+}
+
+input CreateMultipleUsersInput {
+  file: Upload!
+  roleName: RoleName!
+  password: String
 }
 
 input UpdateUserInput {
@@ -30,20 +41,85 @@ input UpdateUserInput {
   roleName: RoleName
 }
 
+type StudentClass {
+  id: ID!
+  created_at: Date!
+  updated_at: Date
+  year: String!
+  section: String!
+  teachers: [User]
+  students: [User]
+  department: Department
+}
+
+input CreateStudentClassInput {
+  year: String!
+  section: String!
+  departmentId: ID!
+}
+
+input UpdateStudentClassInput {
+  id: ID!
+  year: String
+  section: String
+}
+
+type Department {
+  id: ID!
+  created_at: Date!
+  updated_at: Date
+  name: String!
+  classes: [StudentClass]
+  departmentAdministrator: User
+}
+
 type Query {
   users: [User]!
+  getAllStudentsByClassId(classId: ID!): [User]
+  getAllNewDepartmentAdministrators: [User]
   user(id: ID!): User
   roles: [Role]!
   role(id: ID!): Role
+  studentClasses: [StudentClass]!
+  studentClass(id: ID!): StudentClass!
+  departments: [Department]!
+  department(id: ID!): Department!
 }
 
 type Mutation {
   createUser(createUserInput: CreateUserInput!): User!
+  createMultipleUsers(input: CreateMultipleUsersInput!): Int!
   updateUser(updateUserInput: UpdateUserInput!): User!
   removeUser(id: ID!): User
 
   createRole(createRoleInput: CreateRoleInput!): Role!
   revokeUserRole(userId: ID!, roleName: RoleName!): User!
+
+  createStudentClass(
+    createStudentClassInput: CreateStudentClassInput!
+  ): StudentClass!
+  updateStudentClass(
+    updateStudentClassInput: UpdateStudentClassInput!
+  ): StudentClass!
+  deleteStudentClass(id: ID!, removeStudents: Boolean = false): Boolean!
+
+  admitStudentToClass(studentId: ID!, classId: ID!): Boolean!
+  admitStudentsToClass(studentIds: UUIDArrayDto!, classId: ID!): Boolean!
+  assignTeacherToClass(teacherId: ID!, classId: ID!): Boolean!
+
+  promoteStudentFromClass(studentId: ID!, classId: ID!): Boolean!
+  promoteStudentsFromClass(studentIds: UUIDArrayDto!, classId: ID!): Boolean!
+  dismissTeacherFromClass(teacherId: ID!, classId: ID!): Boolean!
+
+  createDepartment(name: String!): Department!
+  updateDepartment(id: ID!, name: String): Department!
+  removeDepartment(id: ID!): Boolean
+
+  addClassToDepartment(departmentId: ID!, classId: ID!): Boolean!
+  removeClassFromDepartment(departmentId: ID!, classId: ID!): Boolean!
+
+  appointDepartmentAdministrator(departmentId: ID!, userId: ID!): Boolean!
+  dismissDepartmentAdministrator(departmentId: ID!, userId: ID!): Boolean!
 }
 
 type Role {

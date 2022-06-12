@@ -1,0 +1,74 @@
+type AssignmentDefinition {
+  id: ID!
+  created_at: Date!
+  updated_at: Date
+  name: String!
+  submissionDeadline: Date!
+  instructionsFile: CourseDocument!
+  submissions: [AssignmentSubmission]
+  course: Course!
+}
+
+input CreateAssignmentDefinitionInput {
+  submissionDeadline: Date!
+  instructionsFileId: ID!
+  courseId: ID!
+  name: String!
+}
+
+input UpdateAssignmentDefinitionInput {
+  id: ID!
+  submissionDeadline: Date
+  instructionsFileId: ID
+  name: String!
+}
+
+type AssignmentSubmission {
+  id: ID!
+  created_at: Date!
+  updated_at: Date
+  submissionDate: Date!
+  submissionFile: CourseDocument!
+  definition: AssignmentDefinition!
+  submittedBy: User!
+}
+
+input CreateAssignmentSubmissionInput {
+  submissionDate: Date!
+  submissionFileId: ID!
+  definitionId: ID!
+  studentId: ID!
+  replaceFile: Boolean = false
+}
+
+input UpdateAssignmentSubmissionInput {
+  id: ID!
+  submissionDate: Date
+  submissionFileId: ID
+  replaceFile: Boolean = false
+}
+
+type Query {
+  assignmentDefinitions(courseId: ID!): [AssignmentDefinition]!
+  assignmentDefinition(id: ID!): AssignmentDefinition
+  assignmentSubmissions(assignmentDefinitionId: ID!): [AssignmentSubmission]!
+  assignmentSubmission(id: ID!): AssignmentSubmission
+}
+
+type Mutation {
+  createAssignmentDefinition(
+    createAssignmentDefinitionInput: CreateAssignmentDefinitionInput!
+  ): AssignmentDefinition!
+  updateAssignmentDefinition(
+    updateAssignmentDefinitionInput: UpdateAssignmentDefinitionInput!
+  ): AssignmentDefinition!
+  removeAssignmentDefinition(id: ID!): Boolean
+
+  createAssignmentSubmission(
+    createAssignmentSubmissionInput: CreateAssignmentSubmissionInput!
+  ): AssignmentSubmission!
+  updateAssignmentSubmission(
+    updateAssignmentSubmissionInput: UpdateAssignmentSubmissionInput!
+  ): AssignmentSubmission!
+  removeAssignmentSubmission(id: ID!): Boolean!
+}

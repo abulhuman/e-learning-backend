@@ -2,26 +2,40 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { GraphQLModule } from '@nestjs/graphql'
+import { PassportModule } from '@nestjs/passport'
+import { ServeStaticModule } from '@nestjs/serve-static'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { GraphQLUpload } from 'graphql-upload'
 import * as Joi from 'joi'
 import { join } from 'node:path'
-import { DatabaseModule } from './database/database.module'
+import appConfigValidation from './app.config'
+import { AppService } from './app/app.service'
+import authConfigValidation from './auth/auth.config'
 import { AuthModule } from './auth/auth.module'
-import { UsersModule } from './users/users.module'
-import { TypeOrmModule } from '@nestjs/typeorm'
 import { Session } from './auth/entities/session.entity'
-import { PassportModule } from '@nestjs/passport'
 import { CourseModule } from './course/course.module'
+import { databaseConfigValidation } from './database/database.config'
+import { DatabaseModule } from './database/database.module'
+import emailConfigValidation from './mail/mail.config'
+import { MailModule } from './mail/mail.module'
+import { NotificationModule } from './notification/notification.module'
+import { telegramConfigValidation } from './telegram/telegram.config'
+import { TelegramModule } from './telegram/telegram.module'
+import { UsersModule } from './users/users.module'
+import { AssignmentModule } from './assignment/assignment.module'
+import { ScheduleModule } from '@nestjs/schedule'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       validationSchema: Joi.object({
-        NODE_ENV: Joi.string().valid('development', 'production').optional(),
-        DATABASE_URL: Joi.string().required(),
-        PORT: Joi.number().required(),
-        SESSION_SECRET: Joi.string().required(),
-        COOKIE_MAX_AGE: Joi.number().default(4.32e7),
+        ...appConfigValidation,
+        ...authConfigValidation,
+        ...databaseConfigValidation,
+        ...emailConfigValidation,
+        ...telegramConfigValidation,
       }),
+      expandVariables: true,
     }),
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       imports: [ConfigModule],
@@ -34,6 +48,8 @@ import { CourseModule } from './course/course.module'
           path: join(process.cwd(), 'src/graphql.ts'),
         },
         emitTypenameField: true,
+        installSubscriptionHandlers: true,
+        resolvers: { Upload: GraphQLUpload },
       }),
     }),
     DatabaseModule,
@@ -44,6 +60,17 @@ import { CourseModule } from './course/course.module'
     PassportModule.register({
       session: true,
     }),
+    MailModule,
+    TelegramModule,
+    NotificationModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, 'upload'),
+      serveRoot: '/upload',
+    }),
+    AssignmentModule,
+    ScheduleModule.forRoot(),
   ],
+  providers: [AppService],
+  exports: [AppService],
 })
 export class AppModule {}

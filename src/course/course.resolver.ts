@@ -1,5 +1,13 @@
 import { ParseUUIDPipe } from '@nestjs/common'
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql'
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql'
+import { NotificationService } from 'src/notification/notification.service'
 import { CourseService } from './course.service'
 import { CreateChapterInput } from './dto/create-chapter.input'
 import { CreateCourseDocumentInput } from './dto/create-course-document.input'
@@ -9,10 +17,22 @@ import { UpdateChapterInput } from './dto/update-chapter.input'
 import { UpdateCourseDocumentInput } from './dto/update-course-document.input'
 import { UpdateCourseInput } from './dto/update-course.input'
 import { UpdateSubChapterInput } from './dto/update-sub-chapter.input'
+import { NotificationType } from 'src/graphql'
+
+import { createWriteStream } from 'node:fs'
+import {
+  documentFileFilter,
+  editFileName,
+} from 'src/files/utils/file-upload.utils'
+import { join } from 'node:path'
+import { Course } from './entities/course.entity'
 
 @Resolver('Course')
 export class CourseResolver {
-  constructor(private readonly courseService: CourseService) {}
+  constructor(
+    private readonly courseService: CourseService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   @Mutation('createCourse')
   createCourse(
@@ -45,13 +65,30 @@ export class CourseResolver {
   findOne(@Args('id', ParseUUIDPipe) id: string) {
     return this.courseService.findOneCourse(id)
   }
+  @ResolveField('courseDocuments')
+  findCourseDocuments(@Parent() course: Course) {
+    return this.courseService.findCourseDocumentsForCourse(course.id)
+  }
 
   @Mutation('assignUserToCourse')
-  assignUserToCourse(
+  async assignUserToCourse(
     @Args('courseId', ParseUUIDPipe) courseId: string,
     @Args('userId', ParseUUIDPipe) userId: string,
   ) {
-    return this.courseService.assignUserToCourse(courseId, userId)
+    const updatedCourse = await this.courseService.assignUserToCourse(
+      courseId,
+      userId,
+    )
+    if (updatedCourse.users.some(user => user.id === userId)) {
+      const notification = await this.notificationService.create({
+        data: JSON.stringify(updatedCourse),
+        recipientId: userId,
+        type: NotificationType.COURSE_ADDITION,
+      })
+      await this.notificationService.dispatch(notification)
+      return true
+    }
+    return false
   }
 
   @Mutation('unassignUserFromCourse')
@@ -107,11 +144,25 @@ export class CourseResolver {
   }
 
   @Mutation('createCourseDocument')
-  createCourseDocument(
+  async createCourseDocument(
     @Args('createCourseDocumentInput')
     createCourseDocumentInput: CreateCourseDocumentInput,
   ) {
-    return this.courseService.createOneCourseDocument(createCourseDocumentInput)
+    const { fileUpload } = createCourseDocumentInput
+    const { createReadStream, filename } = await fileUpload
+    documentFileFilter(filename)
+    const storedFileName = editFileName(filename)
+    await new Promise((resolve, reject) => {
+      const readStream = createReadStream()
+      readStream
+        .pipe(createWriteStream(join(__dirname, '../upload', storedFileName)))
+        .on('close', resolve)
+        .on('error', reject)
+    })
+    return this.courseService.createOneCourseDocument(
+      createCourseDocumentInput,
+      storedFileName,
+    )
   }
 
   @Mutation('updateCourseDocument')

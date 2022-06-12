@@ -1,5 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
+import { TelegramAccount } from 'src/telegram/entities/telegram-account.entity'
 import { UsersService } from 'src/users/users.service'
 import { Repository } from 'typeorm'
 import { CreateChapterInput } from './dto/create-chapter.input'
@@ -57,17 +62,18 @@ export class CourseService {
 
   async createOneCourseDocument(
     createCourseDocumentInput: CreateCourseDocumentInput,
+    storedFileName: string,
   ) {
     const { courseId } = createCourseDocumentInput
     delete createCourseDocumentInput.courseId
-
-    // todo handle fileuplaod??
+    delete createCourseDocumentInput.fileUpload
 
     const newCourseDocument = this.courseDocumentRepository.create(
       createCourseDocumentInput,
     )
+    newCourseDocument.storedFileName = storedFileName
     newCourseDocument.course = await this.findOneCourse(courseId)
-    return await this.chapterRepository.save(newCourseDocument)
+    return await this.courseDocumentRepository.save(newCourseDocument)
   }
 
   findAllCourses() {
@@ -76,8 +82,48 @@ export class CourseService {
     })
   }
 
+  findCoursesForUser(userId: string) {
+    return this.courseRepository
+      .createQueryBuilder('course')
+      .leftJoin('course.users', 'user')
+      .where('user.id = :id', { id: userId })
+      .getMany()
+  }
+
+  findUsersInCourse(courseId: string) {
+    return this.courseRepository
+      .createQueryBuilder('course')
+      .leftJoinAndSelect('course.users', 'user')
+      .where('course.id = :id', { id: courseId })
+      .getOne()
+      .then(course => course.users)
+  }
+
+  findUsersWithAccounts(courseId: string) {
+    return this.courseRepository
+      .createQueryBuilder('course')
+      .leftJoinAndSelect('course.users', 'user')
+      .where('course.id = :id', { id: courseId })
+      .innerJoinAndSelect(
+        TelegramAccount,
+        'account',
+        'account.userId = user.id',
+      )
+      .getOne()
+      .then(course => course.users)
+  }
+
   findAllChapters() {
     return this.chapterRepository.find({ relations: ['course', 'subChapters'] })
+  }
+
+  findChaptersForCourse(courseId: string) {
+    return this.chapterRepository
+      .createQueryBuilder('chapter')
+      .leftJoin('chapter.course', 'course')
+      .leftJoinAndSelect('chapter.subChapters', 'subChapter')
+      .where('course.id = :id', { id: courseId })
+      .getMany()
   }
 
   findAllSubChapters() {
@@ -86,6 +132,14 @@ export class CourseService {
 
   findAllCourseDocuments() {
     return this.courseDocumentRepository.find({ relations: ['course'] })
+  }
+
+  findCourseDocumentsForCourse(courseId: string) {
+    return this.courseDocumentRepository
+      .createQueryBuilder('courseDocument')
+      .leftJoin('courseDocument.course', 'course')
+      .where('course.id = :id', { id: courseId })
+      .getMany()
   }
 
   findOneCourse(id: string) {
@@ -102,8 +156,15 @@ export class CourseService {
     return this.subChapterRepository.findOne(id)
   }
 
-  findOneCourseDocument(id: string) {
-    return this.courseDocumentRepository.findOne(id)
+  async findOneCourseDocument(id: string) {
+    const courseDocument = await this.courseDocumentRepository.findOne(id, {
+      relations: ['assignmentSubmission'],
+    })
+    if (!courseDocument)
+      throw new NotFoundException(
+        `Course document with id: ${id} was not found.`,
+      )
+    return courseDocument
   }
 
   async updateCourse(id: string, updateCourseInput: UpdateCourseInput) {
@@ -138,22 +199,54 @@ export class CourseService {
 
   async removeCourse(id: string) {
     const courseToDelete = await this.findOneCourse(id)
-    return this.courseRepository.remove(courseToDelete)
+    return (
+      this.courseRepository
+        .remove(courseToDelete)
+        .then(res => {
+          return !!res
+        })
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .catch(_err => false)
+    )
   }
 
   async removeChapter(id: string) {
     const chapterToDelete = await this.findOneChapter(id)
-    return this.chapterRepository.remove(chapterToDelete)
+    return (
+      this.chapterRepository
+        .remove(chapterToDelete)
+        .then(res => {
+          return !!res
+        })
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .catch(_err => false)
+    )
   }
 
   async removeSubChapter(id: string) {
     const subChapterToDelete = await this.findOneSubChapter(id)
-    return this.subChapterRepository.remove(subChapterToDelete)
+    return (
+      this.subChapterRepository
+        .remove(subChapterToDelete)
+        .then(res => {
+          return !!res
+        })
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .catch(_err => false)
+    )
   }
 
   async removeCourseDocument(id: string) {
     const courseDocumentToDelete = await this.findOneCourseDocument(id)
-    return this.courseDocumentRepository.remove(courseDocumentToDelete)
+    return (
+      this.courseDocumentRepository
+        .remove(courseDocumentToDelete)
+        .then(res => {
+          return !!res
+        })
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .catch(_err => false)
+    )
   }
 
   async assignUserToCourse(courseId: any, userId: any) {
@@ -162,9 +255,7 @@ export class CourseService {
 
     course?.users.push(user)
 
-    const updatedCourse = await this.courseRepository.save(course)
-
-    return updatedCourse.users.includes(user)
+    return this.courseRepository.save(course)
   }
 
   async unassignUserFromCourse(courseId: string, userId: string) {

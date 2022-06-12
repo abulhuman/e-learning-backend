@@ -1,5 +1,8 @@
-import { IsNotEmpty, IsString, IsUrl, IsUUID } from 'class-validator'
-import { CreateCourseDocumentInput as ICreateCourseDocumentInput } from 'src/graphql'
+import { IsNotEmpty, IsString, IsUUID } from 'class-validator'
+import {
+  CreateCourseDocumentInput as ICreateCourseDocumentInput,
+  Upload,
+} from 'src/graphql'
 
 export class CreateCourseDocumentInput implements ICreateCourseDocumentInput {
   @IsNotEmpty()
@@ -8,11 +11,10 @@ export class CreateCourseDocumentInput implements ICreateCourseDocumentInput {
 
   @IsNotEmpty()
   @IsString()
-  documentName: string
+  documentDisplayName: string
 
   @IsNotEmpty()
-  @IsUrl()
-  documentURL: string
+  fileUpload: Upload
 
   @IsNotEmpty()
   @IsUUID()

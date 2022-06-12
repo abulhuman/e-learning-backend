@@ -31,6 +31,8 @@ export class SubChapter implements ISubChapter {
   @Column({ nullable: true })
   chapterId: string
 
-  @ManyToOne(() => Chapter, (chapter: Chapter) => chapter.subChapters)
+  @ManyToOne(() => Chapter, (chapter: Chapter) => chapter.subChapters, {
+    onDelete: 'CASCADE',
+  })
   chapter: Chapter
 }
