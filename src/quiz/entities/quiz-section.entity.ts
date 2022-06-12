@@ -24,6 +24,9 @@ export class QuizSection implements IQuizSection {
   @CreateDateColumn()
   created_at: Date
 
+  @Column()
+  number: number
+
   @ManyToOne(() => Quiz, quiz => quiz.sections, {
     onDelete: 'CASCADE',
   })

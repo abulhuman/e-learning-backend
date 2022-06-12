@@ -19,8 +19,9 @@ input CreateQuizInput {
 }
 
 input CreateQuizSectionInput {
-  sectionType: QuizSectionType!
+  type: QuizSectionType!
   description: String
+  number: Int!
 }
 
 enum QuizSectionType {
@@ -32,6 +33,7 @@ type QuizSection {
   id: ID!
   description: String
   sectionType: String
+  number: Int!
   quiz: Quiz!
 }
 
@@ -49,12 +51,16 @@ type Question {
   questionType: QuestionType
 }
 
+enum AnswerTrueFalse {
+  TRUE
+  FALSE
+}
 type TrueFalse {
   id: ID!
   text: String!
   number: Int!
   questionType: QuestionType!
-  answer: Boolean
+  answer: AnswerTrueFalse!
 }
 
 type MultipleChoice {
@@ -63,7 +69,7 @@ type MultipleChoice {
   number: Int!
   questionType: QuestionType!
   choices: [Choice]!
-  answer: String
+  answer: String!
 }
 
 type Cloze {
@@ -79,7 +85,7 @@ type Essay {
   text: String!
   number: Int!
   questionType: QuestionType!
-  answer: String
+  answer: String!
 }
 
 type Choice {
@@ -92,7 +98,7 @@ type Choice {
 type SubQuestion {
   id: ID!
   number: Int!
-  answer: String
+  answer: String!
   question: Cloze!
 }
 

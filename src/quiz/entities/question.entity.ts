@@ -7,6 +7,7 @@ import {
   Essay as IEssay,
   SubQuestion as ISubQuestion,
   Choice as IChoice,
+  AnswerTrueFalse,
 } from 'src/graphql'
 import {
   ChildEntity,
@@ -41,7 +42,7 @@ export class TrueFalse extends Question implements ITrueFalse {
   questionType: QuestionType
 
   @Column()
-  answer: boolean
+  answer: AnswerTrueFalse
 }
 
 @ChildEntity()
