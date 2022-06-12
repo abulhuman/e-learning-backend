@@ -314,9 +314,8 @@ export class CourseService {
   }
 
   async assignTeacherToCourse(courseId: any, teacherId: any) {
-    let user: User
     try {
-      user = await this.usersService.findOneUserById(teacherId, true)
+      const user = await this.usersService.findOneUserById(teacherId, true)
       const userRoles = user.roles.map(role => role.name)
       if (
         !userRoles.includes(RoleName.COURSE_TEACHER) ||
@@ -330,33 +329,27 @@ export class CourseService {
       course?.teachers.push(user)
       await this.courseRepository.save(course)
     } catch (error) {
-      const { status } = error
-
-      throw status === 404
-        ? new NotFoundException(error.response)
-        : new BadRequestException(error.response)
+      throw error
     }
     return true
   }
 
   async assignClassToCourse(courseId: string, classId: string) {
-    const course = await this.findOneCourse(courseId)
-    const clazz = await this.usersService.findOneStudentClass(classId)
-    if (!course?.takingClasses) course.takingClasses = []
-    course.takingClasses.push(clazz)
-    let updatedCourse: Course
     try {
+      const course = await this.findOneCourse(courseId)
+      const clazz = await this.usersService.findOneStudentClass(classId)
+      if (!course?.takingClasses) course.takingClasses = []
+      course.takingClasses.push(clazz)
+
       if (!course?.students) course.students = []
       clazz.students.forEach(student => {
         course.students.push(student)
       })
 
-      updatedCourse = await this.courseRepository.save(course)
+      const updatedCourse = await this.courseRepository.save(course)
       return !!updatedCourse
     } catch (error) {
-      const { message, detail } = error
-      console.log(`error: `, { message, detail })
-      return false
+      throw error
     }
   }
 
@@ -367,10 +360,15 @@ export class CourseService {
     const { ids: coursesIds } = _coursesIds
     const { ids: classesIds } = _classesIds
     coursesIds.forEach(courseId => {
-      classesIds.forEach(classId => {
-        this.assignClassToCourse(courseId, classId)
+      classesIds.forEach(async classId => {
+        try {
+          await this.assignClassToCourse(courseId, classId)
+        } catch (error) {
+          throw error
+        }
       })
     })
+    return true
   }
 
   async assignCourseToDepartment(courseId: string, departmentId: string) {
@@ -477,32 +475,46 @@ export class CourseService {
   }
 
   async unassignClassFromCourse(courseId: string, classId: string) {
-    const course = await this.findOneCourse(courseId)
-    const clazz = await this.usersService.findOneStudentClass(classId)
-    if (!course?.takingClasses)
-      throw new BadRequestException(
-        `This class currently does not take any courses.`,
-      )
-
-    course.takingClasses = course.takingClasses.filter(
-      clazz => clazz.id !== classId,
-    )
-    let updatedCourse: Course
     try {
+      const course = await this.findOneCourse(courseId)
+      const clazz = await this.usersService.findOneStudentClass(classId)
+      if (!course?.takingClasses?.length)
+        throw new BadRequestException(
+          `This class currently does not take any courses.`,
+        )
+
+      course.takingClasses = course.takingClasses.filter(
+        clazz => clazz.id !== classId,
+      )
       clazz.students.forEach(clazzStudent => {
         course.students = course.students.filter(
           courseStudent => courseStudent.id !== clazzStudent.id,
         )
       })
-      console.log(course)
 
-      updatedCourse = await this.courseRepository.save(course)
+      const updatedCourse = await this.courseRepository.save(course)
       return !!updatedCourse
     } catch (error) {
-      const { message, detail } = error
-      console.log(`error: `, { message, detail })
-      return false
+      throw error
     }
+  }
+
+  async unassignClassesFromCourses(
+    _coursesIds: UUIDArrayDto,
+    _classesIds: UUIDArrayDto,
+  ) {
+    const { ids: coursesIds } = _coursesIds
+    const { ids: classesIds } = _classesIds
+    coursesIds.forEach(courseId => {
+      classesIds.forEach(async classId => {
+        try {
+          await this.unassignClassFromCourse(courseId, classId)
+        } catch (error) {
+          throw error
+        }
+      })
+    })
+    return true
   }
 
   async unassignCourseFromDepartment(courseId: string, departmentId: string) {
