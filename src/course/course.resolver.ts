@@ -106,10 +106,7 @@ export class CourseResolver {
     try {
       await this.courseService.assignTeacherToCourse(courseId, teacherId)
     } catch (error) {
-      const { status } = error
-      throw status === 404
-        ? new NotFoundException(error.response, status)
-        : new BadRequestException(error.response)
+      throw error
     }
     // todo send notification
     // if (updatedCourse.users.some(user => user.id === userId)) {
@@ -219,6 +216,22 @@ export class CourseResolver {
     @Args('classId', ParseUUIDPipe) classId: string,
   ) {
     return this.courseService.unassignClassFromCourse(courseId, classId)
+  }
+
+  @Mutation('unassignClassesFromCourses')
+  async unassignClassesFromCourses(
+    @Args('coursesIds') coursesIds: UUIDArrayDto,
+    @Args('classesIds') classesIds: UUIDArrayDto,
+  ) {
+    try {
+      await this.courseService.unassignClassesFromCourses(
+        coursesIds,
+        classesIds,
+      )
+    } catch (error) {
+      throw error
+    }
+    return true
   }
 
   @Mutation('unassignCourseFromDepartment')

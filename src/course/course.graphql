@@ -128,6 +128,10 @@ type Mutation {
   unassignStudentFromCourse(courseId: ID!, studentId: ID!): Boolean!
   unassignTeacherFromCourse(courseId: ID!, teacherId: ID!): Boolean!
   unassignClassFromCourse(courseId: ID!, classId: ID!): Boolean!
+  unassignClassesFromCourses(
+    coursesIds: UUIDArrayDto!
+    classesIds: UUIDArrayDto!
+  ): Boolean!
   unassignCourseFromDepartment(courseId: ID!, departmentId: ID!): Boolean!
   unassignOwnerFromCourse(courseId: ID!, ownerId: ID!): Boolean
 
