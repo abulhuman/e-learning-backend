@@ -274,7 +274,7 @@ export class UsersService {
       ],
     })
     if (!studentClass)
-      throw new NotFoundException(`Class with id": ${id} was not found.`)
+      throw new NotFoundException(`Class with id: ${id} was not found.`)
     return studentClass
   }
 
