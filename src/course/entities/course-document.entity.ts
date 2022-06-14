@@ -11,6 +11,7 @@ import {
   RelationId,
   UpdateDateColumn,
 } from 'typeorm'
+import { Chapter } from './chapter.entity'
 import { Course } from './course.entity'
 
 @Entity()
@@ -55,4 +56,9 @@ export class CourseDocument implements ICourseDocument {
       assignmentSubmission.submissionFile,
   )
   assignmentSubmission?: AssignmentSubmission
+
+  @ManyToOne(() => Chapter, (chapter: Chapter) => chapter.documents, {
+    onDelete: 'CASCADE',
+  })
+  chapter?: Chapter
 }

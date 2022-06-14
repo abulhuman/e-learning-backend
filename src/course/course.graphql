@@ -38,6 +38,7 @@ type Chapter {
   sequenceNumber: Int!
   course: Course!
   subChapters: [SubChapter]!
+  documents: [CourseDocument]
 }
 
 input CreateChapterInput {
@@ -80,16 +81,18 @@ type CourseDocument {
   documentType: String!
   documentDisplayName: String!
   storedFileName: String!
-  course: Course!
+  course: Course 
   assignmentDefinition: AssignmentDefinition
   assignmentSubmission: AssignmentSubmission
+  chapter: Chapter
 }
 
 input CreateCourseDocumentInput {
   documentType: String!
   documentDisplayName: String!
   fileUpload: Upload!
-  courseId: ID!
+  courseId: ID 
+  chapterId: ID
 }
 
 input UpdateCourseDocumentInput {

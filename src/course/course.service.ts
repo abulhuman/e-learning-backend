@@ -64,21 +64,45 @@ export class CourseService {
     createCourseDocumentInput: CreateCourseDocumentInput,
     storedFileName: string,
   ) {
-    const { courseId } = createCourseDocumentInput
-    delete createCourseDocumentInput.courseId
+    let newCourseDocument: CourseDocument
     delete createCourseDocumentInput.fileUpload
-
-    const newCourseDocument = this.courseDocumentRepository.create(
-      createCourseDocumentInput,
+    if (
+      !createCourseDocumentInput.courseId &&
+      !createCourseDocumentInput.chapterId
     )
+      throw new BadRequestException(
+        `either \`courseId\` or \`chapterId\` are required on input type CreateCourseDocumentInput`,
+      )
+    if (createCourseDocumentInput.courseId) {
+      const { courseId } = createCourseDocumentInput
+      delete createCourseDocumentInput.courseId
+
+      newCourseDocument = this.courseDocumentRepository.create(
+        createCourseDocumentInput,
+      )
+      newCourseDocument.course = await this.findOneCourse(courseId)
+    } else {
+      const { chapterId } = createCourseDocumentInput
+      delete createCourseDocumentInput.chapterId
+      newCourseDocument = this.courseDocumentRepository.create(
+        createCourseDocumentInput,
+      )
+      newCourseDocument.chapter = await this.findOneChapter(chapterId)
+    }
+
     newCourseDocument.storedFileName = storedFileName
-    newCourseDocument.course = await this.findOneCourse(courseId)
     return await this.courseDocumentRepository.save(newCourseDocument)
   }
 
   findAllCourses() {
     return this.courseRepository.find({
-      relations: ['chapters', 'chapters.subChapters', 'users', 'users.roles'],
+      relations: [
+        'chapters',
+        'chapters.subChapters',
+        'chapters.documents',
+        'users',
+        'users.roles',
+      ],
     })
   }
 
@@ -149,7 +173,9 @@ export class CourseService {
   }
 
   findOneChapter(id: string) {
-    return this.chapterRepository.findOne(id, { relations: ['subChapters'] })
+    return this.chapterRepository.findOne(id, {
+      relations: ['subChapters', 'documents'],
+    })
   }
 
   findOneSubChapter(id: string) {
@@ -158,7 +184,7 @@ export class CourseService {
 
   async findOneCourseDocument(id: string) {
     const courseDocument = await this.courseDocumentRepository.findOne(id, {
-      relations: ['assignmentSubmission'],
+      relations: ['assignmentSubmission', 'chapter'],
     })
     if (!courseDocument)
       throw new NotFoundException(

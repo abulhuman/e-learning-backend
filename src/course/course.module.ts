@@ -1,6 +1,10 @@
 import { forwardRef, Module } from '@nestjs/common'
 import { CourseService } from './course.service'
-import { CourseResolver } from './course.resolver'
+import {
+  CourseResolver,
+  ChapterResolver,
+  CourseDocumentResolver,
+} from './course.resolver'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Course } from './entities/course.entity'
 import { SubChapter } from './entities/sub-chapter.entity'
@@ -17,7 +21,12 @@ import { AssignmentModule } from 'src/assignment/assignment.module'
     NotificationModule,
     forwardRef(() => AssignmentModule),
   ],
-  providers: [CourseResolver, CourseService],
+  providers: [
+    CourseResolver,
+    ChapterResolver,
+    CourseDocumentResolver,
+    CourseService,
+  ],
   exports: [CourseService],
 })
 export class CourseModule {}

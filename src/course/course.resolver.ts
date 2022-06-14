@@ -26,6 +26,7 @@ import {
 } from 'src/files/utils/file-upload.utils'
 import { join } from 'node:path'
 import { Course } from './entities/course.entity'
+import { Chapter } from './entities/chapter.entity'
 
 @Resolver('Course')
 export class CourseResolver {
@@ -179,5 +180,30 @@ export class CourseResolver {
   @Mutation('removeCourseDocument')
   removeCourseDocument(@Args('id', ParseUUIDPipe) id: string) {
     return this.courseService.removeCourseDocument(id)
+  }
+}
+
+@Resolver('Chapter')
+export class ChapterResolver {
+  constructor(private readonly courseService: CourseService) {}
+
+  @ResolveField('subChapters')
+  async subChapters(@Parent() chapter: Chapter) {
+    return (await this.courseService.findOneChapter(chapter.id)).subChapters
+  }
+
+  @ResolveField('documents')
+  async documents(@Parent() chapter: Chapter) {
+    return (await this.courseService.findOneChapter(chapter.id)).documents
+  }
+}
+
+@Resolver('CourseDocument')
+export class CourseDocumentResolver {
+  constructor(private readonly courseService: CourseService) {}
+
+  @ResolveField('chapter')
+  async chapter(@Parent() chapter: Chapter) {
+    return (await this.courseService.findOneCourseDocument(chapter.id)).chapter
   }
 }
