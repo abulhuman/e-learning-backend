@@ -27,6 +27,9 @@ export class AssignmentSubmission implements IAssignmentSubmission {
   @Column({ type: 'timestamp' })
   submissionDate: Date
 
+  @Column({ type: 'float' })
+  totalScore?: number
+
   @OneToOne(
     () => CourseDocument,
     (courseDocument: CourseDocument) => courseDocument.assignmentSubmission,

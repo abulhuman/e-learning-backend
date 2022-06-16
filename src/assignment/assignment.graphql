@@ -50,6 +50,7 @@ type AssignmentSubmission {
   created_at: Date!
   updated_at: Date
   submissionDate: Date!
+  totalScore: Float
   submissionFile: CourseDocument!
   definition: AssignmentDefinition!
   submittedBy: User!
@@ -66,6 +67,7 @@ input CreateAssignmentSubmissionInput {
 input UpdateAssignmentSubmissionInput {
   id: ID!
   submissionDate: Date
+  totalScore: Float
   submissionFileId: ID
   replaceFile: Boolean = false
 }
