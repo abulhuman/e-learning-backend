@@ -106,6 +106,7 @@ export class QuizService {
               answer === AnswerTrueFalse.TRUE
                 ? AnswerTrueFalse.TRUE
                 : AnswerTrueFalse.FALSE
+            trueFalseQuestion.questionType = QuestionType.TRUE_FALSE
             return trueFalseQuestion
           }
           case QuestionType.ESSAY: {
@@ -122,6 +123,7 @@ export class QuizService {
             essayQuestion.number = number
             essayQuestion.text = text
             essayQuestion.answer = answer
+            essayQuestion.questionType = QuestionType.ESSAY
             return essayQuestion
           }
           case QuestionType.CLOZE: {
@@ -134,17 +136,18 @@ export class QuizService {
                 )}`,
               )
             }
-            const essayQuestion = new Cloze()
-            essayQuestion.number = number
-            essayQuestion.text = text
-            essayQuestion.subQuestions = subQuestions.map(subQuestionInput => {
+            const clozeQuestion = new Cloze()
+            clozeQuestion.number = number
+            clozeQuestion.text = text
+            clozeQuestion.subQuestions = subQuestions.map(subQuestionInput => {
               const { answer, number } = subQuestionInput
               const subQuestion = new SubQuestion()
               subQuestion.number = number
               subQuestion.answer = answer
               return subQuestion
             })
-            return essayQuestion
+            clozeQuestion.questionType = QuestionType.CLOZE
+            return clozeQuestion
           }
           case QuestionType.MULTIPLE_CHOICE: {
             const { number, text, answer, choices } = questionInput
@@ -180,6 +183,7 @@ export class QuizService {
               choice.text = choiceInput.text
               return choice
             })
+            multipleChoiceQuestion.questionType = QuestionType.MULTIPLE_CHOICE
             return multipleChoiceQuestion
           }
         }
