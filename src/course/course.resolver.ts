@@ -356,4 +356,9 @@ export class CourseResolver {
   async owningDepartment(@Parent() course: Course) {
     return (await this.courseService.findOneCourse(course.id)).owningDepartment
   }
+  @ResolveField('assignmentDefinitions')
+  async assignmentDefinitions(@Parent() course: Course) {
+    return (await this.courseService.findOneCourse(course.id))
+      .assignmentDefinitions
+  }
 }

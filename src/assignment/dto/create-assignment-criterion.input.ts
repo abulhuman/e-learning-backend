@@ -1,5 +1,4 @@
 import {
-  IsDecimal,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -20,7 +19,6 @@ export class CreateAssignmentCriterionInput
   description?: string
 
   @IsNotEmpty()
-  @IsDecimal()
   @IsNumber()
   weight: number
 

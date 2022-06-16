@@ -128,7 +128,7 @@ export class CourseService {
         'account.userId = user.id',
       )
       .getOne()
-      .then(course => course.students)
+      .then(course => course?.students)
   }
 
   findAllChapters() {
@@ -171,6 +171,7 @@ export class CourseService {
         'owner',
         'takingClasses',
         'owningDepartment',
+        'assignmentDefinitions',
       ],
     })
     if (!course)
