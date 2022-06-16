@@ -12,6 +12,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
+import { AssignmentCriterion } from './assignment-criterion.entity'
 import { AssignmentSubmission } from './assignment-submission.entity'
 
 @Entity()
@@ -48,4 +49,10 @@ export class AssignmentDefinition implements IAssignmentDefinition {
     (submission: AssignmentSubmission) => submission.definition,
   )
   submissions?: AssignmentSubmission[]
+
+  @OneToMany(
+    () => AssignmentCriterion,
+    (criterion: AssignmentCriterion) => criterion.definition,
+  )
+  criteria
 }

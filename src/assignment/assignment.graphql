@@ -7,6 +7,7 @@ type AssignmentDefinition {
   instructionsFile: CourseDocument!
   submissions: [AssignmentSubmission]
   course: Course!
+  critera: [AssignmentCriterion]
 }
 
 input CreateAssignmentDefinitionInput {
@@ -21,6 +22,30 @@ input UpdateAssignmentDefinitionInput {
   submissionDeadline: Date
   instructionsFileId: ID
   name: String!
+}
+
+type AssignmentCriterion {
+  id: ID!
+  created_at: Date!
+  updated_at: Date
+  title: String!
+  description: String
+  weight: Float!
+  definition: AssignmentDefinition!
+}
+
+input CreateAssignmentCriterionInput {
+  title: String!
+  description: String
+  weight: Float!
+  definitionId: ID!
+}
+
+input UpdateAssignmentCriterionInput {
+  id: ID!
+  title: String
+  description: String
+  weight: Float
 }
 
 type AssignmentSubmission {
@@ -53,6 +78,8 @@ type Query {
   assignmentDefinition(id: ID!): AssignmentDefinition
   assignmentSubmissions(assignmentDefinitionId: ID!): [AssignmentSubmission]!
   assignmentSubmission(id: ID!): AssignmentSubmission
+  assignmentCriteria(assignmentDefinitionId: ID!): [AssignmentCriterion]!
+  assignmentCriterion(id: ID!): AssignmentCriterion
 }
 
 type Mutation {
@@ -71,4 +98,12 @@ type Mutation {
     updateAssignmentSubmissionInput: UpdateAssignmentSubmissionInput!
   ): AssignmentSubmission!
   removeAssignmentSubmission(id: ID!): Boolean!
+
+  createAssignmentCriterion(
+    createAssignmentCriterionInput: CreateAssignmentCriterionInput!
+  ): AssignmentCriterion!
+  updateAssignmentCriterion(
+    updateAssignmentCriterionInput: UpdateAssignmentCriterionInput!
+  ): AssignmentCriterion!
+  removeAssignmentCriterion(id: ID!): Boolean!
 }

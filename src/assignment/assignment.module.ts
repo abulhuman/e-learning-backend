@@ -13,11 +13,14 @@ import { UsersModule } from 'src/users/users.module'
 import {
   AssignmentDefinitionResolver,
   AssignmentSubmissionResolver,
+  AssignmentCriterionResolver,
 } from './assignment.resolver'
 import {
   AssignmentDefinitionService,
   AssignmentSubmissionService,
+  AssignmentCriterionService,
 } from './assignment.service'
+import { AssignmentCriterion } from './entities/assignment-criterion.entity'
 import { AssignmentDefinition } from './entities/assignment-definition.entity'
 import { AssignmentSubmission } from './entities/assignment-submission.entity'
 
@@ -28,6 +31,7 @@ import { AssignmentSubmission } from './entities/assignment-submission.entity'
     TypeOrmModule.forFeature([
       AssignmentDefinition,
       AssignmentSubmission,
+      AssignmentCriterion,
       Course,
       Chapter,
       SubChapter,
@@ -40,8 +44,10 @@ import { AssignmentSubmission } from './entities/assignment-submission.entity'
   providers: [
     AssignmentDefinitionResolver,
     AssignmentSubmissionResolver,
+    AssignmentCriterionResolver,
     AssignmentDefinitionService,
     AssignmentSubmissionService,
+    AssignmentCriterionService,
     CourseService,
   ],
   exports: [CourseService],
