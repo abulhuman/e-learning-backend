@@ -7,7 +7,7 @@ type AssignmentDefinition {
   instructionsFile: CourseDocument!
   submissions: [AssignmentSubmission]
   course: Course!
-  critera: [AssignmentCriterion]
+  criteria: [AssignmentCriterion]
 }
 
 input CreateAssignmentDefinitionInput {
