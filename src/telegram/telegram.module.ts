@@ -19,7 +19,7 @@ import { TelegramService } from './telegram.service'
     HttpModule,
     ConfigModule,
     forwardRef(() => CourseModule),
-    UsersModule,
+    forwardRef(() => UsersModule),
   ],
   exports: [TelegramService],
 })

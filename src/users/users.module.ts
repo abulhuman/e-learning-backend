@@ -35,7 +35,6 @@ import { UsersService } from './users.service'
     StudentClassResolver,
     DepartmentResolver,
     UsersService,
-    NotificationService,
     {
       provide: 'PUB_SUB',
       useValue: new PubSub(),

@@ -1,16 +1,11 @@
+import { HttpException, ParseUUIDPipe } from '@nestjs/common'
 import {
-  BadRequestException,
-  HttpException,
-  NotFoundException,
-  ParseUUIDPipe,
-} from '@nestjs/common'
-import {
-  Resolver,
-  Query,
-  Mutation,
   Args,
-  ResolveField,
+  Mutation,
   Parent,
+  Query,
+  ResolveField,
+  Resolver,
 } from '@nestjs/graphql'
 import { NotificationService } from 'src/notification/notification.service'
 import { CourseService } from './course.service'
@@ -24,19 +19,22 @@ import { UpdateCourseInput } from './dto/update-course.input'
 import { UpdateSubChapterInput } from './dto/update-sub-chapter.input'
 
 import { createWriteStream } from 'node:fs'
+import { join } from 'node:path'
+import { UUIDArrayDto } from 'src/app/dto/uuid-array.dto'
 import {
   documentFileFilter,
   editFileName,
 } from 'src/files/utils/file-upload.utils'
-import { join } from 'node:path'
+import { NotificationType } from 'src/graphql'
 import { Course } from './entities/course.entity'
-import { UUIDArrayDto } from 'src/app/dto/uuid-array.dto'
+import { UsersService } from 'src/users/users.service'
 
 @Resolver('Course')
 export class CourseResolver {
   constructor(
     private readonly courseService: CourseService,
     private readonly notificationService: NotificationService,
+    private readonly usersService: UsersService,
   ) {}
 
   @Mutation('createCourse')
@@ -85,16 +83,11 @@ export class CourseResolver {
     } catch (error) {
       return false
     }
-    // todo send notification
-    // if (updatedCourse.users.some(user => user.id === userId)) {
-    //   const notification = await this.notificationService.create({
-    //     data: JSON.stringify(updatedCourse),
-    //     recipientId: userId,
-    //     type: NotificationType.COURSE_ADDITION,
-    //   })
-    //   await this.notificationService.dispatch(notification)
-    //   return true
-    // }
+    await this.notificationService.create({
+      data: JSON.stringify({ courseId }),
+      recipientId: studentId,
+      type: NotificationType.COURSE_ADDITION,
+    })
     return true
   }
 
@@ -108,16 +101,11 @@ export class CourseResolver {
     } catch (error) {
       throw error
     }
-    // todo send notification
-    // if (updatedCourse.users.some(user => user.id === userId)) {
-    //   const notification = await this.notificationService.create({
-    //     data: JSON.stringify(updatedCourse),
-    //     recipientId: userId,
-    //     type: NotificationType.COURSE_ADDITION,
-    //   })
-    //   await this.notificationService.dispatch(notification)
-    //   return true
-    // }
+    await this.notificationService.create({
+      data: JSON.stringify({ courseId }),
+      recipientId: teacherId,
+      type: NotificationType.TEACHER_COURSE_ASSIGNMENT,
+    })
     return true
   }
 
@@ -131,16 +119,23 @@ export class CourseResolver {
     } catch (error) {
       return false
     }
-    // todo send notification
-    // if (updatedCourse.users.some(user => user.id === userId)) {
-    //   const notification = await this.notificationService.create({
-    //     data: JSON.stringify(updatedCourse),
-    //     recipientId: userId,
-    //     type: NotificationType.COURSE_ADDITION,
-    //   })
-    //   await this.notificationService.dispatch(notification)
-    //   return true
-    // }
+    const studentClass = await this.usersService.findOneStudentClass(classId)
+    const course = this.courseService.findOneCourse(courseId)
+    await this.usersService.findAllStudentsByClassId(classId).then(users =>
+      Promise.all(
+        users.map(user =>
+          this.notificationService.create({
+            data: JSON.stringify({
+              studentClass,
+              course,
+              user,
+            }),
+            recipientId: user.id,
+            type: NotificationType.COURSE_CLASS_ADDITION,
+          }),
+        ),
+      ),
+    )
     return true
   }
 
@@ -154,16 +149,6 @@ export class CourseResolver {
     } catch (error) {
       return false
     }
-    // todo send notification
-    // if (updatedCourse.users.some(user => user.id === userId)) {
-    //   const notification = await this.notificationService.create({
-    //     data: JSON.stringify(updatedCourse),
-    //     recipientId: userId,
-    //     type: NotificationType.COURSE_ADDITION,
-    //   })
-    //   await this.notificationService.dispatch(notification)
-    //   return true
-    // }
     return true
   }
 
