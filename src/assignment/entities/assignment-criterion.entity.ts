@@ -23,10 +23,7 @@ export class AssignmentCriterion implements IAssignmentCriterion {
   @Column()
   title: string
 
-  @Column({ nullable: true })
-  description?: string
-
-  @Column({ type: 'float' })
+  @Column({ type: 'int' })
   weight: number
 
   @ManyToOne(

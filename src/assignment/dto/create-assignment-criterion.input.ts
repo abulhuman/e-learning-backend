@@ -1,10 +1,4 @@
-import {
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsUUID,
-} from 'class-validator'
+import { IsInt, IsNotEmpty, IsString, IsUUID, Max, Min } from 'class-validator'
 import { CreateAssignmentCriterionInput as ICreateAssignmentCriterionInput } from 'src/graphql'
 
 export class CreateAssignmentCriterionInput
@@ -14,12 +8,10 @@ export class CreateAssignmentCriterionInput
   @IsString()
   title: string
 
-  @IsOptional()
-  @IsString()
-  description?: string
-
   @IsNotEmpty()
-  @IsNumber()
+  @IsInt()
+  @Min(1)
+  @Max(20)
   weight: number
 
   @IsNotEmpty()

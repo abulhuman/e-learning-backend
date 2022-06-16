@@ -29,23 +29,20 @@ type AssignmentCriterion {
   created_at: Date!
   updated_at: Date
   title: String!
-  description: String
-  weight: Float!
+  weight: Int!
   definition: AssignmentDefinition!
 }
 
 input CreateAssignmentCriterionInput {
   title: String!
-  description: String
-  weight: Float!
+  weight: Int!
   definitionId: ID!
 }
 
 input UpdateAssignmentCriterionInput {
   id: ID!
   title: String
-  description: String
-  weight: Float
+  weight: Int
 }
 
 type AssignmentSubmission {
