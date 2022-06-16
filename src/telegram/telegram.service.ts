@@ -93,7 +93,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     return this.findOne({ id }, withUser)
   }
 
-  findOneByUserId(userId: string) {
+  findOneByUserId(userId: string): Promise<TelegramAccount | undefined> {
     return this.findOne({
       user: {
         id: userId,
