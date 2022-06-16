@@ -10,6 +10,8 @@ type Notification {
 
 enum NotificationType {
   COURSE_ADDITION
+  TEACHER_COURSE_ASSIGNMENT
+  COURSE_CLASS_ADDITION
 }
 
 input CreateNotificationInput {

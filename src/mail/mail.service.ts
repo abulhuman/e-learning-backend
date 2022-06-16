@@ -3,7 +3,9 @@ import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import * as moment from 'moment'
 import { AssignmentDefinition } from 'src/assignment/entities/assignment-definition.entity'
-import { CourseAdditionNotification } from 'src/notification/dto/course-addition-notification.dto'
+import { AuthService } from 'src/auth/auth.service'
+import { ClassCourseNotification } from 'src/notification/dto/class-course-notification.dto'
+import { CourseNotification } from 'src/notification/dto/course-notification.dto'
 import { User } from 'src/users/entities/user.entity'
 
 @Injectable()
@@ -28,8 +30,8 @@ export class MailService {
     })
   }
 
-  async sendCourseAdditionEmail(newNotification: CourseAdditionNotification) {
-    const { course, recipient, created_at } = newNotification
+  async sendCourseAdditionEmail(notification: CourseNotification) {
+    const { course, recipient, created_at } = notification
     try {
       await this.mailerService.sendMail({
         to: recipient.email,
@@ -37,7 +39,45 @@ export class MailService {
         template: '/course-addition',
         context: {
           course,
-          name: recipient.firstName + recipient.lastName,
+          name: [recipient.firstName, recipient.lastName].join(' '),
+          at: created_at.toDateString(),
+        },
+      })
+    } catch (error) {
+      this.logger.error(error)
+    }
+  }
+
+  async sendTeacherCourseAssignment(notification: CourseNotification) {
+    const { course, recipient, created_at } = notification
+    try {
+      await this.mailerService.sendMail({
+        to: recipient.email,
+        subject: `Assigned to course ${course.name}`,
+        template: '/teacher-course-assignment',
+        context: {
+          course,
+          name: [recipient.firstName, recipient.lastName].join(' '),
+          at: created_at.toDateString(),
+        },
+      })
+    } catch (error) {
+      this.logger.error(error)
+    }
+  }
+
+  async sendClassCourseAssignment(notification: ClassCourseNotification) {
+    const { course, studentClass, recipient, created_at } = notification
+
+    try {
+      await this.mailerService.sendMail({
+        to: recipient.email,
+        subject: `Class ${studentClass.section} added to course ${course.name}`,
+        template: '/class-course-assignment',
+        context: {
+          course,
+          studentClass,
+          name: [recipient.firstName, recipient.lastName].join(' '),
           at: created_at.toDateString(),
         },
       })
