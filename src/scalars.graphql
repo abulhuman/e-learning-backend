@@ -1,6 +1,6 @@
 scalar Date
 scalar Upload
-scalar Date
+scalar Any
 
 input UUIDArrayDto {
   ids: [String]

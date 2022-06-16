@@ -123,6 +123,16 @@ type SubQuestion {
   question: Cloze!
 }
 
+type AnyQuestion {
+  id: ID!
+  text: String!
+  number: Int!
+  questionType: QuestionType!
+  answer: Any
+  choices: [Choice]
+  subQuestions: [SubQuestion]
+}
+
 type Mutation {
   createQuiz(input: CreateQuizInput): Quiz!
 }
@@ -130,5 +140,7 @@ type Mutation {
 type Query {
   quiz(id: ID!): Quiz
   quizzes: [Quiz]
+  quizSection(id: ID!): QuizSection
   quizSections: [QuizSection]
+  question(id: ID!): AnyQuestion
 }

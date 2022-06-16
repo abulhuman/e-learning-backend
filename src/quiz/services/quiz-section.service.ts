@@ -13,6 +13,11 @@ export class QuizSectionService {
     const newLocal = await this.sectionRepo.find({ relations: ['quiz'] })
     return newLocal
   }
+
+  async findOne(id: string) {
+    return this.sectionRepo.findOne(id)
+  }
+
   findAllForQuiz(quizId: string) {
     return this.sectionRepo
       .createQueryBuilder('section')
