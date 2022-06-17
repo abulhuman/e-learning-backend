@@ -7,6 +7,7 @@ import {
 } from 'typeorm'
 import { Quiz as IQuiz } from 'src/graphql'
 import { QuizSection } from './quiz-section.entity'
+import { QuizAttempt } from './quiz-attempt.entity'
 @Entity()
 export class Quiz implements IQuiz {
   @PrimaryGeneratedColumn('uuid')
@@ -32,4 +33,7 @@ export class Quiz implements IQuiz {
 
   @OneToMany(() => QuizSection, section => section.quiz, { cascade: true })
   sections: QuizSection[]
+
+  @OneToMany(() => QuizAttempt, attempt => attempt.quiz, { cascade: true })
+  attempts: QuizAttempt[]
 }

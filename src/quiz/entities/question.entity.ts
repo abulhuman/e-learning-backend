@@ -18,6 +18,7 @@ import {
   PrimaryGeneratedColumn,
   TableInheritance,
 } from 'typeorm'
+import { QuestionAttempt } from './quiz-attempt.entity'
 import { QuizSection } from './quiz-section.entity'
 
 @Entity()
@@ -36,6 +37,11 @@ export class Question implements IQuestion {
     onDelete: 'CASCADE',
   })
   section: QuizSection
+
+  @ManyToOne(() => QuestionAttempt, attempt => attempt.question, {
+    cascade: true,
+  })
+  attempts: QuestionAttempt[]
 }
 
 @ChildEntity()

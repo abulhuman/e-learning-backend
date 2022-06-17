@@ -9,6 +9,40 @@ type Quiz {
   sections: [QuizSection]
 }
 
+type QuestionAttempt {
+  id: ID!
+  question: Question!
+  answer: String
+  subQuestions: [SubQuestionAttempt]
+  quizAttempt: QuizAttempt!
+}
+
+type SubQuestionAttempt {
+  id: ID!
+  number: Int!
+  answer: String!
+}
+
+type QuizAttempt {
+  id: ID!
+  created_at: Date!
+  user: User!
+  questions: [QuestionAttempt]
+}
+
+input QuestionAttemptInput {
+  attemptID: ID!
+  questionID: ID!
+  questionType: QuestionType!
+  answer: String
+  subQuestions: [SubQuestionAttemptInput]
+}
+
+input SubQuestionAttemptInput {
+  number: Int!
+  answer: String!
+}
+
 input CreateQuizInput {
   title: String!
   description: String
