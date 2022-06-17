@@ -31,7 +31,7 @@ export class AssignmentCriterionResolver {
   }
 
   @Query('assignmentCriterion')
-  findOne(@Args('id') id: string) {
+  findOne(@Args('id', ParseUUIDPipe) id: string) {
     return this.assignmentCriterionService.findOneAssignmentCriterion(id)
   }
 

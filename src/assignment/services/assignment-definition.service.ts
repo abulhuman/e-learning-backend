@@ -159,7 +159,7 @@ export class AssignmentDefinitionService {
       id,
     )
     for (const key in updateAssignmentDefinitionInput)
-      if (!updateAssignmentDefinitionInput[key])
+      if (updateAssignmentDefinitionInput[key] === undefined)
         delete updateAssignmentDefinitionInput[key]
     const { instructionsFileId } = updateAssignmentDefinitionInput
     delete updateAssignmentDefinitionInput.instructionsFileId
