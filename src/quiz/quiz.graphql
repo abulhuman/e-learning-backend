@@ -27,10 +27,15 @@ type QuizAttempt {
   id: ID!
   created_at: Date!
   user: User!
+  quiz: Quiz!
   questions: [QuestionAttempt]
+  completed: Boolean!
 }
-
-input QuestionAttemptInput {
+input CreateQuizAttemptInput {
+  userId: ID!
+  quizId: ID!
+}
+input AttemptQuestionInput {
   attemptID: ID!
   questionID: ID!
   questionType: QuestionType!
@@ -169,6 +174,9 @@ type AnyQuestion {
 
 type Mutation {
   createQuiz(input: CreateQuizInput): Quiz!
+  createQuizAttempt(input: CreateQuizAttemptInput): QuizAttempt!
+  attemptQuestion(input: AttemptQuestionInput): QuestionAttempt!
+  completeAttempt(attemptId: ID!): QuizAttempt!
 }
 
 type Query {

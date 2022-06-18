@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { FindCondition, FindConditions, Repository } from 'typeorm'
 import { Cloze, MultipleChoice, Question } from '../entities/question.entity'
 
 @Injectable()
@@ -11,6 +11,11 @@ export class QuestionService {
     private multipleChoiceRepo: Repository<MultipleChoice>,
     @InjectRepository(Cloze) private clozeRepo: Repository<Cloze>,
   ) {}
+
+  findOne(options: FindConditions<Question>, relations: string[] = []) {
+    return this.questionRepo.findOne(options, { relations })
+  }
+
   findAllForQuizSection(sectionId: string) {
     return this.questionRepo
       .createQueryBuilder('question')

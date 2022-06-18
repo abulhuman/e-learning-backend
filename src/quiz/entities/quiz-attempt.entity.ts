@@ -31,6 +31,9 @@ export class QuizAttempt implements IQuizAttempt {
   @ManyToOne(() => Quiz, quiz => quiz.attempts)
   quiz: Quiz
 
+  @Column({ default: false })
+  completed: boolean
+
   @OneToMany(() => QuestionAttempt, question => question.quizAttempt, {
     cascade: true,
   })
