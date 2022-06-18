@@ -67,6 +67,10 @@ import { ScheduleModule } from '@nestjs/schedule'
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, 'upload'),
       serveRoot: '/upload',
+      serveStaticOptions: {
+        index: false,
+        fallthrough: false,
+      },
     }),
     QuizModule,
     AssignmentModule,

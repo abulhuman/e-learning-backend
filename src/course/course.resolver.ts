@@ -36,7 +36,7 @@ export class CourseResolver {
     private readonly courseService: CourseService,
     private readonly notificationService: NotificationService,
     private readonly usersService: UsersService,
-  ) { }
+  ) {}
 
   @Mutation('createCourse')
   createCourse(
