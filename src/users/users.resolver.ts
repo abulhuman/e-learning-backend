@@ -57,8 +57,16 @@ export class UserResolver {
   }
 
   @Query('users')
-  findAllUsers() {
-    return this.usersService.findAllUsers()
+  async findAllUsers(@Args('filter') filter: { roleName: RoleName }) {
+    const users = await this.usersService.findAllUsers()
+    let roleName: RoleName
+    if (filter?.roleName) ({ roleName } = filter)
+    return roleName
+      ? users.filter(user => {
+          const userRoles = user.roles.map(role => role.name)
+          return userRoles.includes(roleName)
+        })
+      : users
   }
 
   @Query('getAllStudentsByClassId')
@@ -73,7 +81,7 @@ export class UserResolver {
     const allUsers = await this.usersService.findAllUsers()
     const allDepartmentAdministrators = allUsers.map(user => {
       const userRoles = user.roles.map(role => role.name)
-      if (userRoles.includes(RoleName.DEPARTMENT_ADMINSTRATOR)) return user
+      if (userRoles.includes(RoleName.DEPARTMENT_ADMINISTRATOR)) return user
     })
     const allNewDepartmentAdministrators = allDepartmentAdministrators
       .filter(user => !user?.department)
@@ -104,8 +112,8 @@ export class UserResolver {
   }
 
   @ResolveField('roles')
-  roles(@Parent() user: User) {
-    return user.roles
+  async roles(@Parent() user: User) {
+    return (await this.usersService.findOneUserById(user.id, true)).roles
   }
 
   @ResolveField('notifications')
@@ -120,11 +128,63 @@ export class UserResolver {
       .attendingClass
   }
 
-  @ResolveField('learningClasses')
-  async learningClasses(@Parent() user: User) {
+  @ResolveField('teachingClasses')
+  async teachingClasses(@Parent() user: User) {
     return (
       await this.usersService.findOneUserById(user.id, true, false, false, true)
-    ).learningClasses
+    ).teachingClasses
+  }
+
+  @ResolveField('teachingCourses')
+  async teachingCourses(@Parent() user: User) {
+    return (
+      await this.usersService.findOneUserById(
+        user.id,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+      )
+    ).teachingCourses
+  }
+
+  @ResolveField('attendingCourses')
+  async attendingCourses(@Parent() user: User) {
+    return (
+      await this.usersService.findOneUserById(
+        user.id,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+      )
+    ).attendingCourses
+  }
+
+  @ResolveField('ownedCourses')
+  async ownedCourses(@Parent() user: User) {
+    const _ = false
+    return (
+      await this.usersService.findOneUserById(
+        user.id,
+        true,
+        _,
+        _,
+        _,
+        _,
+        _,
+        _,
+        _,
+        true,
+      )
+    ).ownedCourses
   }
 
   @ResolveField('department')
@@ -263,6 +323,12 @@ export class StudentClassResolver {
     return (await this.usersService.findOneStudentClass(studentClass.id))
       .department
   }
+
+  @ResolveField('attendingCourses')
+  async attendingCourses(@Parent() studentClass: StudentClass) {
+    return (await this.usersService.findOneStudentClass(studentClass.id))
+      .attendingCourses
+  }
 }
 
 @Resolver('Role')
@@ -379,5 +445,11 @@ export class DepartmentResolver {
   async departmentAdministrator(@Parent() department: Department) {
     return (await this.usersService.findOneDepartment(department.id))
       .departmentAdministrator
+  }
+
+  @ResolveField('ownedCourses')
+  async ownedCourses(@Parent() department: Department) {
+    return (await this.usersService.findOneDepartment(department.id))
+      .ownedCourses
   }
 }

@@ -8,9 +8,15 @@ type User {
   email: String!
   password: String!
   attendingClass: StudentClass
-  learningClasses: [StudentClass]
+  teachingClasses: [StudentClass]
   roles: [Role]!
   courses: [Course]
+    @deprecated(
+      reason: "Use `teachingCourses` for teachers; `attendingCourses` for students; `ownedCourses` for courseOnwer."
+    )
+  teachingCourses: [Course]
+  attendingCourses: [Course]
+  ownedCourses: [Course]
   notifications: [Notification]
   department: Department
   assignmentSubmissions: [AssignmentSubmission]
@@ -49,6 +55,7 @@ type StudentClass {
   section: String!
   teachers: [User]
   students: [User]
+  attendingCourses: [Course]
   department: Department
 }
 
@@ -71,10 +78,15 @@ type Department {
   name: String!
   classes: [StudentClass]
   departmentAdministrator: User
+  ownedCourses: [Course]
+}
+
+input UserFilter {
+  roleName: RoleName
 }
 
 type Query {
-  users: [User]!
+  users(filter: UserFilter): [User]!
   getAllStudentsByClassId(classId: ID!): [User]
   getAllNewDepartmentAdministrators: [User]
   user(id: ID!): User
@@ -133,7 +145,7 @@ type Role {
 enum RoleName {
   DEV
   ADMINISTRATOR
-  DEPARTMENT_ADMINSTRATOR
+  DEPARTMENT_ADMINISTRATOR
   TEACHER
   STUDENT
   COURSE_MANAGER

@@ -1,5 +1,7 @@
 import { AssignmentDefinition } from 'src/assignment/entities/assignment-definition.entity'
 import { Course as ICourse } from 'src/graphql'
+import { Department } from 'src/users/entities/department.entity'
+import { StudentClass } from 'src/users/entities/student-class.entity'
 import { User } from 'src/users/entities/user.entity'
 import {
   Column,
@@ -7,6 +9,7 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -44,6 +47,24 @@ export class Course implements ICourse {
   @JoinTable()
   users?: User[]
 
+  @ManyToMany(() => User, (user: User) => user.teachingCourses)
+  @JoinTable()
+  teachers?: User[]
+
+  @ManyToMany(() => User, (user: User) => user.attendingCourses)
+  @JoinTable()
+  students?: User[]
+
+  @ManyToOne(() => User, (user: User) => user.ownedCourses)
+  owner: User
+
+  @ManyToMany(
+    () => StudentClass,
+    (studentClass: StudentClass) => studentClass.attendingCourses,
+  )
+  @JoinTable()
+  takingClasses?: StudentClass[]
+
   @OneToMany(() => Chapter, (chapter: Chapter) => chapter.course)
   chapters: Chapter[]
 
@@ -58,4 +79,10 @@ export class Course implements ICourse {
     (courseDocument: CourseDocument) => courseDocument.course,
   )
   assignmentDefinitions?: AssignmentDefinition[]
+
+  @ManyToOne(
+    () => Department,
+    (department: Department) => department.ownedCourses,
+  )
+  owningDepartment: Department
 }

@@ -7,10 +7,15 @@ type Course {
   description: String!
   overview: String!
   creditHour: Int!
-  users: [User]
+  users: [User] @deprecated(reason: "Use `teachers` or `students` or `owner`")
+  teachers: [User]
+  students: [User]
+  owner: User
+  takingClasses: [StudentClass]
   chapters: [Chapter]!
   courseDocuments: [CourseDocument]!
   assignmentDefinitions: [AssignmentDefinition]
+  owningDepartment: Department
 }
 
 input CreateCourseInput {
@@ -19,6 +24,7 @@ input CreateCourseInput {
   description: String!
   overview: String!
   creditHour: Int!
+  departmentId: ID!
 }
 
 input UpdateCourseInput {
@@ -112,8 +118,25 @@ type Mutation {
   updateCourse(updateCourseInput: UpdateCourseInput!): Course!
   removeCourse(id: ID!): Boolean!
 
-  assignUserToCourse(courseId: ID!, userId: ID!): Boolean!
-  unassignUserFromCourse(courseId: ID!, userId: ID!): Boolean!
+  assignStudentToCourse(courseId: ID!, studentId: ID!): Boolean!
+  assignTeacherToCourse(courseId: ID!, teacherId: ID!): Boolean!
+  assignClassToCourse(courseId: ID!, classId: ID!): Boolean!
+  assignClassesToCourses(
+    coursesIds: UUIDArrayDto!
+    classesIds: UUIDArrayDto!
+  ): Boolean!
+  assignCourseToDepartment(courseId: ID!, departmentId: ID!): Boolean!
+  assignOwnerToCourse(courseId: ID!, ownerId: ID!): Boolean!
+
+  unassignStudentFromCourse(courseId: ID!, studentId: ID!): Boolean!
+  unassignTeacherFromCourse(courseId: ID!, teacherId: ID!): Boolean!
+  unassignClassFromCourse(courseId: ID!, classId: ID!): Boolean!
+  unassignClassesFromCourses(
+    coursesIds: UUIDArrayDto!
+    classesIds: UUIDArrayDto!
+  ): Boolean!
+  unassignCourseFromDepartment(courseId: ID!, departmentId: ID!): Boolean!
+  unassignOwnerFromCourse(courseId: ID!, ownerId: ID!): Boolean
 
   createChapter(createChapterInput: CreateChapterInput): Chapter!
   updateChapter(updateChapterInput: UpdateChapterInput): Chapter!

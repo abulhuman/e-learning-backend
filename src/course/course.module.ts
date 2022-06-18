@@ -6,19 +6,30 @@ import {
   CourseDocumentResolver,
 } from './course.resolver'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { Course } from './entities/course.entity'
-import { SubChapter } from './entities/sub-chapter.entity'
+import { AssignmentModule } from 'src/assignment/assignment.module'
+import { NotificationModule } from 'src/notification/notification.module'
+import { StudentClass } from 'src/users/entities/student-class.entity'
+import { User } from 'src/users/entities/user.entity'
+import { UsersModule } from 'src/users/users.module'
+import { CourseResolver } from './course.resolver'
+import { CourseService } from './course.service'
 import { Chapter } from './entities/chapter.entity'
 import { CourseDocument } from './entities/course-document.entity'
-import { UsersModule } from 'src/users/users.module'
-import { NotificationModule } from 'src/notification/notification.module'
-import { AssignmentModule } from 'src/assignment/assignment.module'
+import { Course } from './entities/course.entity'
+import { SubChapter } from './entities/sub-chapter.entity'
 
 @Module({
   imports: [
-    UsersModule,
-    TypeOrmModule.forFeature([Course, Chapter, SubChapter, CourseDocument]),
-    NotificationModule,
+    forwardRef(() => UsersModule),
+    TypeOrmModule.forFeature([
+      Course,
+      Chapter,
+      SubChapter,
+      CourseDocument,
+      StudentClass,
+      User,
+    ]),
+    forwardRef(() => NotificationModule),
     forwardRef(() => AssignmentModule),
   ],
   providers: [
