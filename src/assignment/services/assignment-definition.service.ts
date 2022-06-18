@@ -111,7 +111,7 @@ export class AssignmentDefinitionService {
     allUsers.forEach(user => {
       this.mailService.sendAssignmentCreationEmail(user, assignment)
     })
-    telegramUsers.forEach(user => {
+    telegramUsers?.forEach(user => {
       this.telegramService.findOneByUserId(user.id).then(account => {
         this.telegramService
           .sendMessage({
@@ -143,7 +143,7 @@ export class AssignmentDefinitionService {
   async findOneAssignmentDefinition(id: string) {
     const assignmentDefinition =
       await this.assignmentDefinitionRepository.findOne(id, {
-        relations: ['course', 'instructionsFile', 'submissions'],
+        relations: ['course', 'instructionsFile', 'submissions', 'criteria'],
       })
     if (!assignmentDefinition)
       throw new NotFoundException(
@@ -159,7 +159,7 @@ export class AssignmentDefinitionService {
       id,
     )
     for (const key in updateAssignmentDefinitionInput)
-      if (!updateAssignmentDefinitionInput[key])
+      if (updateAssignmentDefinitionInput[key] === undefined)
         delete updateAssignmentDefinitionInput[key]
     const { instructionsFileId } = updateAssignmentDefinitionInput
     delete updateAssignmentDefinitionInput.instructionsFileId

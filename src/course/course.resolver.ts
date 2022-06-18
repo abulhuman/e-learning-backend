@@ -36,7 +36,7 @@ export class CourseResolver {
     private readonly courseService: CourseService,
     private readonly notificationService: NotificationService,
     private readonly usersService: UsersService,
-  ) {}
+  ) { }
 
   @Mutation('createCourse')
   createCourse(
@@ -357,8 +357,12 @@ export class CourseResolver {
   async owningDepartment(@Parent() course: Course) {
     return (await this.courseService.findOneCourse(course.id)).owningDepartment
   }
+  @ResolveField('assignmentDefinitions')
+  async assignmentDefinitions(@Parent() course: Course) {
+    return (await this.courseService.findOneCourse(course.id))
+      .assignmentDefinitions
+  }
 }
-
 @Resolver('Chapter')
 export class ChapterResolver {
   constructor(private readonly courseService: CourseService) {}

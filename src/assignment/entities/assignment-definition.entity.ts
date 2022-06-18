@@ -12,6 +12,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
+import { AssignmentCriterion } from './assignment-criterion.entity'
 import { AssignmentSubmission } from './assignment-submission.entity'
 
 @Entity()
@@ -31,6 +32,12 @@ export class AssignmentDefinition implements IAssignmentDefinition {
   @Column()
   name: string
 
+  @Column({ nullable: true })
+  maximumScore: number
+
+  @Column({ type: 'boolean', nullable: true })
+  isCriteriaBased?: boolean
+
   @OneToOne(
     () => CourseDocument,
     (courseDocument: CourseDocument) => courseDocument.assignmentDefinition,
@@ -48,4 +55,10 @@ export class AssignmentDefinition implements IAssignmentDefinition {
     (submission: AssignmentSubmission) => submission.definition,
   )
   submissions?: AssignmentSubmission[]
+
+  @OneToMany(
+    () => AssignmentCriterion,
+    (criterion: AssignmentCriterion) => criterion.definition,
+  )
+  criteria
 }

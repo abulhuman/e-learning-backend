@@ -10,6 +10,7 @@ import { UsersService } from 'src/users/users.service'
 import { Repository } from 'typeorm'
 import { CreateAssignmentSubmissionInput } from '../dto/create-assignment-submission.input'
 import { UpdateAssignmentSubmissionInput } from '../dto/update-assignment-submission.input'
+import { AssignmentCriterion } from '../entities/assignment-criterion.entity'
 import { AssignmentSubmission } from '../entities/assignment-submission.entity'
 import { AssignmentDefinitionService } from './assignment-definition.service'
 
@@ -77,13 +78,20 @@ export class AssignmentSubmissionService {
   }
   findAllAssignmentSubmissions() {
     return this.assignmentSubmissionRepository.find({
-      relations: ['submissionFile', 'definition', 'submittedBy'],
+      relations: ['submissionFile', 'definition', 'submittedBy', 'values'],
     })
   }
   async findOneAssignmentSubmission(id: string) {
     const assignmentSubmission =
       await this.assignmentSubmissionRepository.findOne(id, {
-        relations: ['submissionFile', 'definition', 'submittedBy'],
+        relations: [
+          'submissionFile',
+          'definition',
+          'definition.criteria',
+          'submittedBy',
+          'values',
+          'values.criterion',
+        ],
       })
     if (!assignmentSubmission)
       throw new NotFoundException(
@@ -146,5 +154,22 @@ export class AssignmentSubmissionService {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         .catch(_err => false)
     )
+  }
+  async gradeSubmission(id: string, totalScore = 0) {
+    const submission = await this.findOneAssignmentSubmission(id)
+    const { values, definition } = submission
+    const { criteria } = definition
+    let scoreSum = 0
+    values.forEach(value => {
+      scoreSum += value.score * value.criterion.weight
+    })
+    let weightedCriteriaSum = 0
+    criteria.forEach((criterion: AssignmentCriterion) => {
+      weightedCriteriaSum += criterion.weight * 6
+    })
+    submission.totalScore = definition.isCriteriaBased
+      ? definition.maximumScore * (scoreSum / weightedCriteriaSum)
+      : totalScore
+    return this.assignmentSubmissionRepository.save(submission)
   }
 }

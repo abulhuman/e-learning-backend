@@ -4,13 +4,18 @@ type AssignmentDefinition {
   updated_at: Date
   name: String!
   submissionDeadline: Date!
+  maximumScore: Float!
+  isCriteriaBased: Boolean
   instructionsFile: CourseDocument!
   submissions: [AssignmentSubmission]
   course: Course!
+  criteria: [AssignmentCriterion]
 }
 
 input CreateAssignmentDefinitionInput {
   submissionDeadline: Date!
+  maximumScore: Float!
+  isCriteriaBased: Boolean = false
   instructionsFileId: ID!
   courseId: ID!
   name: String!
@@ -19,8 +24,52 @@ input CreateAssignmentDefinitionInput {
 input UpdateAssignmentDefinitionInput {
   id: ID!
   submissionDeadline: Date
+  maximumScore: Float
+  isCriteriaBased: Boolean = false
   instructionsFileId: ID
-  name: String!
+  name: String
+}
+
+type AssignmentCriterion {
+  id: ID!
+  created_at: Date!
+  updated_at: Date
+  title: String!
+  weight: Int!
+  definition: AssignmentDefinition!
+  values: [CriterionValue]
+}
+
+input CreateAssignmentCriterionInput {
+  title: String!
+  weight: Int!
+  definitionId: ID!
+}
+
+input UpdateAssignmentCriterionInput {
+  id: ID!
+  title: String
+  weight: Int
+}
+
+type CriterionValue {
+  id: ID!
+  created_at: Date!
+  updated_at: Date
+  score: Float!
+  criterion: AssignmentCriterion
+  submission: AssignmentSubmission
+}
+
+input CreateCriterionValueInput {
+  score: Float!
+  criterionId: ID!
+  submissionId: ID!
+}
+
+input UpdateCriterionValueInput {
+  id: ID!
+  score: Float!
 }
 
 type AssignmentSubmission {
@@ -28,9 +77,11 @@ type AssignmentSubmission {
   created_at: Date!
   updated_at: Date
   submissionDate: Date!
+  totalScore: Float
   submissionFile: CourseDocument!
   definition: AssignmentDefinition!
   submittedBy: User!
+  values: [CriterionValue]
 }
 
 input CreateAssignmentSubmissionInput {
@@ -44,6 +95,7 @@ input CreateAssignmentSubmissionInput {
 input UpdateAssignmentSubmissionInput {
   id: ID!
   submissionDate: Date
+  totalScore: Float
   submissionFileId: ID
   replaceFile: Boolean = false
 }
@@ -53,6 +105,10 @@ type Query {
   assignmentDefinition(id: ID!): AssignmentDefinition
   assignmentSubmissions(assignmentDefinitionId: ID!): [AssignmentSubmission]!
   assignmentSubmission(id: ID!): AssignmentSubmission
+  assignmentCriteria(assignmentDefinitionId: ID!): [AssignmentCriterion]!
+  assignmentCriterion(id: ID!): AssignmentCriterion
+  criterionValues(criterionId: ID!): [CriterionValue]!
+  criterionValue(id: ID!): CriterionValue
 }
 
 type Mutation {
@@ -71,4 +127,22 @@ type Mutation {
     updateAssignmentSubmissionInput: UpdateAssignmentSubmissionInput!
   ): AssignmentSubmission!
   removeAssignmentSubmission(id: ID!): Boolean!
+
+  createAssignmentCriterion(
+    createAssignmentCriterionInput: CreateAssignmentCriterionInput!
+  ): AssignmentCriterion!
+  updateAssignmentCriterion(
+    updateAssignmentCriterionInput: UpdateAssignmentCriterionInput!
+  ): AssignmentCriterion!
+  removeAssignmentCriterion(id: ID!): Boolean!
+
+  createCriterionValue(
+    createCriterionValueInput: CreateCriterionValueInput
+  ): CriterionValue!
+  updateCriterionValue(
+    updateCriterionValueInput: UpdateCriterionValueInput
+  ): CriterionValue!
+  removeCriterionValue(id: ID!): Boolean!
+
+  gradeSubmission(id: ID!, totalScore: Float): AssignmentSubmission!
 }
