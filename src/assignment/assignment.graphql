@@ -78,18 +78,27 @@ type AssignmentSubmission {
   updated_at: Date
   submissionDate: Date!
   totalScore: Float
-  submissionFile: CourseDocument!
+  submissionFile: String!
   definition: AssignmentDefinition!
   submittedBy: User!
   values: [CriterionValue]
 }
 
+type AssignmentSubmissionDocument {
+  id: ID!
+  created_at: Date!
+  updated_at: Date
+  documentType: String!
+  documentDisplayName: String!
+  storedFileName: String!
+  assignmentSubmission: AssignmentSubmission
+}
+
 input CreateAssignmentSubmissionInput {
   submissionDate: Date!
-  submissionFileId: ID!
+  file: Upload!
   definitionId: ID!
   studentId: ID!
-  replaceFile: Boolean = false
 }
 
 input UpdateAssignmentSubmissionInput {
