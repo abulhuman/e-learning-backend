@@ -1,4 +1,4 @@
-import { Args, Mutation, Resolver } from '@nestjs/graphql'
+import { Args, Mutation, Resolver, Query } from '@nestjs/graphql'
 import { AttemptQuestionInput, CreateQuizAttemptInput } from 'src/graphql'
 import { QuizService } from '../quiz.service'
 import { QuizAttemptService } from '../services/quiz-attempt.service'
@@ -22,5 +22,16 @@ export class QuizAttemptResolver {
   @Mutation('attemptQuestion')
   attemptQuestion(@Args('input') input: AttemptQuestionInput) {
     return this.quizAttemptService.attemptQuestion(input)
+  }
+
+  @Query('myAttemptForQuiz')
+  attemptForQuiz(
+    @Args('quizId') quizId: string,
+    @Args('userId') userId: string,
+  ) {
+    return this.quizAttemptService.findOne(
+      { quiz: { id: quizId }, user: { id: userId } },
+      ['grade', 'grade.marker'],
+    )
   }
 }

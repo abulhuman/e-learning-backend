@@ -201,4 +201,5 @@ type Query {
   quizSection(id: ID!): QuizSection
   quizSections: [QuizSection]
   question(id: ID!): AnyQuestion
+  myAttemptForQuiz(quizId: ID!, userId: ID!): QuizAttempt
 }
