@@ -38,12 +38,8 @@ export class AssignmentDefinition implements IAssignmentDefinition {
   @Column({ type: 'boolean', nullable: true })
   isCriteriaBased?: boolean
 
-  @OneToOne(
-    () => CourseDocument,
-    (courseDocument: CourseDocument) => courseDocument.assignmentDefinition,
-  )
-  @JoinColumn()
-  instructionsFile: CourseDocument
+  @Column()
+  instructionsFile: string
 
   @ManyToOne(() => Course, (course: Course) => course.assignmentDefinitions, {
     onDelete: 'CASCADE',
