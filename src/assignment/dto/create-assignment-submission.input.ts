@@ -1,4 +1,5 @@
 import { IsDateString, IsNotEmpty, IsUUID } from 'class-validator'
+import { FileUpload } from 'graphql-upload'
 import { CreateAssignmentSubmissionInput as ICreateAssignmentSubmissionInput } from 'src/graphql'
 
 export class CreateAssignmentSubmissionInput
@@ -9,8 +10,7 @@ export class CreateAssignmentSubmissionInput
   submissionDate: Date
 
   @IsNotEmpty()
-  @IsUUID()
-  submissionFileId: string
+  file: Promise<FileUpload>
 
   @IsNotEmpty()
   @IsUUID()
@@ -19,8 +19,4 @@ export class CreateAssignmentSubmissionInput
   @IsNotEmpty()
   @IsUUID()
   definitionId: string
-
-  @IsNotEmpty()
-  // @IsOptional()
-  replaceFile: boolean
 }
