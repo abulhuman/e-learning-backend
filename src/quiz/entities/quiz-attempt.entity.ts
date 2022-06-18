@@ -8,11 +8,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm'
 import { Question } from './question.entity'
+import { QuizGrade } from './quiz-grade.entity'
 import { Quiz } from './quiz.entity'
 
 @Entity()
@@ -35,6 +38,10 @@ export class QuizAttempt implements IQuizAttempt {
 
   @Column({ default: false })
   completed: boolean
+
+  @OneToOne(() => QuizGrade, grade => grade.attempt, { cascade: true })
+  @JoinColumn()
+  grade: QuizGrade
 
   @OneToMany(() => QuestionAttempt, question => question.quizAttempt, {
     cascade: true,

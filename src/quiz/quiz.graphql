@@ -31,6 +31,7 @@ type QuizAttempt {
   quiz: Quiz!
   questions: [QuestionAttempt]
   completed: Boolean!
+  grade: QuizGrade
 }
 input CreateQuizAttemptInput {
   userId: ID!
@@ -174,11 +175,24 @@ type AnyQuestion {
   subQuestions: [SubQuestion]
 }
 
+type QuizGrade {
+  attempt: QuizAttempt!
+  marker: User!
+  score: Float!
+}
+
+input GradeAttemptInput {
+  attemptId: ID!
+  markerId: ID!
+  score: Float!
+}
+
 type Mutation {
   createQuiz(input: CreateQuizInput): Quiz!
   createQuizAttempt(input: CreateQuizAttemptInput): QuizAttempt!
   attemptQuestion(input: AttemptQuestionInput): QuestionAttempt!
   completeAttempt(attemptId: ID!): QuizAttempt!
+  gradeAttempt(input: GradeAttemptInput): QuizGrade
 }
 
 type Query {

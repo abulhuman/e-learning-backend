@@ -4,9 +4,11 @@ import * as moment from 'moment'
 import {
   AnswerTrueFalse,
   CreateQuizInput,
+  GradeAttemptInput,
   QuestionType,
   QuizSectionType,
 } from 'src/graphql'
+import { UsersService } from 'src/users/users.service'
 import { FindConditions, Repository } from 'typeorm'
 import {
   Choice,
@@ -16,6 +18,8 @@ import {
   SubQuestion,
   TrueFalse,
 } from './entities/question.entity'
+import { QuizAttempt } from './entities/quiz-attempt.entity'
+import { QuizGrade } from './entities/quiz-grade.entity'
 import {
   ObjectiveQuizSection,
   SubjectiveQuizSection,
@@ -27,6 +31,11 @@ export class QuizService {
   constructor(
     @InjectRepository(Quiz)
     private quizRepo: Repository<Quiz>,
+    @InjectRepository(QuizAttempt)
+    private quizAttemptRepo: Repository<QuizAttempt>,
+    private userService: UsersService,
+    @InjectRepository(QuizGrade)
+    private gradeRepo: Repository<QuizGrade>,
   ) {}
 
   create(input: CreateQuizInput) {
@@ -191,6 +200,14 @@ export class QuizService {
       return newSection
     })
     return this.quizRepo.save(newQuiz)
+  }
+
+  async gradeAttempt(input: GradeAttemptInput) {
+    const attempt = await this.quizAttemptRepo.findOne({ id: input.attemptId })
+    const marker = await this.userService.findOneUserById(input.markerId)
+
+    const grade = this.gradeRepo.create({ attempt, marker, score: input.score })
+    return this.gradeRepo.save(grade)
   }
 
   findOneById(id: string) {

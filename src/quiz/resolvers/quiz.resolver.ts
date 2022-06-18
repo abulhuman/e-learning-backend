@@ -7,7 +7,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql'
-import { CreateQuizInput } from 'src/graphql'
+import { CreateQuizInput, GradeAttemptInput } from 'src/graphql'
 import { Quiz } from '../entities/quiz.entity'
 import { QuizService } from '../quiz.service'
 import { QuizSectionService } from '../services/quiz-section.service'
@@ -37,5 +37,9 @@ export class QuizResolver {
   @Mutation('createQuiz')
   create(@Args('input') input: CreateQuizInput) {
     return this.quizService.create(input)
+  }
+  @Mutation('gradeAttempt')
+  grade(@Args('input') input: GradeAttemptInput) {
+    return this.quizService.gradeAttempt(input)
   }
 }
