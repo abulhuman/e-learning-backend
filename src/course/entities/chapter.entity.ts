@@ -9,6 +9,7 @@ import {
   RelationId,
   UpdateDateColumn,
 } from 'typeorm'
+import { CourseDocument } from './course-document.entity'
 import { Course } from './course.entity'
 import { SubChapter } from './sub-chapter.entity'
 
@@ -40,4 +41,10 @@ export class Chapter implements IChapter {
 
   @OneToMany(() => SubChapter, (subChapter: SubChapter) => subChapter.chapter)
   subChapters: SubChapter[]
+
+  @OneToMany(
+    () => CourseDocument,
+    (courseDocument: CourseDocument) => courseDocument.chapter,
+  )
+  documents?: CourseDocument[]
 }

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator'
+import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator'
 import {
   CreateCourseDocumentInput as ICreateCourseDocumentInput,
   Upload,
@@ -16,7 +16,11 @@ export class CreateCourseDocumentInput implements ICreateCourseDocumentInput {
   @IsNotEmpty()
   fileUpload: Upload
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsUUID()
-  courseId: string
+  courseId?: string
+
+  @IsOptional()
+  @IsUUID()
+  chapterId?: string
 }

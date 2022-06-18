@@ -27,6 +27,7 @@ import {
 } from 'src/files/utils/file-upload.utils'
 import { NotificationType } from 'src/graphql'
 import { Course } from './entities/course.entity'
+import { Chapter } from './entities/chapter.entity'
 import { UsersService } from 'src/users/users.service'
 
 @Resolver('Course')
@@ -355,5 +356,30 @@ export class CourseResolver {
   @ResolveField('owningDepartment')
   async owningDepartment(@Parent() course: Course) {
     return (await this.courseService.findOneCourse(course.id)).owningDepartment
+  }
+}
+
+@Resolver('Chapter')
+export class ChapterResolver {
+  constructor(private readonly courseService: CourseService) {}
+
+  @ResolveField('subChapters')
+  async subChapters(@Parent() chapter: Chapter) {
+    return (await this.courseService.findOneChapter(chapter.id)).subChapters
+  }
+
+  @ResolveField('documents')
+  async documents(@Parent() chapter: Chapter) {
+    return (await this.courseService.findOneChapter(chapter.id)).documents
+  }
+}
+
+@Resolver('CourseDocument')
+export class CourseDocumentResolver {
+  constructor(private readonly courseService: CourseService) {}
+
+  @ResolveField('chapter')
+  async chapter(@Parent() chapter: Chapter) {
+    return (await this.courseService.findOneCourseDocument(chapter.id)).chapter
   }
 }
