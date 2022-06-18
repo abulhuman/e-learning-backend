@@ -31,6 +31,9 @@ export class Quiz implements IQuiz {
   @Column({ type: 'int' })
   duration: number
 
+  @Column()
+  maxScore: number
+
   @OneToMany(() => QuizSection, section => section.quiz, { cascade: true })
   sections: QuizSection[]
 

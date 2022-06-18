@@ -9,13 +9,12 @@ import {
 } from 'src/graphql'
 import { FindConditions, Repository } from 'typeorm'
 import {
-  Essay,
-  TrueFalse,
+  Choice,
   Cloze,
+  Essay,
   MultipleChoice,
   SubQuestion,
-  Choice,
-  Question,
+  TrueFalse,
 } from './entities/question.entity'
 import {
   ObjectiveQuizSection,
@@ -46,6 +45,7 @@ export class QuizService {
       )
     }
     const newQuiz = this.quizRepo.create(input)
+    newQuiz.maxScore = input.maxScore
     newQuiz.sections = input.sections.map(sectionInput => {
       const newSection =
         sectionInput.type === QuizSectionType.OBJECTIVE

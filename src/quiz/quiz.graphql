@@ -6,6 +6,7 @@ type Quiz {
   end: Date!
   created_at: Date!
   duration: Int!
+  maxScore: Int!
   sections: [QuizSection]
 }
 
@@ -54,6 +55,7 @@ input CreateQuizInput {
   start: Date!
   end: Date!
   duration: Int!
+  maxScore: Int!
   sections: [CreateQuizSectionInput]!
 }
 
