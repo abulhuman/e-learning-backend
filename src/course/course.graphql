@@ -87,9 +87,7 @@ type CourseDocument {
   documentType: String!
   documentDisplayName: String!
   storedFileName: String!
-  course: Course 
-  assignmentDefinition: AssignmentDefinition
-  assignmentSubmission: AssignmentSubmission
+  course: Course
   chapter: Chapter
 }
 
@@ -97,7 +95,7 @@ input CreateCourseDocumentInput {
   documentType: String!
   documentDisplayName: String!
   fileUpload: Upload!
-  courseId: ID 
+  courseId: ID
   chapterId: ID
 }
 

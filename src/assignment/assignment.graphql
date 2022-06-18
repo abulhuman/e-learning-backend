@@ -6,7 +6,7 @@ type AssignmentDefinition {
   submissionDeadline: Date!
   maximumScore: Float!
   isCriteriaBased: Boolean
-  instructionsFile: CourseDocument!
+  instructionsFile: String!
   submissions: [AssignmentSubmission]
   course: Course!
   criteria: [AssignmentCriterion]
@@ -16,7 +16,7 @@ input CreateAssignmentDefinitionInput {
   submissionDeadline: Date!
   maximumScore: Float!
   isCriteriaBased: Boolean = false
-  instructionsFileId: ID!
+  instructionsFile: Upload!
   courseId: ID!
   name: String!
 }

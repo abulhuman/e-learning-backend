@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsUUID,
 } from 'class-validator'
+import { FileUpload } from 'graphql-upload'
 import { CreateAssignmentDefinitionInput as ICreateAssignmentDefinitionInput } from 'src/graphql'
 
 export class CreateAssignmentDefinitionInput
@@ -23,8 +24,7 @@ export class CreateAssignmentDefinitionInput
   submissionDeadline: Date
 
   @IsNotEmpty()
-  @IsUUID()
-  instructionsFileId: string
+  instructionsFile: Promise<FileUpload>
 
   @IsNotEmpty()
   @IsUUID()
