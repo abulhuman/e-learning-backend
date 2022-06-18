@@ -28,7 +28,9 @@ export class QuizAttempt implements IQuizAttempt {
   })
   user: User
 
-  @ManyToOne(() => Quiz, quiz => quiz.attempts)
+  @ManyToOne(() => Quiz, quiz => quiz.attempts, {
+    onDelete: 'CASCADE',
+  })
   quiz: Quiz
 
   @Column({ default: false })
