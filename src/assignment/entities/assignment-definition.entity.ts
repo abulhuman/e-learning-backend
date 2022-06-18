@@ -32,6 +32,12 @@ export class AssignmentDefinition implements IAssignmentDefinition {
   @Column()
   name: string
 
+  @Column({ nullable: true })
+  maximumScore: number
+
+  @Column({ type: 'boolean', nullable: true })
+  isCriteriaBased?: boolean
+
   @OneToOne(
     () => CourseDocument,
     (courseDocument: CourseDocument) => courseDocument.assignmentDefinition,

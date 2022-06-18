@@ -15,15 +15,18 @@ import {
   AssignmentDefinitionResolver,
   AssignmentSubmissionResolver,
   AssignmentCriterionResolver,
+  CriterionValueResolver,
 } from './assignment.resolver'
 import {
   AssignmentDefinitionService,
   AssignmentSubmissionService,
   AssignmentCriterionService,
+  CriterionValueService,
 } from './assignment.service'
 import { AssignmentCriterion } from './entities/assignment-criterion.entity'
 import { AssignmentDefinition } from './entities/assignment-definition.entity'
 import { AssignmentSubmission } from './entities/assignment-submission.entity'
+import { CriterionValue } from './entities/criterion-value.entity'
 
 @Module({
   imports: [
@@ -33,6 +36,7 @@ import { AssignmentSubmission } from './entities/assignment-submission.entity'
       AssignmentDefinition,
       AssignmentSubmission,
       AssignmentCriterion,
+      CriterionValue,
       Course,
       Chapter,
       SubChapter,
@@ -47,9 +51,11 @@ import { AssignmentSubmission } from './entities/assignment-submission.entity'
     AssignmentDefinitionResolver,
     AssignmentSubmissionResolver,
     AssignmentCriterionResolver,
+    CriterionValueResolver,
     AssignmentDefinitionService,
     AssignmentSubmissionService,
     AssignmentCriterionService,
+    CriterionValueService,
     CourseService,
   ],
   exports: [CourseService],

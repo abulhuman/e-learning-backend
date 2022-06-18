@@ -7,11 +7,13 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
 import { AssignmentDefinition } from './assignment-definition.entity'
+import { CriterionValue } from './criterion-value.entity'
 
 @Entity()
 export class AssignmentSubmission implements IAssignmentSubmission {
@@ -27,7 +29,7 @@ export class AssignmentSubmission implements IAssignmentSubmission {
   @Column({ type: 'timestamp' })
   submissionDate: Date
 
-  @Column({ type: 'float' })
+  @Column({ type: 'float', nullable: true })
   totalScore?: number
 
   @OneToOne(
@@ -51,4 +53,7 @@ export class AssignmentSubmission implements IAssignmentSubmission {
     onDelete: 'SET NULL',
   })
   submittedBy: User
+
+  @OneToMany(() => CriterionValue, (value: CriterionValue) => value.submission)
+  values?: CriterionValue[]
 }
