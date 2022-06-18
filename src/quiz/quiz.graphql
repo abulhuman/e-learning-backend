@@ -1,0 +1,205 @@
+type Quiz {
+  id: ID!
+  title: String!
+  description: String
+  start: Date!
+  end: Date!
+  created_at: Date!
+  duration: Int!
+  maxScore: Int!
+  sections: [QuizSection]
+}
+
+type QuestionAttempt {
+  id: ID!
+  question: Question!
+  answer: String
+  subQuestions: [SubQuestionAttempt]
+  quizAttempt: QuizAttempt!
+}
+
+type SubQuestionAttempt {
+  id: ID!
+  number: Int!
+  answer: String!
+}
+
+type QuizAttempt {
+  id: ID!
+  created_at: Date!
+  user: User!
+  quiz: Quiz!
+  questions: [QuestionAttempt]
+  completed: Boolean!
+  grade: QuizGrade
+}
+input CreateQuizAttemptInput {
+  userId: ID!
+  quizId: ID!
+}
+input AttemptQuestionInput {
+  attemptID: ID!
+  questionID: ID!
+  questionType: QuestionType!
+  answer: String
+  subQuestions: [SubQuestionAttemptInput]
+}
+
+input SubQuestionAttemptInput {
+  number: Int!
+  answer: String!
+}
+
+input CreateQuizInput {
+  title: String!
+  description: String
+  start: Date!
+  end: Date!
+  duration: Int!
+  maxScore: Int!
+  sections: [CreateQuizSectionInput]!
+}
+
+input CreateQuizSectionInput {
+  type: QuizSectionType!
+  description: String
+  questions: [CreateQuestionInput]!
+  number: Int!
+}
+
+enum QuizSectionType {
+  OBJECTIVE
+  SUBJECTIVE
+}
+
+type QuizSection {
+  id: ID!
+  description: String
+  sectionType: String
+  number: Int!
+  quiz: Quiz!
+  questions: [Question]!
+}
+
+input CreateSubQuestionInput {
+  number: Int!
+  answer: String!
+}
+
+input CreateChoiceInput {
+  key: String!
+  text: String!
+}
+
+input CreateQuestionInput {
+  type: QuestionType!
+  text: String!
+  number: Int!
+  answer: String
+  subQuestions: [CreateSubQuestionInput]
+  choices: [CreateChoiceInput]
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  CLOZE
+  ESSAY
+}
+
+type Question {
+  id: ID!
+  text: String!
+  number: Int!
+  questionType: QuestionType
+}
+
+enum AnswerTrueFalse {
+  TRUE
+  FALSE
+}
+type TrueFalse {
+  id: ID!
+  text: String!
+  number: Int!
+  questionType: QuestionType!
+  answer: AnswerTrueFalse!
+}
+
+type MultipleChoice {
+  id: ID!
+  text: String!
+  number: Int!
+  questionType: QuestionType!
+  choices: [Choice]!
+  answer: String!
+}
+
+type Cloze {
+  id: ID!
+  text: String!
+  number: Int!
+  questionType: QuestionType!
+  subQuestions: [SubQuestion]!
+}
+
+type Essay {
+  id: ID!
+  text: String!
+  number: Int!
+  questionType: QuestionType!
+  answer: String!
+}
+
+type Choice {
+  id: ID!
+  key: String!
+  text: String!
+  question: MultipleChoice
+}
+
+type SubQuestion {
+  id: ID!
+  number: Int!
+  answer: String!
+  question: Cloze!
+}
+
+type AnyQuestion {
+  id: ID!
+  text: String!
+  number: Int!
+  questionType: QuestionType!
+  answer: Any
+  choices: [Choice]
+  subQuestions: [SubQuestion]
+}
+
+type QuizGrade {
+  attempt: QuizAttempt!
+  marker: User!
+  score: Float!
+}
+
+input GradeAttemptInput {
+  attemptId: ID!
+  markerId: ID!
+  score: Float!
+}
+
+type Mutation {
+  createQuiz(input: CreateQuizInput): Quiz!
+  createQuizAttempt(input: CreateQuizAttemptInput): QuizAttempt!
+  attemptQuestion(input: AttemptQuestionInput): QuestionAttempt!
+  completeAttempt(attemptId: ID!): QuizAttempt!
+  gradeAttempt(input: GradeAttemptInput): QuizGrade
+}
+
+type Query {
+  quiz(id: ID!): Quiz
+  quizzes: [Quiz]
+  quizSection(id: ID!): QuizSection
+  quizSections: [QuizSection]
+  question(id: ID!): AnyQuestion
+  myAttemptForQuiz(quizId: ID!, userId: ID!): QuizAttempt
+}

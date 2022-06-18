@@ -3,6 +3,7 @@ import { Course } from 'src/course/entities/course.entity'
 import { User as IUser } from 'src/graphql'
 import { ExcludeFromResponse } from 'src/utils/decorators/exclude-from-response.decorator'
 import { Notification } from 'src/notification/entities/notification.entity'
+import { QuizAttempt } from 'src/quiz/entities/quiz-attempt.entity'
 import {
   Column,
   CreateDateColumn,
@@ -87,6 +88,8 @@ export class User implements IUser {
   )
   department?: Department
 
+  @OneToMany(() => QuizAttempt, (attempt: QuizAttempt) => attempt.user)
+  quizAttempts: QuizAttempt[]
   @ManyToOne(
     () => AssignmentSubmission,
     (assignmentSubmission: AssignmentSubmission) =>
