@@ -13,4 +13,7 @@ export class TelegramAccount implements ITelegramAccount {
   @OneToOne(() => User)
   @JoinColumn()
   user: User
+
+  @Column({ nullable: true })
+  chat_id?: string
 }

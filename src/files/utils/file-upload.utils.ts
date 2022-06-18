@@ -14,16 +14,32 @@ export const editFileName = (fileName: string) => {
 
 export const documentFileFilter = (fileName: string) => {
   const fileExtName = extname(fileName)
-  const allowedExtensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx']
+  const allowedExtensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'zip']
   if (!allowedExtensions.includes(fileExtName.slice(1))) {
     throw new BadRequestException(
-      'Only one of these document formats (pdf, doc, docx, ppt, pptx) are allowed.',
+      'Only one of these document formats (pdf, doc, docx, ppt, pptx, zip) are allowed.',
     )
   }
   // optional guard
-  if (!fileName.match(/.*\.(pdf|doc|docx|ppt|pptx)$/gim))
+  if (!fileName.match(/.*\.(pdf|doc|docx|ppt|pptx|zip)$/gim))
     throw new BadRequestException(
-      'Only one of these document formats (pdf, doc, docx, ppt, pptx) are allowed.',
+      'Only one of these document formats (pdf, doc, docx, ppt, pptx, zip) are allowed.',
+    )
+  return true
+}
+
+export const spreadSheetFileFilter = (fileName: string) => {
+  const fileExtName = extname(fileName)
+  const allowedExtensions = ['xlsx', 'csv']
+  if (!allowedExtensions.includes(fileExtName.slice(1))) {
+    throw new BadRequestException(
+      'Only one of these document formats (xlsx, csv) are allowed.',
+    )
+  }
+  // optional guard
+  if (!fileName.match(/.*\.(xlsx|csv)$/gim))
+    throw new BadRequestException(
+      'Only one of these document formats (xlsx, csv) are allowed.',
     )
   return true
 }

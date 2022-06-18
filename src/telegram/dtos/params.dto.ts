@@ -55,3 +55,11 @@ export interface SendDocumentParams {
   document: string
   caption?: string
 }
+
+export interface EditMessageParams {
+  chat_id: string
+  message_id: string
+  text: string
+  parse_mode?: FormattingOption
+  reply_markup?: InlineKeybardMarkup
+}

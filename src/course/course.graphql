@@ -7,9 +7,15 @@ type Course {
   description: String!
   overview: String!
   creditHour: Int!
-  users: [User]
+  users: [User] @deprecated(reason: "Use `teachers` or `students` or `owner`")
+  teachers: [User]
+  students: [User]
+  owner: User
+  takingClasses: [StudentClass]
   chapters: [Chapter]!
   courseDocuments: [CourseDocument]!
+  assignmentDefinitions: [AssignmentDefinition]
+  owningDepartment: Department
 }
 
 input CreateCourseInput {
@@ -18,10 +24,11 @@ input CreateCourseInput {
   description: String!
   overview: String!
   creditHour: Int!
+  departmentId: ID!
 }
 
 input UpdateCourseInput {
-  id: String!
+  id: ID!
   code: String
   name: String
   description: String
@@ -46,7 +53,7 @@ input CreateChapterInput {
 }
 
 input UpdateChapterInput {
-  id: String!
+  id: ID!
   title: String
   sequenceNumber: Int
 }
@@ -67,7 +74,7 @@ input CreateSubChapterInput {
 }
 
 input UpdateSubChapterInput {
-  id: String!
+  id: ID!
   title: String
   sequenceNumber: Int
 }
@@ -80,6 +87,8 @@ type CourseDocument {
   documentDisplayName: String!
   storedFileName: String!
   course: Course!
+  assignmentDefinition: AssignmentDefinition
+  assignmentSubmission: AssignmentSubmission
 }
 
 input CreateCourseDocumentInput {
@@ -90,7 +99,7 @@ input CreateCourseDocumentInput {
 }
 
 input UpdateCourseDocumentInput {
-  id: String!
+  id: ID!
   documentType: String
   documentDisplayName: String
   fileUpload: Upload
@@ -104,18 +113,35 @@ type Query {
 type Mutation {
   createCourse(createCourseInput: CreateCourseInput!): Course!
   updateCourse(updateCourseInput: UpdateCourseInput!): Course!
-  removeCourse(id: ID!): Course
+  removeCourse(id: ID!): Boolean!
 
-  assignUserToCourse(courseId: ID!, userId: ID!): Boolean!
-  unassignUserFromCourse(courseId: ID!, userId: ID!): Boolean!
+  assignStudentToCourse(courseId: ID!, studentId: ID!): Boolean!
+  assignTeacherToCourse(courseId: ID!, teacherId: ID!): Boolean!
+  assignClassToCourse(courseId: ID!, classId: ID!): Boolean!
+  assignClassesToCourses(
+    coursesIds: UUIDArrayDto!
+    classesIds: UUIDArrayDto!
+  ): Boolean!
+  assignCourseToDepartment(courseId: ID!, departmentId: ID!): Boolean!
+  assignOwnerToCourse(courseId: ID!, ownerId: ID!): Boolean!
+
+  unassignStudentFromCourse(courseId: ID!, studentId: ID!): Boolean!
+  unassignTeacherFromCourse(courseId: ID!, teacherId: ID!): Boolean!
+  unassignClassFromCourse(courseId: ID!, classId: ID!): Boolean!
+  unassignClassesFromCourses(
+    coursesIds: UUIDArrayDto!
+    classesIds: UUIDArrayDto!
+  ): Boolean!
+  unassignCourseFromDepartment(courseId: ID!, departmentId: ID!): Boolean!
+  unassignOwnerFromCourse(courseId: ID!, ownerId: ID!): Boolean
 
   createChapter(createChapterInput: CreateChapterInput): Chapter!
   updateChapter(updateChapterInput: UpdateChapterInput): Chapter!
-  removeChapter(id: ID!): Chapter!
+  removeChapter(id: ID!): Boolean!
 
   createSubChapter(createSubChapterInput: CreateSubChapterInput): SubChapter!
   updateSubChapter(updateSubChapterInput: UpdateSubChapterInput): SubChapter!
-  removeSubChapter(id: ID!): SubChapter!
+  removeSubChapter(id: ID!): Boolean!
 
   createCourseDocument(
     createCourseDocumentInput: CreateCourseDocumentInput
@@ -123,5 +149,5 @@ type Mutation {
   updateCourseDocument(
     updateCourseDocumentInput: UpdateCourseDocumentInput
   ): CourseDocument!
-  removeCourseDocument(id: ID!): CourseDocument!
+  removeCourseDocument(id: ID!): Boolean!
 }

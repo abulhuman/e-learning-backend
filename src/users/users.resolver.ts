@@ -12,18 +12,28 @@ import { UpdateUserInput } from './dto/update-user.input'
 import { CreateRoleInput } from './dto/create-role.input'
 import { Role } from './entities/role.entity'
 import { User } from './entities/user.entity'
-import { ParseUUIDPipe, UseFilters } from '@nestjs/common'
+import {
+  InternalServerErrorException,
+  Logger,
+  ParseBoolPipe,
+  ParseUUIDPipe,
+  UseFilters,
+} from '@nestjs/common'
 import { QueryFailedExceptionFilter } from 'src/database/filters/query-failed-exception.filter'
-import { RoleName } from 'src/graphql'
+import { CreateMultipleUsersInput, RoleName } from 'src/graphql'
 import { NotificationService } from 'src/notification/notification.service'
 import { UpdateStudentClassInput } from './dto/update-student-class.input'
 import { StudentClass } from './entities/student-class.entity'
 import { CreateStudentClassInput } from './dto/create-student-class.input'
 import { UUIDArrayDto } from 'src/app/dto/uuid-array.dto'
 import { Department } from './entities/department.entity'
+import { FileUpload } from 'graphql-upload'
+import arrayifyStream from 'arrayify-stream'
+import { spreadSheetFileFilter } from 'src/files/utils/file-upload.utils'
 
 @Resolver('User')
 export class UserResolver {
+  private readonly logger = new Logger(UserResolver.name)
   constructor(
     private readonly usersService: UsersService,
     private notificationService: NotificationService,
@@ -35,9 +45,28 @@ export class UserResolver {
     return this.usersService.createUser(createUserInput)
   }
 
+  @Mutation('createMultipleUsers')
+  async createMultipleUsers(@Args('input') input: CreateMultipleUsersInput) {
+    const { file } = input
+    const { createReadStream, filename }: FileUpload = await file
+    spreadSheetFileFilter(filename)
+    const readStream = createReadStream()
+    const fileBuffer = await arrayifyStream(readStream)
+    const users = this.usersService.parseWorkbook(fileBuffer[0], input)
+    return this.usersService.createMany(users, input.roleName)
+  }
+
   @Query('users')
-  findAllUsers() {
-    return this.usersService.findAllUsers()
+  async findAllUsers(@Args('filter') filter: { roleName: RoleName }) {
+    const users = await this.usersService.findAllUsers()
+    let roleName: RoleName
+    if (filter?.roleName) ({ roleName } = filter)
+    return roleName
+      ? users.filter(user => {
+          const userRoles = user.roles.map(role => role.name)
+          return userRoles.includes(roleName)
+        })
+      : users
   }
 
   @Query('getAllStudentsByClassId')
@@ -47,9 +76,29 @@ export class UserResolver {
     return this.usersService.findAllStudentsByClassId(classId)
   }
 
+  @Query('getAllNewDepartmentAdministrators')
+  async getAllNewDepartmentAdministrators() {
+    const allUsers = await this.usersService.findAllUsers()
+    const allDepartmentAdministrators = allUsers.map(user => {
+      const userRoles = user.roles.map(role => role.name)
+      if (userRoles.includes(RoleName.DEPARTMENT_ADMINISTRATOR)) return user
+    })
+    const allNewDepartmentAdministrators = allDepartmentAdministrators
+      .filter(user => !user?.department)
+      .filter(admin => !!admin)
+    return allNewDepartmentAdministrators
+  }
+
   @Query('user')
   findOneUser(@Args('id') id: string) {
-    return this.usersService.findOneUserById(id)
+    return this.usersService.findOneUserById(
+      id,
+      true,
+      false,
+      false,
+      false,
+      true,
+    )
   }
 
   @Mutation('updateUser')
@@ -63,8 +112,8 @@ export class UserResolver {
   }
 
   @ResolveField('roles')
-  roles(@Parent() user: User) {
-    return user.roles
+  async roles(@Parent() user: User) {
+    return (await this.usersService.findOneUserById(user.id, true)).roles
   }
 
   @ResolveField('notifications')
@@ -79,11 +128,63 @@ export class UserResolver {
       .attendingClass
   }
 
-  @ResolveField('learningClasses')
-  async learningClasses(@Parent() user: User) {
+  @ResolveField('teachingClasses')
+  async teachingClasses(@Parent() user: User) {
     return (
       await this.usersService.findOneUserById(user.id, true, false, false, true)
-    ).learningClasses
+    ).teachingClasses
+  }
+
+  @ResolveField('teachingCourses')
+  async teachingCourses(@Parent() user: User) {
+    return (
+      await this.usersService.findOneUserById(
+        user.id,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+      )
+    ).teachingCourses
+  }
+
+  @ResolveField('attendingCourses')
+  async attendingCourses(@Parent() user: User) {
+    return (
+      await this.usersService.findOneUserById(
+        user.id,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+      )
+    ).attendingCourses
+  }
+
+  @ResolveField('ownedCourses')
+  async ownedCourses(@Parent() user: User) {
+    const _ = false
+    return (
+      await this.usersService.findOneUserById(
+        user.id,
+        true,
+        _,
+        _,
+        _,
+        _,
+        _,
+        _,
+        _,
+        true,
+      )
+    ).ownedCourses
   }
 
   @ResolveField('department')
@@ -98,6 +199,21 @@ export class UserResolver {
         true,
       )
     ).department
+  }
+
+  @ResolveField('assignmentSubmissions')
+  async assignmentSubmissions(@Parent() user: User) {
+    return (
+      await this.usersService.findOneUserById(
+        user.id,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+      )
+    ).assignmentSubmissions
   }
 }
 
@@ -182,6 +298,14 @@ export class StudentClassResolver {
     return this.usersService.dismissTeacherFromClass(teacherId, classId)
   }
 
+  @Mutation('deleteStudentClass')
+  deleteStudentClass(
+    @Args('id', ParseUUIDPipe) id: string,
+    @Args('removeStudents', ParseBoolPipe) removeStudents,
+  ): boolean | Promise<boolean> {
+    return this.usersService.deleteStudentClass(id, removeStudents)
+  }
+
   @ResolveField('students')
   async students(@Parent() studentClass: StudentClass) {
     return (await this.usersService.findOneStudentClass(studentClass.id))
@@ -198,6 +322,12 @@ export class StudentClassResolver {
   async department(@Parent() studentClass: StudentClass) {
     return (await this.usersService.findOneStudentClass(studentClass.id))
       .department
+  }
+
+  @ResolveField('attendingCourses')
+  async attendingCourses(@Parent() studentClass: StudentClass) {
+    return (await this.usersService.findOneStudentClass(studentClass.id))
+      .attendingCourses
   }
 }
 
@@ -216,8 +346,8 @@ export class RoleResolver {
   }
 
   @Query('role')
-  findOneRole(@Args('id') id: string) {
-    return this.usersService.findOneRole(id)
+  findOneRole(@Args('id', ParseUUIDPipe) id: string) {
+    return this.usersService.findOneRole({ id }, ['members'])
   }
 
   @Mutation('revokeUserRole')
@@ -264,7 +394,7 @@ export class DepartmentResolver {
   removeDepartment(
     @Args('id', ParseUUIDPipe)
     id: string,
-  ): Promise<Department> {
+  ): Promise<boolean> {
     return this.usersService.removeDepartment(id)
   }
 
@@ -315,5 +445,11 @@ export class DepartmentResolver {
   async departmentAdministrator(@Parent() department: Department) {
     return (await this.usersService.findOneDepartment(department.id))
       .departmentAdministrator
+  }
+
+  @ResolveField('ownedCourses')
+  async ownedCourses(@Parent() department: Department) {
+    return (await this.usersService.findOneDepartment(department.id))
+      .ownedCourses
   }
 }

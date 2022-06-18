@@ -8,11 +8,18 @@ type User {
   email: String!
   password: String!
   attendingClass: StudentClass
-  learningClasses: [StudentClass]
+  teachingClasses: [StudentClass]
   roles: [Role]!
   courses: [Course]
+    @deprecated(
+      reason: "Use `teachingCourses` for teachers; `attendingCourses` for students; `ownedCourses` for courseOnwer."
+    )
+  teachingCourses: [Course]
+  attendingCourses: [Course]
+  ownedCourses: [Course]
   notifications: [Notification]
   department: Department
+  assignmentSubmissions: [AssignmentSubmission]
 }
 
 input CreateUserInput {
@@ -22,6 +29,12 @@ input CreateUserInput {
   roleName: RoleName!
   email: String!
   password: String!
+}
+
+input CreateMultipleUsersInput {
+  file: Upload!
+  roleName: RoleName!
+  password: String
 }
 
 input UpdateUserInput {
@@ -42,12 +55,14 @@ type StudentClass {
   section: String!
   teachers: [User]
   students: [User]
+  attendingCourses: [Course]
   department: Department
 }
 
 input CreateStudentClassInput {
   year: String!
   section: String!
+  departmentId: ID!
 }
 
 input UpdateStudentClassInput {
@@ -63,11 +78,17 @@ type Department {
   name: String!
   classes: [StudentClass]
   departmentAdministrator: User
+  ownedCourses: [Course]
+}
+
+input UserFilter {
+  roleName: RoleName
 }
 
 type Query {
-  users: [User]!
-  getAllStudentsByClassId(classId: ID!): [User] 
+  users(filter: UserFilter): [User]!
+  getAllStudentsByClassId(classId: ID!): [User]
+  getAllNewDepartmentAdministrators: [User]
   user(id: ID!): User
   roles: [Role]!
   role(id: ID!): Role
@@ -79,6 +100,7 @@ type Query {
 
 type Mutation {
   createUser(createUserInput: CreateUserInput!): User!
+  createMultipleUsers(input: CreateMultipleUsersInput!): Int!
   updateUser(updateUserInput: UpdateUserInput!): User!
   removeUser(id: ID!): User
 
@@ -91,7 +113,7 @@ type Mutation {
   updateStudentClass(
     updateStudentClassInput: UpdateStudentClassInput!
   ): StudentClass!
-  removeStudentClass(id: ID!): StudentClass!
+  deleteStudentClass(id: ID!, removeStudents: Boolean = false): Boolean!
 
   admitStudentToClass(studentId: ID!, classId: ID!): Boolean!
   admitStudentsToClass(studentIds: UUIDArrayDto!, classId: ID!): Boolean!
@@ -103,7 +125,7 @@ type Mutation {
 
   createDepartment(name: String!): Department!
   updateDepartment(id: ID!, name: String): Department!
-  removeDepartment(id: ID!): Department
+  removeDepartment(id: ID!): Boolean
 
   addClassToDepartment(departmentId: ID!, classId: ID!): Boolean!
   removeClassFromDepartment(departmentId: ID!, classId: ID!): Boolean!
@@ -123,7 +145,7 @@ type Role {
 enum RoleName {
   DEV
   ADMINISTRATOR
-  DEPARTMENT_ADMINSTRATOR
+  DEPARTMENT_ADMINISTRATOR
   TEACHER
   STUDENT
   COURSE_MANAGER

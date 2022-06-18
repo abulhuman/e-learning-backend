@@ -1,9 +1,12 @@
+import { AssignmentDefinition } from 'src/assignment/entities/assignment-definition.entity'
+import { AssignmentSubmission } from 'src/assignment/entities/assignment-submission.entity'
 import { CourseDocument as ICourseDocument } from 'src/graphql'
 import {
   Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   RelationId,
   UpdateDateColumn,
@@ -34,6 +37,22 @@ export class CourseDocument implements ICourseDocument {
   @Column({ nullable: true })
   courseId: string
 
-  @ManyToOne(() => Course, (course: Course) => course.courseDocuments)
+  @ManyToOne(() => Course, (course: Course) => course.courseDocuments, {
+    onDelete: 'CASCADE',
+  })
   course: Course
+
+  @OneToOne(
+    () => AssignmentDefinition,
+    (assignmentDefinition: AssignmentDefinition) =>
+      assignmentDefinition.instructionsFile,
+  )
+  assignmentDefinition?: AssignmentDefinition
+
+  @OneToOne(
+    () => AssignmentSubmission,
+    (assignmentSubmission: AssignmentSubmission) =>
+      assignmentSubmission.submissionFile,
+  )
+  assignmentSubmission?: AssignmentSubmission
 }

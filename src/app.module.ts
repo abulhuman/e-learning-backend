@@ -23,6 +23,8 @@ import { telegramConfigValidation } from './telegram/telegram.config'
 import { TelegramModule } from './telegram/telegram.module'
 import { UsersModule } from './users/users.module'
 import { QuizModule } from './quiz/quiz.module'
+import { AssignmentModule } from './assignment/assignment.module'
+import { ScheduleModule } from '@nestjs/schedule'
 
 @Module({
   imports: [
@@ -67,6 +69,8 @@ import { QuizModule } from './quiz/quiz.module'
       serveRoot: '/upload',
     }),
     QuizModule,
+    AssignmentModule,
+    ScheduleModule.forRoot(),
   ],
   providers: [AppService],
   exports: [AppService],

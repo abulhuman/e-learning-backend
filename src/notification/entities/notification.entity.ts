@@ -37,6 +37,8 @@ export class Notification implements INotification {
   })
   status?: NotificationStatus
 
-  @ManyToOne(() => User, (user: User) => user.notifications)
+  @ManyToOne(() => User, (user: User) => user.notifications, {
+    onDelete: 'CASCADE',
+  })
   recipient: User
 }

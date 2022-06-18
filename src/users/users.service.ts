@@ -8,19 +8,23 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import * as bcrypt from 'bcrypt'
+import { validateSync } from 'class-validator'
 import { AuthService } from 'src/auth/auth.service'
-import { RoleName } from 'src/graphql'
-import { Repository } from 'typeorm'
+import { CreateMultipleUsersInput, RoleName } from 'src/graphql'
+import { FindConditions, Repository } from 'typeorm'
+import { read, utils } from 'xlsx'
 import { CreateRoleInput } from './dto/create-role.input'
 import { CreateStudentClassInput } from './dto/create-student-class.input'
 import { CreateUserInput } from './dto/create-user.input'
 import { FindUserDto } from './dto/find-user.dto'
 import { UpdateStudentClassInput } from './dto/update-student-class.input'
 import { UpdateUserInput } from './dto/update-user.input'
+import { UserEntry } from './dto/user-entry.dto'
 import { Department } from './entities/department.entity'
 import { Role } from './entities/role.entity'
 import { StudentClass } from './entities/student-class.entity'
 import { User } from './entities/user.entity'
+import { generate } from 'randomstring'
 
 @Injectable()
 export class UsersService {
@@ -39,7 +43,7 @@ export class UsersService {
     createUserInput.password = await bcrypt.hash(createUserInput.password, 10)
     const { roleName, ...rest } = createUserInput
 
-    let roleToAssign = await this.findOneRole(undefined, roleName)
+    let roleToAssign = await this.findOneRole({ name: roleName })
 
     if (!roleToAssign) {
       const newRoleInput = new CreateRoleInput(createUserInput.roleName)
@@ -51,29 +55,53 @@ export class UsersService {
     // await this.authService.sendVerificationLink(newUser)
     return this.userRepository.save(newUser)
   }
+  async createMany(users: Partial<User>[], roleName: RoleName) {
+    let roleToAssign = await this.findOneRole({ name: roleName })
+    if (!roleToAssign) {
+      roleToAssign = await this.createRole(new CreateRoleInput(roleName))
+    }
+
+    const usersToSave = users.map(user => {
+      user.roles = [roleToAssign]
+      user.password = bcrypt.hashSync(user.password, 10)
+      return user
+    })
+
+    return this.userRepository.save(usersToSave).then(users => users.length + 1)
+  }
 
   async findAllUsers() {
     return this.userRepository.find({
-      relations: ['roles', 'notifications', 'attendingClass'],
+      relations: ['roles', 'notifications', 'attendingClass', 'department'],
     })
   }
 
-  findOneUserById(
+  async findOneUserById(
     id: string,
     withRoles = true,
     withNotifications = false,
     withAttendingClass = false,
-    withLearningClasses = false,
+    withTeachingClasses = false,
     withDepartment = false,
+    withSubmissions = false,
+    withTeachingCourses = false,
+    withAttendingCourses = false,
+    withOwnedCourses = false,
   ): Promise<User> {
-    return this.findOne(
+    const user = await this.findOne(
       { id },
       withRoles,
       withNotifications,
       withAttendingClass,
-      withLearningClasses,
+      withTeachingClasses,
       withDepartment,
+      withSubmissions,
+      withTeachingCourses,
+      withAttendingCourses,
+      withOwnedCourses,
     )
+    if (!user) throw new NotFoundException(`User with id: ${id} was not found.`)
+    return user
   }
 
   findOneUserByEmail(email: string, withRoles = true): Promise<User> {
@@ -108,15 +136,23 @@ export class UsersService {
     withRoles = false,
     withNotifications = false,
     withAttendingClass = false,
-    withLearningClasses = false,
+    withTeachingClasses = false,
     withDepartment = false,
+    withSubmissions = false,
+    withTeachingCourses = false,
+    withAttendingCourses = false,
+    withOwnedCourses = false,
   ): Promise<User> {
     const relations = []
     if (withRoles) relations.push('roles')
     if (withNotifications) relations.push('notifications')
     if (withAttendingClass) relations.push('attendingClass')
-    if (withLearningClasses) relations.push('learningClasses')
+    if (withTeachingClasses) relations.push('teachingClasses')
     if (withDepartment) relations.push('department')
+    if (withSubmissions) relations.push('assignmentSubmissions')
+    if (withTeachingCourses) relations.push('teachingCourses')
+    if (withAttendingCourses) relations.push('attendingCourses')
+    if (withOwnedCourses) relations.push('ownedCourses')
     return this.userRepository.findOne(findUserDto, {
       relations,
     })
@@ -148,10 +184,9 @@ export class UsersService {
       )
 
     if (updateUserInput.roleName) {
-      let roleToAssign = await this.findOneRole(
-        undefined,
-        updateUserInput.roleName,
-      )
+      let roleToAssign = await this.findOneRole({
+        name: updateUserInput.roleName,
+      })
 
       if (!roleToAssign) {
         roleToAssign = await this.createRole(
@@ -180,15 +215,14 @@ export class UsersService {
     return this.roleRepository.find({ relations: ['members'] })
   }
 
-  findOneRole(id?: string, roleName?: RoleName) {
-    return this.roleRepository.findOne(id, {
-      relations: ['members'],
-      where: { name: roleName },
+  findOneRole(options: FindConditions<Role>, relations?: string[]) {
+    return this.roleRepository.findOne(options, {
+      relations,
     })
   }
 
   async removeRole(id: string) {
-    const roleToDelete = await this.findOneRole(id)
+    const roleToDelete = await this.findOneRole({ id })
 
     return this.roleRepository.remove(roleToDelete)
   }
@@ -207,7 +241,7 @@ export class UsersService {
         `User role ${roleName} was not found on User with id ${userId}.`,
       )
 
-    const roleToRevoke = await this.findOneRole(undefined, roleName)
+    const roleToRevoke = await this.findOneRole({ name: roleName })
 
     if (!roleToRevoke)
       throw new NotFoundException(`Role with name ${roleName} was not found.`)
@@ -222,12 +256,26 @@ export class UsersService {
     const newStudentClass = this.studentClassRepository.create(
       createStudentClassInput,
     )
+    const { departmentId } = createStudentClassInput
+    delete createStudentClassInput.departmentId
+    const department = await this.findOneDepartment(departmentId)
+    Object.assign(newStudentClass, { department })
     return this.studentClassRepository.save(newStudentClass)
   }
   async findOneStudentClass(id: string) {
-    return this.studentClassRepository.findOne(id, {
-      relations: ['students', 'teachers', 'teachers.roles', 'department'],
+    const studentClass = await this.studentClassRepository.findOne(id, {
+      relations: [
+        'students',
+        'students.courses',
+        'teachers',
+        'teachers.roles',
+        'department',
+        'attendingCourses',
+      ],
     })
+    if (!studentClass)
+      throw new NotFoundException(`Class with id: ${id} was not found.`)
+    return studentClass
   }
 
   async findAllStudentClasses() {
@@ -305,17 +353,17 @@ export class UsersService {
       throw new NotFoundException(`Class with id": ${classId} was not found.`)
 
     if (
-      teacherUser.learningClasses
+      teacherUser.teachingClasses
         ?.map(studentClass => studentClass.id)
         ?.includes(classId)
     )
       throw new BadRequestException(
         `This teacher is already assigned to the class: (Year: ${teacherClass.year}, Section: ${teacherClass.section}).`,
       )
-    if (!teacherUser.learningClasses) teacherUser.learningClasses = []
+    if (!teacherUser.teachingClasses) teacherUser.teachingClasses = []
     if (!teacherClass.teachers) teacherClass.teachers = []
 
-    teacherUser.learningClasses.push(teacherClass)
+    teacherUser.teachingClasses.push(teacherClass)
     teacherClass.teachers.push(teacherUser)
 
     await this.userRepository.save(teacherUser)
@@ -382,7 +430,7 @@ export class UsersService {
 
     if (!teacherClass)
       throw new NotFoundException(`Class with id": ${classId} was not found.`)
-    const learningClassIds = teacherUser.learningClasses.map(
+    const learningClassIds = teacherUser.teachingClasses.map(
       learningClass => learningClass.id,
     )
     if (!learningClassIds.find(learningClassId => learningClassId === classId))
@@ -390,15 +438,29 @@ export class UsersService {
         `This teacher is not assigned to the class: (Year: ${teacherClass.year}, Section: ${teacherClass.section}).`,
       )
     const classIndex = learningClassIds.indexOf(classId)
-    teacherUser.learningClasses.splice(classIndex, 1)
+    teacherUser.teachingClasses.splice(classIndex, 1)
     this.userRepository.save(teacherUser)
     return true
   }
-  async removeStudentClass(id: string) {
+  async deleteStudentClass(id: string, removeStudents = false) {
     const studentClassToRemove = await this.findOneStudentClass(id)
-    if (!studentClassToRemove)
-      throw new NotFoundException(`Class with id": ${id} was not found.`)
-    return this.studentClassRepository.remove(studentClassToRemove)
+    if (studentClassToRemove?.students?.length) {
+      if (!removeStudents) {
+        throw new BadRequestException(`The class is not empty.`)
+      }
+      studentClassToRemove.students.forEach(student => {
+        student.attendingClass = null
+        this.userRepository.save(student)
+      })
+      studentClassToRemove.students = []
+    }
+    return (
+      this.studentClassRepository
+        .remove(studentClassToRemove)
+        .then(res => !!res)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .catch(_err => false)
+    )
   }
 
   async createDepartment(name: string) {
@@ -406,9 +468,12 @@ export class UsersService {
     return this.departmentRepository.save(newDepartment)
   }
   async findOneDepartment(id: string) {
-    return this.departmentRepository.findOne(id, {
-      relations: ['classes', 'departmentAdministrator'],
+    const department = await this.departmentRepository.findOne(id, {
+      relations: ['classes', 'departmentAdministrator', 'ownedCourses'],
     })
+    if (!department)
+      throw new NotFoundException(`Department with id": ${id} was not found.`)
+    return department
   }
   async findAllDepartments() {
     return this.departmentRepository.find()
@@ -420,11 +485,15 @@ export class UsersService {
     Object.assign(departmentToUpdate, { name })
     return this.departmentRepository.save(departmentToUpdate)
   }
-  async removeDepartment(id: string): Promise<Department> {
+  async removeDepartment(id: string): Promise<boolean> {
     const departmentToDelete = await this.findOneDepartment(id)
-    if (!departmentToDelete)
-      throw new NotFoundException(`Department with id": ${id} was not found.`)
-    return this.departmentRepository.remove(departmentToDelete)
+    return (
+      this.departmentRepository
+        .remove(departmentToDelete)
+        .then(res => !!res)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .catch(_err => false)
+    )
   }
   async addClassToDepartment(departmentId: string, classId: string) {
     const department = await this.findOneDepartment(departmentId)
@@ -489,7 +558,7 @@ export class UsersService {
 
     const userRoles = user.roles.map(role => role.name)
     const isNotDepartmentAdministrator = !userRoles.includes(
-      RoleName.DEPARTMENT_ADMINSTRATOR,
+      RoleName.DEPARTMENT_ADMINISTRATOR,
     )
 
     if (isNotDepartmentAdministrator)
@@ -518,7 +587,7 @@ export class UsersService {
 
     const userRoles = user.roles.map(role => role.name)
     const isNotDepartmentAdministrator = !userRoles.includes(
-      RoleName.DEPARTMENT_ADMINSTRATOR,
+      RoleName.DEPARTMENT_ADMINISTRATOR,
     )
 
     if (isNotDepartmentAdministrator)
@@ -532,5 +601,42 @@ export class UsersService {
     department.departmentAdministrator = null
     this.departmentRepository.save(department)
     return true
+  }
+
+  parseWorkbook(fileBuffer: any[], input: CreateMultipleUsersInput) {
+    const REQUIRED_FIELDS = ['firstName', 'middleName', 'lastName', 'email']
+
+    const workbook = read(fileBuffer)
+
+    const users: UserEntry[] = []
+    Object.entries(workbook.Sheets).forEach(([sheetName, sheet]) => {
+      const usersToImport = utils.sheet_to_json(sheet, {
+        header: [...REQUIRED_FIELDS, 'password'],
+        defval: undefined,
+      })
+      usersToImport.forEach((userJSON: Partial<UserEntry>, index) => {
+        const newUser = new UserEntry()
+        newUser.email = userJSON.email
+        newUser.firstName = userJSON.firstName
+        newUser.middleName = userJSON.middleName
+        newUser.lastName = userJSON.lastName
+        if (input.password) {
+          newUser.password = input.password
+        } else if (!userJSON.password || userJSON.password.length < 8) {
+          newUser.password = generate({
+            length: 8,
+            capitalization: 'uppercase',
+          })
+        }
+        const errors = validateSync(newUser, { stopAtFirstError: true })
+        if (errors.length) {
+          throw new BadRequestException(
+            `Error on row ${index + 1} of sheet ${sheetName}: Invalid entry`,
+          )
+        }
+        users.push(newUser)
+      })
+    })
+    return users
   }
 }

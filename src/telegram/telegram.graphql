@@ -2,6 +2,7 @@ type TelegramAccount {
   id: ID!
   first_name: String!
   user: User!
+  chat_id: String
 }
 
 input AuthorizeTelegramInput {
