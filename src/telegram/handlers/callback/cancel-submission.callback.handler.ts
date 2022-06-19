@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
 import { from, switchMap } from 'rxjs'
 import { TextMessage } from 'src/telegram/dtos'
 import { Handler } from 'src/telegram/interfaces/hanlder.interface'
@@ -7,7 +7,10 @@ import { TelegramService } from 'src/telegram/telegram.service'
 @Injectable()
 export class CancelSubmissionCallbackHandler implements Handler {
   private logger = new Logger(CancelSubmissionCallbackHandler.name)
-  constructor(private telegramService: TelegramService) {}
+  constructor(
+    @Inject(forwardRef(() => TelegramService))
+    private telegramService: TelegramService,
+  ) {}
   handle(message: TextMessage) {
     from(this.telegramService.cancelSubmission(message.chat.id))
       .pipe(
