@@ -43,6 +43,12 @@ export class SubmitCommandHandler implements Handler {
                 },
               ])
             })
+            buttons.inline_keyboard.push([
+              {
+                text: 'Cancel',
+                callback_data: 'cancel',
+              },
+            ])
           }
           return this.telegramService.sendMessage({
             text,
