@@ -186,6 +186,7 @@ export class QuizService {
             const multipleChoiceQuestion = new MultipleChoice()
             multipleChoiceQuestion.text = text
             multipleChoiceQuestion.number = number
+            multipleChoiceQuestion.answer = answer
             multipleChoiceQuestion.choices = choices.map(choiceInput => {
               const choice = new Choice()
               choice.key = choiceInput.key
@@ -211,15 +212,20 @@ export class QuizService {
   }
 
   findOneById(id: string) {
-    return this.findOne({ id })
+    return this.findOne({ id }, [
+      'sections',
+      'sections.questions',
+      'sections.questions.choices',
+      'sections.questions.subQuestions',
+    ])
   }
 
   findAll() {
     return this.findMany()
   }
 
-  private findOne(quiz: FindConditions<Quiz>) {
-    return this.quizRepo.findOne(quiz)
+  private findOne(quiz: FindConditions<Quiz>, relations: string[] = []) {
+    return this.quizRepo.findOne(quiz, { relations })
   }
 
   private findMany(quizzes?: FindConditions<Quiz>) {
