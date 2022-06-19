@@ -7,6 +7,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql'
+import { saveFile } from 'src/files/utils/file-upload.utils'
 import { AssignmentSubmissionService } from '../assignment.service'
 import { CreateAssignmentSubmissionInput } from '../dto/create-assignment-submission.input'
 import { AssignmentSubmission } from '../entities/assignment-submission.entity'
@@ -18,12 +19,15 @@ export class AssignmentSubmissionResolver {
   ) {}
 
   @Mutation('createAssignmentSubmission')
-  create(
+  async create(
     @Args('createAssignmentSubmissionInput')
-    createAssignmentSubmissionInput: CreateAssignmentSubmissionInput,
+    input: CreateAssignmentSubmissionInput,
   ) {
+    const { file, ...rest } = input
+    const newFileName = await saveFile(file)
     return this.assignmentSubmissionService.createAssignmentSubmission(
-      createAssignmentSubmissionInput,
+      rest,
+      newFileName,
     )
   }
 
