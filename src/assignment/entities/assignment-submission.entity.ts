@@ -1,14 +1,11 @@
-import { CourseDocument } from 'src/course/entities/course-document.entity'
 import { AssignmentSubmission as IAssignmentSubmission } from 'src/graphql'
 import { User } from 'src/users/entities/user.entity'
 import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
@@ -32,12 +29,8 @@ export class AssignmentSubmission implements IAssignmentSubmission {
   @Column({ type: 'float', nullable: true })
   totalScore?: number
 
-  @OneToOne(
-    () => CourseDocument,
-    (courseDocument: CourseDocument) => courseDocument.assignmentSubmission,
-  )
-  @JoinColumn()
-  submissionFile: CourseDocument
+  @Column()
+  submissionFile: string
 
   @ManyToOne(
     () => AssignmentDefinition,
