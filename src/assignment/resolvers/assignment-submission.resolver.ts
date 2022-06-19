@@ -9,7 +9,6 @@ import {
 } from '@nestjs/graphql'
 import { AssignmentSubmissionService } from '../assignment.service'
 import { CreateAssignmentSubmissionInput } from '../dto/create-assignment-submission.input'
-import { UpdateAssignmentSubmissionInput } from '../dto/update-assignment-submission.input'
 import { AssignmentSubmission } from '../entities/assignment-submission.entity'
 
 @Resolver('AssignmentSubmission')
@@ -36,17 +35,6 @@ export class AssignmentSubmissionResolver {
   @Query('assignmentSubmission')
   findOne(@Args('id') id: string) {
     return this.assignmentSubmissionService.findOneAssignmentSubmission(id)
-  }
-
-  @Mutation('updateAssignmentSubmission')
-  update(
-    @Args('updateAssignmentSubmissionInput')
-    updateAssignmentSubmissionInput: UpdateAssignmentSubmissionInput,
-  ) {
-    return this.assignmentSubmissionService.updateAssignmentSubmission(
-      updateAssignmentSubmissionInput.id,
-      updateAssignmentSubmissionInput,
-    )
   }
 
   @Mutation('removeAssignmentSubmission')
