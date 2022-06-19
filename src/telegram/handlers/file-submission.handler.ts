@@ -1,18 +1,14 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
 import { format } from 'bytes'
-import { createWriteStream } from 'fs'
-import { join } from 'path'
+import * as moment from 'moment'
 import { catchError, from, switchMap } from 'rxjs'
-import { editFileName } from 'src/files/utils/file-upload.utils'
-import { pipeline } from 'stream'
-import { promisify } from 'util'
+import { AssignmentSubmissionService } from 'src/assignment/assignment.service'
+import { saveStream } from 'src/files/utils/file-upload.utils'
 import { Document } from '../dtos'
 import { TelegramAccount } from '../entities/telegram-account.entity'
 import { Handler } from '../interfaces/hanlder.interface'
 import { FormattingOption } from '../telegram.constants'
 import { TelegramService } from '../telegram.service'
-
-const pipelinePromise = promisify(pipeline)
 
 @Injectable()
 export class FileSubmissionHandler implements Handler {
@@ -20,6 +16,8 @@ export class FileSubmissionHandler implements Handler {
   constructor(
     @Inject(forwardRef(() => TelegramService))
     private telegramService: TelegramService,
+    @Inject(forwardRef(() => AssignmentSubmissionService))
+    private assignmentSubmissionService: AssignmentSubmissionService,
   ) {}
   handle(account: TelegramAccount, document: Document) {
     // get filesize in MBs (integer)
@@ -44,22 +42,48 @@ export class FileSubmissionHandler implements Handler {
           error: this.logger.error,
         })
     } else {
-      this.telegramService
-        .getFile(document.file_id)
+      from(this.telegramService.getPendingSubmission(account.id))
         .pipe(
-          switchMap(telegramFile =>
-            this.telegramService.downloadFile(telegramFile.file_path),
-          ),
-          switchMap(fileStream => {
-            const newFileName = editFileName(document.file_name)
-            const writer = createWriteStream(
-              join(__dirname, '../../upload', `${newFileName}`),
-            )
-            return from(pipelinePromise(fileStream, writer))
+          switchMap(assignment => {
+            const diff = moment(assignment.submissionDeadline).diff(moment())
+            if (diff <= 0) {
+              return this.telegramService.sendMessage({
+                text: `Assignment ended ${moment
+                  .duration(diff)
+                  .humanize()} ago`,
+                chat_id: account.chat_id,
+              })
+            } else {
+              return this.telegramService.getFile(document.file_id).pipe(
+                switchMap(telegramFile =>
+                  this.telegramService.downloadFile(telegramFile.file_path),
+                ),
+                switchMap(fileStream =>
+                  from(saveStream(fileStream, document.file_name)),
+                ),
+                switchMap(submissionName => {
+                  return this.assignmentSubmissionService.createAssignmentSubmission(
+                    {
+                      studentId: account.user.id,
+                      definitionId: assignment.id,
+                      submissionDate: new Date(),
+                    },
+                    submissionName,
+                  )
+                }),
+                switchMap(() =>
+                  from(this.telegramService.cancelSubmission(account.id)),
+                ),
+                switchMap(() => {
+                  return this.telegramService.sendMessage({
+                    text: `Submission complete for assignment <b>${assignment.name}</b>.`,
+                    chat_id: account.chat_id,
+                    parse_mode: FormattingOption.HTML,
+                  })
+                }),
+              )
+            }
           }),
-          switchMap(() =>
-            from(this.telegramService.cancelSubmission(account.id)),
-          ),
           catchError(error => {
             this.logger.error(error)
             return this.telegramService.sendMessage({

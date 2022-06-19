@@ -13,7 +13,9 @@ export class FileDispatcher implements Dispatcher {
     private fileSubmissionHandler: FileSubmissionHandler,
   ) {}
   dispatch(update: MessageUpdate<FileMessage>) {
-    from(this.telegramService.findOneById(update.message.from.id)).subscribe({
+    from(
+      this.telegramService.findOneById(update.message.from.id, true),
+    ).subscribe({
       next: account => {
         if (account.pendingSubmission) {
           this.fileSubmissionHandler.handle(account, update.message.document)

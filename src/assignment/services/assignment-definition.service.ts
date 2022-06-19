@@ -1,4 +1,10 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common'
 import { SchedulerRegistry } from '@nestjs/schedule'
 import { InjectRepository } from '@nestjs/typeorm'
 import { CronJob } from 'cron'
@@ -29,6 +35,7 @@ export class AssignmentDefinitionService {
     @Inject(CourseService)
     private readonly courseService: CourseService,
     private scheduler: SchedulerRegistry,
+    @Inject(forwardRef(() => TelegramService))
     private telegramService: TelegramService,
     private mailService: MailService,
   ) {}

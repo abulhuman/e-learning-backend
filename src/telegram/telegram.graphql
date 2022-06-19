@@ -5,6 +5,12 @@ type TelegramAccount {
   chat_id: String
 }
 
+type PendingSubmission {
+  id: ID!
+  account: TelegramAccount!
+  assignment: AssignmentDefinition
+}
+
 input AuthorizeTelegramInput {
   userId: String!
   telegramId: String!

@@ -119,6 +119,12 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     })
   }
 
+  getPendingSubmission(accountId: string) {
+    return this.telegramAccountRepo
+      .findOne({ id: accountId }, { relations: ['pendingSubmission'] })
+      .then(account => account?.pendingSubmission)
+  }
+
   async setAsSubmitting(userId: string, assignmentId: string) {
     const account = await this.findOne({ id: userId })
     const assignment = await this.assignmentDefinitionRepo.findOne({
