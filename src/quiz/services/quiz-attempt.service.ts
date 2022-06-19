@@ -104,6 +104,9 @@ export class QuizAttemptService {
     const question = await this.questionService.findOne({
       id: input.questionID,
     })
+    if (!question) {
+      throw new NotFoundException(`Question with not found `)
+    }
     const questionAttempt = new QuestionAttempt()
     if (input.questionType === QuestionType.CLOZE) {
       questionAttempt.subQuestions = input.subQuestions.map(
@@ -119,7 +122,6 @@ export class QuizAttemptService {
     }
     questionAttempt.question = question
     attempt.questions.push(questionAttempt)
-    const newLocal = await this.attemptRepo.save(attempt)
-    return newLocal
+    return this.attemptRepo.save(attempt)
   }
 }
