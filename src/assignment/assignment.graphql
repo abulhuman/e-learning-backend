@@ -101,14 +101,6 @@ input CreateAssignmentSubmissionInput {
   studentId: ID!
 }
 
-input UpdateAssignmentSubmissionInput {
-  id: ID!
-  submissionDate: Date
-  totalScore: Float
-  submissionFileId: ID
-  replaceFile: Boolean = false
-}
-
 type Query {
   assignmentDefinitions(courseId: ID!): [AssignmentDefinition]!
   assignmentDefinition(id: ID!): AssignmentDefinition
@@ -131,9 +123,6 @@ type Mutation {
 
   createAssignmentSubmission(
     createAssignmentSubmissionInput: CreateAssignmentSubmissionInput!
-  ): AssignmentSubmission!
-  updateAssignmentSubmission(
-    updateAssignmentSubmissionInput: UpdateAssignmentSubmissionInput!
   ): AssignmentSubmission!
   removeAssignmentSubmission(id: ID!): Boolean!
 
