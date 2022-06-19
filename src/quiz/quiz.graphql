@@ -57,6 +57,7 @@ input CreateQuizInput {
   end: Date!
   duration: Int!
   maxScore: Int!
+  courseId: ID!
   sections: [CreateQuizSectionInput]!
 }
 

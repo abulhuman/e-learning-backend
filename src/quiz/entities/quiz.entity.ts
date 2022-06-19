@@ -2,12 +2,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm'
 import { Quiz as IQuiz } from 'src/graphql'
 import { QuizSection } from './quiz-section.entity'
 import { QuizAttempt } from './quiz-attempt.entity'
+import { Course } from 'src/course/entities/course.entity'
 @Entity()
 export class Quiz implements IQuiz {
   @PrimaryGeneratedColumn('uuid')
@@ -30,6 +32,9 @@ export class Quiz implements IQuiz {
 
   @Column({ type: 'int' })
   duration: number
+
+  @ManyToOne(() => Course, course => course.quizzes, { onDelete: 'CASCADE' })
+  course: Course
 
   @Column()
   maxScore: number

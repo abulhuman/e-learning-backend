@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import * as moment from 'moment'
+import { CourseService } from 'src/course/course.service'
 import {
   AnswerTrueFalse,
   CreateQuizInput,
@@ -36,26 +37,29 @@ export class QuizService {
     private userService: UsersService,
     @InjectRepository(QuizGrade)
     private gradeRepo: Repository<QuizGrade>,
+    private courseService: CourseService,
   ) {}
 
-  create(input: CreateQuizInput) {
-    if (!moment().diff(moment(input.start))) {
+  async create(input: CreateQuizInput) {
+    const { courseId, ...quizInput } = input
+    if (!moment().diff(moment(quizInput.start))) {
       throw new BadRequestException('Invalid input: bad "start" date')
     }
-    const diff = moment(input.end).diff(moment(input.start))
+    const diff = moment(quizInput.end).diff(moment(quizInput.start))
     if (!diff) {
       throw new BadRequestException(
         'Invalid input, "end" date must come after "start"',
       )
     }
-    if (diff <= input.duration) {
+    if (diff <= quizInput.duration) {
       throw new BadRequestException(
         'Invalid duration: adjust duration value, or  start and end dates',
       )
     }
-    const newQuiz = this.quizRepo.create(input)
-    newQuiz.maxScore = input.maxScore
-    newQuiz.sections = input.sections.map(sectionInput => {
+    const newQuiz = this.quizRepo.create(quizInput)
+    newQuiz.course = await this.courseService.findOneCourse(courseId)
+    newQuiz.maxScore = quizInput.maxScore
+    newQuiz.sections = quizInput.sections.map(sectionInput => {
       const newSection =
         sectionInput.type === QuizSectionType.OBJECTIVE
           ? new ObjectiveQuizSection()
