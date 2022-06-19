@@ -165,6 +165,26 @@ type SubQuestion {
   question: Cloze!
 }
 
+type ClientQuiz {
+  id: ID!
+  title: String!
+  description: String
+  start: Date!
+  end: Date!
+  created_at: Date!
+  duration: Int!
+  maxScore: Int!
+  sections: [ClientQuizSection]!
+}
+
+type ClientQuizSection {
+  id: ID!
+  description: String!
+  sectionType: String!
+  number: Int!
+  questions: [AnyQuestion]!
+}
+
 type AnyQuestion {
   id: ID!
   text: String!
@@ -196,7 +216,7 @@ type Mutation {
 }
 
 type Query {
-  quiz(id: ID!): Quiz
+  quiz(id: ID!): ClientQuiz
   quizzes: [Quiz]
   quizSection(id: ID!): QuizSection
   quizSections: [QuizSection]
