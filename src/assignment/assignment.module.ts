@@ -8,18 +8,25 @@ import { Course } from 'src/course/entities/course.entity'
 import { SubChapter } from 'src/course/entities/sub-chapter.entity'
 import { MailModule } from 'src/mail/mail.module'
 import { TelegramModule } from 'src/telegram/telegram.module'
+import { StudentClass } from 'src/users/entities/student-class.entity'
 import { User } from 'src/users/entities/user.entity'
 import { UsersModule } from 'src/users/users.module'
 import {
   AssignmentDefinitionResolver,
   AssignmentSubmissionResolver,
+  AssignmentCriterionResolver,
+  CriterionValueResolver,
 } from './assignment.resolver'
 import {
   AssignmentDefinitionService,
   AssignmentSubmissionService,
+  AssignmentCriterionService,
+  CriterionValueService,
 } from './assignment.service'
+import { AssignmentCriterion } from './entities/assignment-criterion.entity'
 import { AssignmentDefinition } from './entities/assignment-definition.entity'
 import { AssignmentSubmission } from './entities/assignment-submission.entity'
+import { CriterionValue } from './entities/criterion-value.entity'
 
 @Module({
   imports: [
@@ -28,11 +35,14 @@ import { AssignmentSubmission } from './entities/assignment-submission.entity'
     TypeOrmModule.forFeature([
       AssignmentDefinition,
       AssignmentSubmission,
+      AssignmentCriterion,
+      CriterionValue,
       Course,
       Chapter,
       SubChapter,
       CourseDocument,
       User,
+      StudentClass,
     ]),
     forwardRef(() => TelegramModule),
     MailModule,
@@ -40,8 +50,12 @@ import { AssignmentSubmission } from './entities/assignment-submission.entity'
   providers: [
     AssignmentDefinitionResolver,
     AssignmentSubmissionResolver,
+    AssignmentCriterionResolver,
+    CriterionValueResolver,
     AssignmentDefinitionService,
     AssignmentSubmissionService,
+    AssignmentCriterionService,
+    CriterionValueService,
     CourseService,
   ],
   exports: [CourseService],

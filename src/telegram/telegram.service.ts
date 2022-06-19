@@ -111,7 +111,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
       .getMany()
   }
 
-  findOneByUserId(userId: string) {
+  findOneByUserId(userId: string): Promise<TelegramAccount | undefined> {
     return this.findOne({
       user: {
         id: userId,

@@ -1,7 +1,9 @@
 import { AssignmentSubmission } from 'src/assignment/entities/assignment-submission.entity'
 import { Course } from 'src/course/entities/course.entity'
 import { User as IUser } from 'src/graphql'
+import { ExcludeFromResponse } from 'src/utils/decorators/exclude-from-response.decorator'
 import { Notification } from 'src/notification/entities/notification.entity'
+import { QuizAttempt } from 'src/quiz/entities/quiz-attempt.entity'
 import {
   Column,
   CreateDateColumn,
@@ -22,9 +24,11 @@ export class User implements IUser {
   @PrimaryGeneratedColumn('uuid')
   readonly id: string
 
+  @ExcludeFromResponse()
   @CreateDateColumn()
   created_at: Date
 
+  @ExcludeFromResponse()
   @UpdateDateColumn({ nullable: true })
   updated_at?: Date
 
@@ -40,6 +44,7 @@ export class User implements IUser {
   @Column({ unique: true })
   email: string
 
+  @ExcludeFromResponse()
   @Column()
   password: string
 
@@ -49,9 +54,19 @@ export class User implements IUser {
   @ManyToMany(() => Course, (course: Course) => course.users)
   courses?: Course[]
 
+  @ManyToMany(() => Course, (course: Course) => course.teachers)
+  teachingCourses?: Course[]
+
+  @ManyToMany(() => Course, (course: Course) => course.students)
+  attendingCourses?: Course[]
+
+  @OneToMany(() => Course, (course: Course) => course.owner)
+  ownedCourses: Course[]
+
   @ManyToOne(
     () => StudentClass,
     (studentClass: StudentClass) => studentClass.students,
+    { onDelete: 'SET NULL' },
   )
   attendingClass: StudentClass
 
@@ -59,7 +74,7 @@ export class User implements IUser {
     () => StudentClass,
     (studentClass: StudentClass) => studentClass.teachers,
   )
-  learningClasses?: StudentClass[]
+  teachingClasses?: StudentClass[]
 
   @OneToMany(
     () => Notification,
@@ -73,10 +88,13 @@ export class User implements IUser {
   )
   department?: Department
 
+  @OneToMany(() => QuizAttempt, (attempt: QuizAttempt) => attempt.user)
+  quizAttempts: QuizAttempt[]
   @ManyToOne(
     () => AssignmentSubmission,
     (assignmentSubmission: AssignmentSubmission) =>
       assignmentSubmission.submittedBy,
+    { onDelete: 'CASCADE' },
   )
   assignmentSubmissions?: AssignmentSubmission[]
 }

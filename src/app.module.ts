@@ -22,6 +22,7 @@ import { NotificationModule } from './notification/notification.module'
 import { telegramConfigValidation } from './telegram/telegram.config'
 import { TelegramModule } from './telegram/telegram.module'
 import { UsersModule } from './users/users.module'
+import { QuizModule } from './quiz/quiz.module'
 import { AssignmentModule } from './assignment/assignment.module'
 import { ScheduleModule } from '@nestjs/schedule'
 
@@ -66,7 +67,12 @@ import { ScheduleModule } from '@nestjs/schedule'
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, 'upload'),
       serveRoot: '/upload',
+      serveStaticOptions: {
+        index: false,
+        fallthrough: false,
+      },
     }),
+    QuizModule,
     AssignmentModule,
     ScheduleModule.forRoot(),
   ],

@@ -11,6 +11,7 @@ import {
   RelationId,
   UpdateDateColumn,
 } from 'typeorm'
+import { Chapter } from './chapter.entity'
 import { Course } from './course.entity'
 
 @Entity()
@@ -37,7 +38,9 @@ export class CourseDocument implements ICourseDocument {
   @Column({ nullable: true })
   courseId: string
 
-  @ManyToOne(() => Course, (course: Course) => course.courseDocuments)
+  @ManyToOne(() => Course, (course: Course) => course.courseDocuments, {
+    onDelete: 'CASCADE',
+  })
   course: Course
 
   @OneToOne(
@@ -53,4 +56,9 @@ export class CourseDocument implements ICourseDocument {
       assignmentSubmission.submissionFile,
   )
   assignmentSubmission?: AssignmentSubmission
+
+  @ManyToOne(() => Chapter, (chapter: Chapter) => chapter.documents, {
+    onDelete: 'CASCADE',
+  })
+  chapter?: Chapter
 }

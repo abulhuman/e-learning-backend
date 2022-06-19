@@ -29,6 +29,7 @@ export class MessageDispatcher implements Dispatcher {
         commandEntity.offset,
         commandEntity.length,
       )
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [command, ...payload] = rawCommand.split(' ')
 
       switch (command) {

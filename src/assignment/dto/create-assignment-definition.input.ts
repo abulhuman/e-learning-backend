@@ -1,16 +1,30 @@
-import { IsDateString, IsNotEmpty, IsUUID } from 'class-validator'
+import {
+  IsBoolean,
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsUUID,
+} from 'class-validator'
+import { FileUpload } from 'graphql-upload'
 import { CreateAssignmentDefinitionInput as ICreateAssignmentDefinitionInput } from 'src/graphql'
 
 export class CreateAssignmentDefinitionInput
   implements ICreateAssignmentDefinitionInput
 {
   @IsNotEmpty()
+  @IsNumber()
+  maximumScore: number
+
+  @IsNotEmpty()
+  @IsBoolean()
+  isCriteriaBased?: boolean = false
+
+  @IsNotEmpty()
   @IsDateString()
   submissionDeadline: Date
 
   @IsNotEmpty()
-  @IsUUID()
-  instructionsFileId: string
+  instructionsFile: Promise<FileUpload>
 
   @IsNotEmpty()
   @IsUUID()

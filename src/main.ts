@@ -1,6 +1,6 @@
-import { ValidationPipe } from '@nestjs/common'
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
-import { NestFactory } from '@nestjs/core'
+import { NestFactory, Reflector } from '@nestjs/core'
 import { graphqlUploadExpress } from 'graphql-upload'
 import { getRepository } from 'typeorm'
 import helmet from 'helmet'
@@ -13,6 +13,8 @@ import { existsSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 
 async function bootstrap() {
+  const uploadPath = join(__dirname, '/upload')
+  existsSync(uploadPath) || mkdirSync(uploadPath)
   const app = await NestFactory.create(AppModule)
   const configService = app.select(ConfigModule).get(ConfigService)
   const sessionRepository = getRepository(Session)
@@ -22,6 +24,7 @@ async function bootstrap() {
       transform: true,
     }),
   )
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)))
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -56,8 +59,6 @@ async function bootstrap() {
   app.use(passport.initialize())
   app.use(passport.session())
   app.use(graphqlUploadExpress())
-  const uploadPath = join(__dirname, '../upload')
-  existsSync(uploadPath) || mkdirSync(uploadPath)
   await app.listen(configService.get('PORT') || 5050)
 }
 bootstrap()

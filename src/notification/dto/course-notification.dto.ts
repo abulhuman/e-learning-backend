@@ -1,6 +1,6 @@
 import { Course } from 'src/course/entities/course.entity'
 import { Notification } from '../entities/notification.entity'
 
-export interface CourseAdditionNotification extends Notification {
+export interface CourseNotification extends Notification {
   course: Course
 }
