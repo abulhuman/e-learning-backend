@@ -9,7 +9,7 @@ export class SubmitCommandHandler implements Handler {
   logger = new Logger(SubmitCommandHandler.name)
   constructor(
     @Inject(forwardRef(() => TelegramService))
-    private telegramService: TelegramService, // @Inject(forwardRef(() => AssignmentDefinitionService)) // private assignmentDefinitionService: AssignmentDefinitionService,
+    private telegramService: TelegramService,
   ) {}
   handle(message: TextMessage) {
     from(this.telegramService.findOneById(message.from.id, true))
@@ -31,6 +31,10 @@ export class SubmitCommandHandler implements Handler {
                 {
                   text: `${assignment.name}`,
                   callback_data: `submit ${assignment.id}`,
+                },
+                {
+                  text: '📂️',
+                  callback_data: `instructions ${assignment.id}`,
                 },
               ])
             })

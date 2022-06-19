@@ -12,6 +12,7 @@ export enum Callback {
   COURSE_FILES = 'course_files',
   SUBMIT = 'submit',
   CANCEL_SUBMISSION = 'cancel_submission',
+  INSTRUCTIONS = 'instructions',
 }
 export const DEFAULT_COMMANDS: BotCommand[] = [
   {

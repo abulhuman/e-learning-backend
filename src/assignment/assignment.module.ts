@@ -57,6 +57,6 @@ import { CriterionValue } from './entities/criterion-value.entity'
     AssignmentCriterionService,
     CriterionValueService,
   ],
-  exports: [AssignmentSubmissionService],
+  exports: [AssignmentSubmissionService, AssignmentDefinitionService],
 })
 export class AssignmentModule {}
