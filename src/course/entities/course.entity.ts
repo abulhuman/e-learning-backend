@@ -1,5 +1,6 @@
 import { AssignmentDefinition } from 'src/assignment/entities/assignment-definition.entity'
 import { Course as ICourse } from 'src/graphql'
+import { Quiz } from 'src/quiz/entities/quiz.entity'
 import { Department } from 'src/users/entities/department.entity'
 import { StudentClass } from 'src/users/entities/student-class.entity'
 import { User } from 'src/users/entities/user.entity'
@@ -67,6 +68,9 @@ export class Course implements ICourse {
 
   @OneToMany(() => Chapter, (chapter: Chapter) => chapter.course)
   chapters: Chapter[]
+
+  @OneToMany(() => Quiz, quiz => quiz.course, { cascade: true })
+  quizzes: Quiz[]
 
   @OneToMany(
     () => CourseDocument,
