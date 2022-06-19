@@ -56,15 +56,20 @@ export class QuestionAttempt implements IQuestionAttempt {
 
   @ManyToOne(() => QuizAttempt, quizAttempt => quizAttempt.questions, {
     onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
   })
   quizAttempt: QuizAttempt
 
-  @ManyToOne(() => Question, question => question.attempts)
+  @ManyToOne(() => Question, question => question.attempts, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   question: Question
-  @Column()
+
+  @Column({ nullable: true })
   answer?: string
 
-  @ManyToOne(() => SubQuestionAttempt, attempt => attempt.questionAttempt, {
+  @OneToMany(() => SubQuestionAttempt, attempt => attempt.questionAttempt, {
     cascade: true,
   })
   subQuestions?: SubQuestionAttempt[]
@@ -79,7 +84,7 @@ export class SubQuestionAttempt implements ISubQuestionAttempt {
   @Column()
   answer: string
 
-  @OneToMany(() => QuestionAttempt, attempt => attempt.subQuestions, {
+  @ManyToOne(() => QuestionAttempt, attempt => attempt.subQuestions, {
     onDelete: 'CASCADE',
   })
   questionAttempt: QuestionAttempt
