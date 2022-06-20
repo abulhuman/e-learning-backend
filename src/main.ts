@@ -15,7 +15,7 @@ import { join } from 'node:path'
 async function bootstrap() {
   const uploadPath = join(__dirname, '/upload')
   existsSync(uploadPath) || mkdirSync(uploadPath)
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(AppModule, { cors: true })
   const configService = app.select(ConfigModule).get(ConfigService)
   const sessionRepository = getRepository(Session)
   app.useGlobalPipes(
