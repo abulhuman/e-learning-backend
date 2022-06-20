@@ -4,7 +4,13 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
+import { createWriteStream, unlinkSync } from 'node:fs'
+import { join } from 'node:path'
 import { UUIDArrayDto } from 'src/app/dto/uuid-array.dto'
+import {
+  documentFileFilter,
+  editFileName,
+} from 'src/files/utils/file-upload.utils'
 import { RoleName } from 'src/graphql'
 import { TelegramAccount } from 'src/telegram/entities/telegram-account.entity'
 import { StudentClass } from 'src/users/entities/student-class.entity'
@@ -212,7 +218,10 @@ export class CourseService {
 
   async findOneCourseDocument(id: string) {
     const courseDocument = await this.courseDocumentRepository.findOne(id, {
-      relations: ['assignmentSubmission', 'chapter'],
+      relations: [
+        // 'assignmentSubmission',
+        'chapter',
+      ],
     })
     if (!courseDocument)
       throw new NotFoundException(
@@ -247,7 +256,35 @@ export class CourseService {
     updateCourseDocumentInput: UpdateCourseDocumentInput,
   ) {
     const courseDocumentToUpdate = await this.findOneCourseDocument(id)
-    Object.assign(courseDocumentToUpdate, updateCourseDocumentInput)
+    const falsey = [null, undefined]
+    let { storedFileName } = courseDocumentToUpdate
+    if (updateCourseDocumentInput.fileUpload) {
+      const { fileUpload } = updateCourseDocumentInput
+      const { createReadStream, filename } = await fileUpload
+      documentFileFilter(filename)
+      storedFileName = editFileName(filename)
+      unlinkSync(
+        join(__dirname, '../upload', courseDocumentToUpdate.storedFileName),
+      )
+
+      await new Promise((resolve, reject) => {
+        const readStream = createReadStream()
+        readStream.pipe(
+          createWriteStream(join(__dirname, '../upload', storedFileName))
+            .on('close', resolve)
+            .on('error', reject),
+        )
+      })
+    } else delete updateCourseDocumentInput.fileUpload
+
+    for (const key in updateCourseDocumentInput) {
+      if (falsey.includes(updateCourseDocumentInput[key]))
+        delete updateCourseDocumentInput[key]
+    }
+    Object.assign(courseDocumentToUpdate, {
+      ...updateCourseDocumentInput,
+      storedFileName,
+    })
     return this.courseDocumentRepository.save(courseDocumentToUpdate)
   }
 
