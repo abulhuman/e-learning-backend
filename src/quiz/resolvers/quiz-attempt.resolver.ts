@@ -31,7 +31,7 @@ export class QuizAttemptResolver {
   ) {
     return this.quizAttemptService.findOne(
       { quiz: { id: quizId }, user: { id: userId } },
-      ['grade', 'grade.marker'],
+      ['grade', 'grade.marker', 'questions', 'questions.subQuestions'],
     )
   }
 }
