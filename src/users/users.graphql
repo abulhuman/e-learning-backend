@@ -85,6 +85,15 @@ input UserFilter {
   roleName: RoleName
 }
 
+type UsersCount {
+  allUsers: Int!
+  students: Int!
+  teachers: Int!
+  courseManagers: Int!
+  courseOwners: Int!
+  departmentAdministrators: Int!
+}
+
 type Query {
   users(filter: UserFilter): [User]!
   getAllStudentsByClassId(classId: ID!): [User]
@@ -96,6 +105,7 @@ type Query {
   studentClass(id: ID!): StudentClass!
   departments: [Department]!
   department(id: ID!): Department!
+  accountCounters: UsersCount!
 }
 
 type Mutation {

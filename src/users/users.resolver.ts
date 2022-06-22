@@ -452,4 +452,9 @@ export class DepartmentResolver {
     return (await this.usersService.findOneDepartment(department.id))
       .ownedCourses
   }
+
+  @Query('accountCounters')
+  accountCounters() {
+    return this.usersService.counters()
+  }
 }
