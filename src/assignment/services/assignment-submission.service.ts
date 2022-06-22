@@ -25,7 +25,7 @@ export class AssignmentSubmissionService {
     private readonly usersService: UsersService,
   ) {}
   async createAssignmentSubmission(input: CreateAssignmentSubmissionInput) {
-    const { definitionId, studentId, file } = input
+    const { submissionDate, definitionId, studentId, file } = input
     let assignmentSubmission =
       await this.assignmentSubmissionRepository.findOne({
         definition: {
@@ -36,7 +36,9 @@ export class AssignmentSubmissionService {
         },
       })
     if (assignmentSubmission === undefined) {
-      assignmentSubmission = this.assignmentSubmissionRepository.create()
+      assignmentSubmission = this.assignmentSubmissionRepository.create({
+        submissionDate,
+      })
       assignmentSubmission.definition =
         await this.assignmentDefinitionService.findOneAssignmentDefinition(
           definitionId,
@@ -57,14 +59,19 @@ export class AssignmentSubmissionService {
   }
   findAllAssignmentSubmissions() {
     return this.assignmentSubmissionRepository.find({
-      relations: ['submissionFile', 'definition', 'submittedBy', 'values'],
+      relations: [
+        // 'submissionFile',
+        'definition',
+        'submittedBy',
+        'values',
+      ],
     })
   }
   async findOneAssignmentSubmission(id: string) {
     const assignmentSubmission =
       await this.assignmentSubmissionRepository.findOne(id, {
         relations: [
-          'submissionFile',
+          // 'submissionFile',
           'definition',
           'definition.criteria',
           'submittedBy',
@@ -107,6 +114,11 @@ export class AssignmentSubmissionService {
     submission.totalScore = definition.isCriteriaBased
       ? definition.maximumScore * (scoreSum / weightedCriteriaSum)
       : totalScore
+    return this.assignmentSubmissionRepository.save(submission)
+  }
+  async gradeNormalSubmission(id: string, totalScore = 0) {
+    const submission = await this.findOneAssignmentSubmission(id)
+    Object.assign(submission, { totalScore })
     return this.assignmentSubmissionRepository.save(submission)
   }
 }

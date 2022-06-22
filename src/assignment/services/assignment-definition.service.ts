@@ -35,11 +35,19 @@ export class AssignmentDefinitionService {
   async createAssignmentDefinition(
     createAssignmentDefinitionInput: CreateAssignmentDefinitionInput,
   ) {
-    const { name, submissionDeadline, courseId, instructionsFile } =
-      createAssignmentDefinitionInput
+    const {
+      name,
+      submissionDeadline,
+      maximumScore,
+      isCriteriaBased,
+      courseId,
+      instructionsFile,
+    } = createAssignmentDefinitionInput
     const assignment = this.assignmentDefinitionRepository.create({
       name,
       submissionDeadline,
+      maximumScore,
+      isCriteriaBased,
     })
     assignment.course = await this.courseService.findOneCourse(courseId)
     const { filename, createReadStream } = await instructionsFile
@@ -138,7 +146,14 @@ export class AssignmentDefinitionService {
 
   findAllAssignmentDefinitions(courseId: string) {
     return this.assignmentDefinitionRepository.find({
-      relations: ['course', 'instructionsFile', 'submissions'],
+      relations: [
+        'course',
+        'course.students',
+        // 'instructionsFile',
+        'submissions',
+        'submissions.submittedBy',
+        'criteria',
+      ],
       where: {
         course: {
           id: courseId,
@@ -149,7 +164,14 @@ export class AssignmentDefinitionService {
   async findOneAssignmentDefinition(id: string) {
     const assignmentDefinition =
       await this.assignmentDefinitionRepository.findOne(id, {
-        relations: ['course', 'instructionsFile', 'submissions', 'criteria'],
+        relations: [
+          'course',
+          'course.students',
+          // 'instructionsFile',
+          'submissions',
+          'submissions.submittedBy',
+          'criteria',
+        ],
       })
     if (!assignmentDefinition)
       throw new NotFoundException(
