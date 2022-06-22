@@ -36,10 +36,11 @@ export class UsersService {
     @InjectRepository(Department)
     private departmentRepository: Repository<Department>,
     @Inject(forwardRef(() => AuthService))
-    private _authService: AuthService,
+    private authService: AuthService,
   ) {}
 
   async createUser(createUserInput: CreateUserInput) {
+    const { password } = createUserInput
     createUserInput.password = await bcrypt.hash(createUserInput.password, 10)
     const { roleName, ...rest } = createUserInput
 
@@ -52,7 +53,7 @@ export class UsersService {
 
     const newUser = this.userRepository.create(rest)
     newUser.roles = [roleToAssign]
-    // await this.authService.sendVerificationLink(newUser)
+    await this.authService.sendVerificationLink(newUser, password)
     return this.userRepository.save(newUser)
   }
   async createMany(users: Partial<User>[], roleName: RoleName) {
@@ -66,6 +67,10 @@ export class UsersService {
       user.password = bcrypt.hashSync(user.password, 10)
       return user
     })
+
+    users.forEach(user =>
+      this.authService.sendVerificationLink(user, user.password),
+    )
 
     return this.userRepository.save(usersToSave).then(users => users.length + 1)
   }
@@ -638,5 +643,30 @@ export class UsersService {
       })
     })
     return users
+  }
+
+  async counters() {
+    const getCount = (role: RoleName) =>
+      this.userRepository
+        .createQueryBuilder('user')
+        .leftJoin('user.roles', 'role')
+        .where('role.name = :role', { role })
+        .getCount()
+    const allUsers = await this.userRepository.count()
+    const students = await getCount(RoleName.STUDENT)
+    const teachers = await getCount(RoleName.TEACHER)
+    const courseManagers = await getCount(RoleName.COURSE_MANAGER)
+    const courseOwners = await getCount(RoleName.COURSE_OWNER)
+    const departmentAdministrators = await getCount(
+      RoleName.DEPARTMENT_ADMINISTRATOR,
+    )
+    return {
+      allUsers,
+      students,
+      teachers,
+      courseManagers,
+      courseOwners,
+      departmentAdministrators,
+    }
   }
 }

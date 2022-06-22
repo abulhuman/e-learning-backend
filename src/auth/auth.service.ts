@@ -1,15 +1,14 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
 import * as bcrypt from 'bcrypt'
 import { MailService } from 'src/mail/mail.service'
 import { User } from 'src/users/entities/user.entity'
 import { UsersService } from 'src/users/users.service'
 @Injectable()
 export class AuthService {
+  private logger = new Logger(AuthService.name)
   constructor(
     @Inject(forwardRef(() => UsersService))
     private userService: UsersService,
-    private jwtService: JwtService,
     private mailService: MailService,
   ) {}
   async validateUser(email: string, password: string): Promise<User | null> {
@@ -19,10 +18,12 @@ export class AuthService {
     }
     return null
   }
-  async sendVerificationLink(user: User) {
-    const payload = { id: user.id }
-    const token = this.jwtService.sign(payload)
+  async sendVerificationLink(user: Partial<User>, password: string) {
     const name = [user.firstName, user.lastName].join(' ')
-    await this.mailService.sendVerificationEmail(user.email, token, name)
+    try {
+      await this.mailService.sendVerificationEmail(user.email, name, password)
+    } catch (error) {
+      this.logger.error(error)
+    }
   }
 }
