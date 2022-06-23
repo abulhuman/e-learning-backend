@@ -29,6 +29,21 @@ export class QuizResolver {
     return this.quizService.findAll()
   }
 
+  @Query('completeQuiz')
+  complete(@Args('id') id: string) {
+    return this.quizService.findOne({ id }, [
+      'sections',
+      'sections.questions',
+      'sections.questions.subQuestions',
+      'sections.questions.choices',
+    ])
+  }
+
+  @Query('quizzesForCourse')
+  findManyForCourse(@Args('courseId', ParseUUIDPipe) courseId: string) {
+    return this.quizService.findMany({ course: { id: courseId } }, ['attempts'])
+  }
+
   @ResolveField('sections')
   async getSections(@Parent() quiz: Quiz) {
     const sections = await this.quizSectionService.findAllForQuiz(quiz.id)
@@ -41,5 +56,10 @@ export class QuizResolver {
   @Mutation('gradeAttempt')
   grade(@Args('input') input: GradeAttemptInput) {
     return this.quizService.gradeAttempt(input)
+  }
+
+  @Mutation('deleteQuiz')
+  delete(@Args('quizId') quizId: string) {
+    return this.quizService.delete(quizId)
   }
 }

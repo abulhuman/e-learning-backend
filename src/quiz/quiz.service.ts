@@ -228,12 +228,15 @@ export class QuizService {
     return this.findMany()
   }
 
-  private findOne(quiz: FindConditions<Quiz>, relations: string[] = []) {
+  findOne(quiz: FindConditions<Quiz>, relations: string[] = []) {
     return this.quizRepo.findOne(quiz, { relations })
   }
 
-  private findMany(quizzes?: FindConditions<Quiz>) {
-    return this.quizRepo.find(quizzes)
+  findMany(quizzes?: FindConditions<Quiz>, relations: string[] = []) {
+    return this.quizRepo.find({ where: quizzes, relations })
+  }
+  delete(id: string) {
+    return this.quizRepo.delete(id)
   }
 }
 

@@ -9,4 +9,9 @@ export class QuestionResolver {
   getQuestion(@Args('id', ParseUUIDPipe) id: string) {
     return this.questionService.getQuestion(id)
   }
+
+  @Query('questionsForQuiz')
+  getQuestionsForQuiz(@Args('quizId', ParseUUIDPipe) id: string) {
+    return this.questionService.findAllForQuiz(id)
+  }
 }
