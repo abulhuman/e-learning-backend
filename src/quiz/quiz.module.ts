@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
+import { CourseModule } from 'src/course/course.module'
 import { UsersModule } from 'src/users/users.module'
 import { Cloze, MultipleChoice, Question } from './entities/question.entity'
 import { QuestionAttempt, QuizAttempt } from './entities/quiz-attempt.entity'
@@ -28,6 +29,7 @@ import { QuizSectionService } from './services/quiz-section.service'
       QuizGrade,
     ]),
     UsersModule,
+    CourseModule,
   ],
   providers: [
     QuizResolver,

@@ -24,12 +24,16 @@ export class QuestionService {
       .getMany()
   }
   findAllForQuiz(quizId: string) {
-    return this.questionRepo
-      .createQueryBuilder('question')
-      .leftJoinAndSelect('question.section', 'section')
-      .leftJoin('section.quiz', 'quiz')
-      .where('quiz.id = :quizId', { quizId })
-      .getMany()
+    return this.questionRepo.find({
+      where: {
+        section: {
+          quiz: {
+            id: quizId,
+          },
+        },
+      },
+      relations: ['choices', 'subQuestions'],
+    })
   }
   async getQuestion(id: string, withAnswer = false) {
     const question = await this.questionRepo.findOne(id)

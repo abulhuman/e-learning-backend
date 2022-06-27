@@ -36,12 +36,12 @@ export class QuizAttemptService {
   }
 
   findAllForQuiz(quizId: string) {
-    return this.attemptRepo
-      .createQueryBuilder('attempt')
-      .leftJoinAndSelect('attempt.user', 'user')
-      .leftJoinAndSelect('attempt.quiz', 'quiz')
-      .where('quiz.id = :quizId', { quizId })
-      .getMany()
+    return this.findMany({ quiz: { id: quizId } }, [
+      'questions',
+      'questions.subQuestions',
+      'grade',
+      'user',
+    ])
   }
 
   existsForUserAndQuiz(userId: string, quizId: string) {
@@ -52,6 +52,13 @@ export class QuizAttemptService {
       .where('quiz.id = :quizId', { quizId })
       .andWhere('user.id = :userId', { userId })
       .getCount()
+  }
+
+  private findMany(
+    options: FindConditions<QuizAttempt>,
+    relations: string[] = [],
+  ) {
+    return this.attemptRepo.find({ where: options, relations })
   }
 
   async create(input: CreateQuizAttemptInput) {

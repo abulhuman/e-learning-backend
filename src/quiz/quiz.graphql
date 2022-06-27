@@ -8,6 +8,7 @@ type Quiz {
   duration: Int!
   maxScore: Int!
   sections: [QuizSection]
+  attempts: [QuizAttempt]
 }
 
 type QuestionAttempt {
@@ -57,6 +58,7 @@ input CreateQuizInput {
   end: Date!
   duration: Int!
   maxScore: Int!
+  courseId: ID!
   sections: [CreateQuizSectionInput]!
 }
 
@@ -213,13 +215,19 @@ type Mutation {
   attemptQuestion(input: AttemptQuestionInput): QuestionAttempt!
   completeAttempt(attemptId: ID!): QuizAttempt!
   gradeAttempt(input: GradeAttemptInput): QuizGrade
+  deleteQuiz(quizId: ID!): Quiz!
 }
 
 type Query {
   quiz(id: ID!): ClientQuiz
+  completeQuiz(id: ID): Quiz
   quizzes: [Quiz]
   quizSection(id: ID!): QuizSection
   quizSections: [QuizSection]
   question(id: ID!): AnyQuestion
   myAttemptForQuiz(quizId: ID!, userId: ID!): QuizAttempt
+  quizzesForCourse(courseId: ID!): [Quiz]!
+  questionsForQuiz(quizId: ID!): [AnyQuestion]!
+  attemptsForQuiz(quizId: ID!): [QuizAttempt]!
+  attempt(id: ID!): QuizAttempt
 }

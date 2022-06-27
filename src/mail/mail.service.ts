@@ -3,7 +3,6 @@ import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import * as moment from 'moment'
 import { AssignmentDefinition } from 'src/assignment/entities/assignment-definition.entity'
-import { AuthService } from 'src/auth/auth.service'
 import { ClassCourseNotification } from 'src/notification/dto/class-course-notification.dto'
 import { CourseNotification } from 'src/notification/dto/course-notification.dto'
 import { User } from 'src/users/entities/user.entity'
@@ -15,17 +14,16 @@ export class MailService {
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
   ) {}
-  async sendVerificationEmail(email: string, token: string, name: string) {
-    const url = `${this.configService.get(
-      'EMAIL_VERIFICATION_URL',
-    )}?token=${token}`
+  async sendVerificationEmail(email: string, name: string, password: string) {
+    const url = `${this.configService.get('FRONTEND_URL')}/login`
     return this.mailerService.sendMail({
       to: email,
-      subject: 'Verify Account Email',
+      subject: 'Verify Account Creation',
       template: '/verification',
       context: {
         url,
         name,
+        password,
       },
     })
   }

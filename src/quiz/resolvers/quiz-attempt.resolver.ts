@@ -24,6 +24,17 @@ export class QuizAttemptResolver {
     return this.quizAttemptService.attemptQuestion(input)
   }
 
+  @Query('attempt')
+  getAttempt(@Args('id') id: string) {
+    return this.quizAttemptService.findOne({ id }, [
+      'questions',
+      'questions.question',
+      'questions.subQuestions',
+      'grade',
+      'grade.marker',
+    ])
+  }
+
   @Query('myAttemptForQuiz')
   attemptForQuiz(
     @Args('quizId') quizId: string,
@@ -31,7 +42,11 @@ export class QuizAttemptResolver {
   ) {
     return this.quizAttemptService.findOne(
       { quiz: { id: quizId }, user: { id: userId } },
-      ['grade', 'grade.marker'],
+      ['grade', 'grade.marker', 'questions', 'questions.subQuestions'],
     )
+  }
+  @Query('attemptsForQuiz')
+  attemptsForQuiz(@Args('quizId') quizId: string) {
+    return this.quizAttemptService.findAllForQuiz(quizId)
   }
 }

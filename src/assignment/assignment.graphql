@@ -143,4 +143,5 @@ type Mutation {
   removeCriterionValue(id: ID!): Boolean!
 
   gradeSubmission(id: ID!, totalScore: Float): AssignmentSubmission!
+  gradeNormalSubmission(id: ID!, totalScore: Float): AssignmentSubmission! 
 }

@@ -54,6 +54,17 @@ export class AssignmentSubmissionResolver {
     return this.assignmentSubmissionService.gradeSubmission(id, totalScore)
   }
 
+  @Mutation('gradeNormalSubmission')
+  gradeNormal(
+    @Args('id', ParseUUIDPipe) id: string,
+    @Args('totalScore', ParseFloatPipe) totalScore: number,
+  ) {
+    return this.assignmentSubmissionService.gradeNormalSubmission(
+      id,
+      totalScore,
+    )
+  }
+
   @ResolveField('values')
   async values(@Parent() submission: AssignmentSubmission) {
     return (
