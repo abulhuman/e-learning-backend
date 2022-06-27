@@ -10,8 +10,8 @@ export class Update {
   type: string
 }
 
-export class MessageUpdate extends Update {
-  message: Message
+export class MessageUpdate<T extends Message> extends Update {
+  message: T
 }
 
 export class CallbackQueryUpdate extends Update {
@@ -30,10 +30,29 @@ export interface Message {
   message_id: string
   date: string
   chat: Chat
-  entities: MessageEntity[]
-  text?: string
   from?: TelegramAccount
-  new_chat_members?: TelegramAccount[]
+}
+export interface TextMessage extends Message {
+  text: string
+  entities?: MessageEntity[]
+}
+
+export interface Document {
+  file_id: string
+  file_unique_id: string
+  file_name?: string
+  file_size?: number
+  mime_type?: string
+}
+
+export interface File {
+  file_id: string
+  file_unique_id: string
+  file_size?: number
+  file_path?: string
+}
+export interface FileMessage extends Message {
+  document: Document
 }
 
 export interface Chat {
@@ -60,7 +79,7 @@ export interface BotCommand {
 export interface CallbackQuery {
   id: string
   from: TelegramAccount
-  message?: Message
+  message?: TextMessage
   chat_instance: string
   data?: string
 }

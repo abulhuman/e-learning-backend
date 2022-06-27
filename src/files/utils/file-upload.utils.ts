@@ -1,8 +1,14 @@
 import { BadRequestException } from '@nestjs/common'
-import { extname } from 'node:path'
+import { FileUpload } from 'graphql-upload'
+import { createWriteStream, ReadStream } from 'node:fs'
+import { extname, join } from 'node:path'
+import { pipeline } from 'node:stream'
+import { promisify } from 'node:util'
+
+const pipelinePromise = promisify(pipeline)
 
 export const editFileName = (fileName: string) => {
-  const name = fileName.split('.')[0]
+  const name = fileName.split('.').slice(0, -1).join('')
   const fileExtName = extname(fileName)
   const randomName = Array(4)
     .fill(null)
@@ -42,4 +48,17 @@ export const spreadSheetFileFilter = (fileName: string) => {
       'Only one of these document formats (xlsx, csv) are allowed.',
     )
   return true
+}
+
+export async function saveFile(fileUpload: Promise<FileUpload>) {
+  const { createReadStream, filename } = await fileUpload
+  const readStream = createReadStream()
+  return saveStream(readStream, filename)
+}
+
+export async function saveStream(readStream: ReadStream, fileName: string) {
+  const newFileName = editFileName(fileName)
+  const writer = createWriteStream(join(__dirname, '../../upload', newFileName))
+  await pipelinePromise(readStream, writer)
+  return newFileName
 }

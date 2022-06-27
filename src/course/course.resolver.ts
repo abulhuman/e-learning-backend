@@ -18,17 +18,12 @@ import { UpdateCourseDocumentInput } from './dto/update-course-document.input'
 import { UpdateCourseInput } from './dto/update-course.input'
 import { UpdateSubChapterInput } from './dto/update-sub-chapter.input'
 
-import { createWriteStream } from 'node:fs'
-import { join } from 'node:path'
 import { UUIDArrayDto } from 'src/app/dto/uuid-array.dto'
-import {
-  documentFileFilter,
-  editFileName,
-} from 'src/files/utils/file-upload.utils'
+import { saveFile } from 'src/files/utils/file-upload.utils'
 import { NotificationType } from 'src/graphql'
-import { Course } from './entities/course.entity'
-import { Chapter } from './entities/chapter.entity'
 import { UsersService } from 'src/users/users.service'
+import { Chapter } from './entities/chapter.entity'
+import { Course } from './entities/course.entity'
 
 @Resolver('Course')
 export class CourseResolver {
@@ -301,16 +296,7 @@ export class CourseResolver {
     createCourseDocumentInput: CreateCourseDocumentInput,
   ) {
     const { fileUpload } = createCourseDocumentInput
-    const { createReadStream, filename } = await fileUpload
-    documentFileFilter(filename)
-    const storedFileName = editFileName(filename)
-    await new Promise((resolve, reject) => {
-      const readStream = createReadStream()
-      readStream
-        .pipe(createWriteStream(join(__dirname, '../upload', storedFileName)))
-        .on('close', resolve)
-        .on('error', reject)
-    })
+    const storedFileName = await saveFile(fileUpload)
     return this.courseService.createOneCourseDocument(
       createCourseDocumentInput,
       storedFileName,

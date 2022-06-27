@@ -1,19 +1,12 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { createWriteStream } from 'fs'
-import { FileUpload } from 'graphql-upload'
-import { join } from 'path'
-import { editFileName } from 'src/files/utils/file-upload.utils'
 import { UsersService } from 'src/users/users.service'
-import { pipeline } from 'stream'
 import { Repository } from 'typeorm'
-import { promisify } from 'util'
 import { CreateAssignmentSubmissionInput } from '../dto/create-assignment-submission.input'
 import { AssignmentCriterion } from '../entities/assignment-criterion.entity'
 import { AssignmentSubmission } from '../entities/assignment-submission.entity'
 import { AssignmentDefinitionService } from './assignment-definition.service'
 
-const pipelinePromise = promisify(pipeline)
 @Injectable()
 export class AssignmentSubmissionService {
   constructor(
@@ -24,7 +17,11 @@ export class AssignmentSubmissionService {
     @Inject(UsersService)
     private readonly usersService: UsersService,
   ) {}
-  async createAssignmentSubmission(input: CreateAssignmentSubmissionInput) {
+
+  async createAssignmentSubmission(
+    input: Omit<CreateAssignmentSubmissionInput, 'file'>,
+    submissionFile: string,
+  ) {
     const { submissionDate, definitionId, studentId, file } = input
     let assignmentSubmission =
       await this.assignmentSubmissionRepository.findOne({
@@ -47,14 +44,7 @@ export class AssignmentSubmissionService {
         await this.usersService.findOneUserById(studentId, true)
     }
 
-    const { createReadStream, filename }: FileUpload = await file
-    const readStream = createReadStream()
-    const newFilename = editFileName(filename)
-    const writer = createWriteStream(
-      join(__dirname, '../../upload', newFilename),
-    )
-    await pipelinePromise(readStream, writer)
-    assignmentSubmission.submissionFile = newFilename
+    assignmentSubmission.submissionFile = submissionFile
     return this.assignmentSubmissionRepository.save(assignmentSubmission)
   }
   findAllAssignmentSubmissions() {

@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { from, switchMap } from 'rxjs'
 import { CourseService } from 'src/course/course.service'
-import { Message } from 'src/telegram/dtos'
+import { TextMessage } from 'src/telegram/dtos'
 import { Handler } from 'src/telegram/interfaces/hanlder.interface'
 import { Callback, FormattingOption } from 'src/telegram/telegram.constants'
 import { TelegramService } from 'src/telegram/telegram.service'
@@ -14,7 +14,7 @@ export class MyCoursesCommandHandler implements Handler {
     private telegramService: TelegramService,
   ) {}
 
-  handle(message: Message) {
+  handle(message: TextMessage) {
     from(this.telegramService.findOneById(message.from.id, true))
       .pipe(
         switchMap(account => {

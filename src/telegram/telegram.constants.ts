@@ -3,12 +3,16 @@ import { BotCommand } from './dtos'
 export enum Command {
   START = '/start',
   MY_COURSES = '/my_courses',
+  SUBMIT = '/submit',
   LOGOUT = '/logout',
 }
 
 export enum Callback {
   CHAPTERS = 'chapters',
   COURSE_FILES = 'course_files',
+  SUBMIT = 'submit',
+  CANCEL_SUBMISSION = 'cancel_submission',
+  INSTRUCTIONS = 'instructions',
 }
 export const DEFAULT_COMMANDS: BotCommand[] = [
   {
@@ -20,6 +24,10 @@ export const AUTHORIZED_COMMANDS: BotCommand[] = [
   {
     command: Command.MY_COURSES,
     description: 'Display your courses',
+  },
+  {
+    command: Command.SUBMIT,
+    description: 'Submit an assignment',
   },
   {
     command: Command.LOGOUT,

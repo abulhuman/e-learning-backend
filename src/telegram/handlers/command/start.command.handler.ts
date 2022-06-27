@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { from, map } from 'rxjs'
-import { Message } from 'src/telegram/dtos'
+import { TextMessage } from 'src/telegram/dtos'
 import { Handler } from 'src/telegram/interfaces/hanlder.interface'
 import { TelegramService } from 'src/telegram/telegram.service'
 
@@ -12,7 +12,7 @@ export class StartCommandHandler implements Handler {
     private telegramService: TelegramService,
     private configService: ConfigService,
   ) {}
-  handle(message: Message) {
+  handle(message: TextMessage) {
     from(this.telegramService.findOneById(message.from.id))
       .pipe(
         map(account => {

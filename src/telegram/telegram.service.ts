@@ -10,6 +10,7 @@ import {
 import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
+import { ReadStream } from 'fs'
 import {
   catchError,
   map,
@@ -23,6 +24,7 @@ import {
   throwError,
 } from 'rxjs'
 import { AppService } from 'src/app/app.service'
+import { AssignmentDefinition } from 'src/assignment/entities/assignment-definition.entity'
 import { FindConditions, Repository } from 'typeorm'
 import { UpdateDispatcher } from './dispatchers/update.dispatcher'
 import * as Telegram from './dtos'
@@ -30,13 +32,14 @@ import {
   AnswerCallbackParams,
   ChatMember,
   EditMessageParams,
+  File,
   GetChatMemberParams,
   GetUpdatesParams,
-  Message,
   SendDocumentParams,
   SendMessageParams,
   SetMenuButtonParams,
   SetMyCommandsParams,
+  TextMessage,
   Update,
 } from './dtos'
 import { TelegramAccount } from './entities/telegram-account.entity'
@@ -46,6 +49,7 @@ import { TelegramModule } from './telegram.module'
 export class TelegramService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(TelegramModule.name)
   private apiURL: string
+  private downloadURL: string
   private offset: number
   private $updateSubscription: Subscription
 
@@ -55,12 +59,17 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     private configService: ConfigService,
     @InjectRepository(TelegramAccount)
     private telegramAccountRepo: Repository<TelegramAccount>,
+    @InjectRepository(AssignmentDefinition)
+    private assignmentDefinitionRepo: Repository<AssignmentDefinition>,
     @Inject(forwardRef(() => UpdateDispatcher))
     private dispatcher: UpdateDispatcher,
   ) {
-    this.apiURL = this.configService
-      .get<string>('TELEGRAM_API_URL')
-      .concat(this.configService.get('BOT_KEY'))
+    this.apiURL = `${this.configService.get(
+      'TELEGRAM_API_URL',
+    )}/bot${this.configService.get('BOT_KEY')}`
+    this.downloadURL = `${this.configService.get(
+      'TELEGRAM_API_URL',
+    )}/file/bot${this.configService.get('BOT_KEY')}`
   }
   onModuleInit() {
     if (this.appService.isInProduction) {
@@ -93,11 +102,42 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     return this.findOne({ id }, withUser)
   }
 
+  findAssignmentsForUser(userId: string) {
+    return this.assignmentDefinitionRepo
+      .createQueryBuilder('assignment')
+      .leftJoin('assignment.course', 'course')
+      .leftJoin('course.users', 'user')
+      .where('user.id = :id', { id: userId })
+      .getMany()
+  }
+
   findOneByUserId(userId: string): Promise<TelegramAccount | undefined> {
     return this.findOne({
       user: {
         id: userId,
       },
+    })
+  }
+
+  getPendingSubmission(accountId: string) {
+    return this.telegramAccountRepo
+      .findOne({ id: accountId }, { relations: ['pendingSubmission'] })
+      .then(account => account?.pendingSubmission)
+  }
+
+  async setAsSubmitting(userId: string, assignmentId: string) {
+    const account = await this.findOne({ id: userId })
+    const assignment = await this.assignmentDefinitionRepo.findOne({
+      id: assignmentId,
+    })
+    account.pendingSubmission = assignment
+    return this.telegramAccountRepo.save(account)
+  }
+
+  async cancelSubmission(userId: string) {
+    return this.findOne({ id: userId }).then(account => {
+      account.pendingSubmission = null
+      return this.telegramAccountRepo.save(account)
     })
   }
 
@@ -108,7 +148,7 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   editMessageText(params: EditMessageParams) {
-    return this.telegramApiCall<Message>(this.editMessageText.name, params)
+    return this.telegramApiCall<TextMessage>(this.editMessageText.name, params)
   }
 
   createAccount(account: TelegramAccount, chat_id: string) {
@@ -121,11 +161,11 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
   }
 
   sendMessage(params: SendMessageParams) {
-    return this.telegramApiCall<Message>(this.sendMessage.name, params)
+    return this.telegramApiCall<TextMessage>(this.sendMessage.name, params)
   }
 
   sendDocument(params: SendDocumentParams) {
-    return this.telegramApiCall<Message>(this.sendDocument.name, params)
+    return this.telegramApiCall<TextMessage>(this.sendDocument.name, params)
   }
 
   setMyCommands(params: SetMyCommandsParams) {
@@ -140,6 +180,10 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     return this.telegramApiCall<boolean>(this.setChatMenuButton.name, params)
   }
 
+  getFile(file_id: string) {
+    return this.telegramApiCall<File>(this.getFile.name, { file_id })
+  }
+
   onModuleDestroy() {
     this.$updateSubscription?.unsubscribe()
   }
@@ -148,6 +192,11 @@ export class TelegramService implements OnModuleInit, OnModuleDestroy {
     return this.telegramApiCall<Update[]>(this.getUpdates.name, params)
   }
 
+  downloadFile(file_path): Observable<ReadStream> {
+    return this.httpService
+      .get(`${this.downloadURL}/${file_path}`, { responseType: 'blob' })
+      .pipe(map((response: AxiosResponse<ReadStream>) => response.data))
+  }
   private telegramApiCall<T>(
     endpoint: string,
     data?: any,

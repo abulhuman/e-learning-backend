@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common'
-import { MessageEntity, MessageUpdate } from '../dtos'
+import { MessageEntity, MessageUpdate, TextMessage } from '../dtos'
 import { LogoutCommandHander } from '../handlers/command/logout.command.handler'
 import { MyCoursesCommandHandler } from '../handlers/command/myCourses.command.handler'
 import { StartCommandHandler } from '../handlers/command/start.command.handler'
+import { SubmitCommandHandler } from '../handlers/command/submit.command.handler'
 import { UnknownCommandHandler } from '../handlers/command/unknown.command.handler'
 import { Dispatcher } from '../interfaces/dispatcher.interface'
 import { Command, MessageEntityType } from '../telegram.constants'
@@ -14,8 +15,9 @@ export class MessageDispatcher implements Dispatcher {
     private mycoursesCommandHandler: MyCoursesCommandHandler,
     private unknownCommandHandler: UnknownCommandHandler,
     private logoutCommandHandler: LogoutCommandHander,
+    private submitCommandHandler: SubmitCommandHandler,
   ) {}
-  dispatch(update: MessageUpdate) {
+  dispatch(update: MessageUpdate<TextMessage>) {
     const { message } = update
     let commandEntity: MessageEntity
     if (
@@ -37,6 +39,10 @@ export class MessageDispatcher implements Dispatcher {
         case Command.MY_COURSES:
           this.mycoursesCommandHandler.handle(message)
           break
+        case Command.SUBMIT: {
+          this.submitCommandHandler.handle(message)
+          break
+        }
         case Command.LOGOUT:
           this.logoutCommandHandler.handle(message)
           break

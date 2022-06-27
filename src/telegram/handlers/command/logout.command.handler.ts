@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { from, switchMap } from 'rxjs'
-import { Message } from 'src/telegram/dtos'
+import { TextMessage } from 'src/telegram/dtos'
 import { TelegramAccount } from 'src/telegram/entities/telegram-account.entity'
 import { Handler } from 'src/telegram/interfaces/hanlder.interface'
 import {
@@ -20,7 +20,7 @@ export class LogoutCommandHander implements Handler {
     @InjectRepository(TelegramAccount)
     private telegramAccountRepo: Repository<TelegramAccount>,
   ) {}
-  handle(message: Message) {
+  handle(message: TextMessage) {
     from(this.telegramAccountRepo.delete(message.from.id))
       .pipe(
         switchMap(() =>
