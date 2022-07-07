@@ -22,7 +22,7 @@ export class AssignmentSubmissionService {
     input: Omit<CreateAssignmentSubmissionInput, 'file'>,
     submissionFile: string,
   ) {
-    const { submissionDate, definitionId, studentId, file } = input
+    const { submissionDate, definitionId, studentId } = input
     let assignmentSubmission =
       await this.assignmentSubmissionRepository.findOne({
         definition: {
