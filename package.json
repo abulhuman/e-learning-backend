@@ -6,7 +6,8 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "prebuild": "mkdir dist && rimraf dist",
+    "rimraf": "./node_modules/rimraf/bin.js",
+    "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "node dist/main",
